@@ -1,6 +1,55 @@
 @import 'tailwindcss';
 @import 'leaflet/dist/leaflet.css';
 
+/* ── Tailwind theme (maps utility classes to your design) ── */
+@theme {
+  --color-primary: #2c5bb6;
+  --color-primary-dim: #1b4fa9;
+  --color-primary-container: #759efd;
+  --color-on-primary: #f9f8ff;
+  --color-on-primary-container: #002053;
+
+  --color-secondary: #575f72;
+  --color-secondary-container: #dbe2f9;
+  --color-on-secondary: #f9f8ff;
+  --color-on-secondary-container: #4a5264;
+
+  --color-tertiary: #685781;
+  --color-tertiary-container: #e4ceff;
+  --color-on-tertiary: #fef7ff;
+  --color-on-tertiary-container: #54436b;
+
+  --color-error: #a83836;
+  --color-error-container: #fa746f;
+  --color-on-error: #fff7f6;
+  --color-on-error-container: #6e0a12;
+
+  --color-surface: #f8fafb;
+  --color-surface-dim: #d4dbde;
+  --color-surface-bright: #f8fafb;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: #f0f4f6;
+  --color-surface-container: #eaeff0;
+  --color-surface-container-high: #e3e9eb;
+  --color-surface-container-highest: #dce4e6;
+  --color-on-surface: #2c3436;
+  --color-on-surface-variant: #596063;
+  --color-outline: #757c7e;
+  --color-outline-variant: #acb3b6;
+
+  --color-inverse-surface: #0b0f10;
+  --color-inverse-on-surface: #9a9d9e;
+  --color-inverse-primary: #759efd;
+
+  --font-family-headline: 'Manrope', sans-serif;
+  --font-family-body: 'Inter', sans-serif;
+
+  --radius: 0.25rem;
+  --radius-xl: 0.75rem;
+  --radius-full: 9999px;
+}
+
+/* Your custom light/dark variables (keep these) */
 :root {
   --text: #6b6375;
   --text-h: #08060d;
@@ -45,7 +94,6 @@
     --social-bg: rgba(47, 48, 58, 0.5);
     --shadow: rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
   }
-
   #social .button-icon {
     filter: invert(1) brightness(2);
   }
@@ -63,12 +111,7 @@ body {
   color: var(--text);
 }
 
-h1,
-h2,
-h3,
-h4,
-h5,
-h6 {
+h1, h2, h3, h4, h5, h6 {
   color: var(--text-h);
   font-family: var(--heading);
 }
