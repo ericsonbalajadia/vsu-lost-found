@@ -16,7 +16,8 @@ export default function SignUp() {
     setLoading(true)
     setError(null)
 
-    const { error } = await supabase.auth.signUp({
+    // 1. Sign up the user
+    const { data: authData, error: signUpError } = await supabase.auth.signUp({
       email,
       password,
       options: {
@@ -24,12 +25,28 @@ export default function SignUp() {
       },
     })
 
-    if (error) {
-      setError(error.message)
-    } else {
-      navigate('/inventory')
+    if (signUpError) {
+      setError(signUpError.message)
+      setLoading(false)
+      return
     }
 
+    // 2. Manually create the profile row (bypass trigger)
+    const userId = authData.user?.id
+    if (userId) {
+      const { error: profileError } = await supabase.rpc('create_user_profile', {
+        user_id: userId,
+        user_email: email,
+        user_name: fullName,
+      })
+      if (profileError) {
+        console.error('Profile creation failed:', profileError)
+        // Optionally set an error, but sign-up succeeded
+      }
+    }
+
+    // 3. Redirect to inventory (or login page if email confirmation required)
+    navigate('/inventory')
     setLoading(false)
   }
 
