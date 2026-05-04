@@ -20,14 +20,18 @@ export const profilesApi = {
       .single()
   },
 
-  async updateProfile(userId: string, payload: UpdateProfilePayload) {
-    return supabase
-      .from('profiles')
-      .update({ ...payload, updated_at: new Date().toISOString() })
-      .eq('id', userId)
-      .select()
-      .single()
-  },
+async updateProfile(userId: string, payload: UpdateProfilePayload) {
+  const { data, error } = await supabase
+    .from('profiles')
+    .update({ ...payload, updated_at: new Date().toISOString() })
+    .eq('id', userId)
+    .select()
+    .single();
+
+  if (error) throw error;
+  if (!data) throw new Error('Profile not found or update failed');
+  return { data, error: null };
+},
 
   async updateNotifPrefs(userId: string, prefs: UpdateNotifPrefsPayload) {
     return supabase
