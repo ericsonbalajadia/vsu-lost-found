@@ -2,6 +2,9 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import AuthGuard  from './guards/AuthGuard'
 import AdminGuard from './guards/AdminGuard'
+import ProfileSettings from './pages/auth/settings/ProfileSettings'
+import SecuritySettings from './pages/auth/settings/SecuritySettings'
+import NotifSettings from './pages/auth/settings/NotifSettings'
 
 // Public pages
 import SignUp from './pages/public/SignUp'
@@ -12,10 +15,6 @@ const Landing         = () => <div className="p-8 text-center font-headline text
 const BrowseGallery   = () => <div className="p-8 text-center font-headline text-2xl">Browse — Phase 3</div>
 const Inventory       = () => <div className="p-8 text-center font-headline text-2xl">Inventory — Phase 3</div>
 
-// Settings pages
-// import ProfileSettings  from './pages/auth/settings/ProfileSettings'
-// import SecuritySettings from './pages/auth/settings/SecuritySettings'
-// import NotifSettings    from './pages/auth/settings/NotifSettings'
 
 export default function App() {
   return (
@@ -30,9 +29,9 @@ export default function App() {
         {/* Authenticated */}
         <Route element={<AuthGuard />}>
           <Route path="/inventory"              element={<Inventory />} />
-          {/* <Route path="/settings/profile"       element={<ProfileSettings />} />
+          <Route path="/settings/profile"       element={<ProfileSettings />} />
           <Route path="/settings/security"      element={<SecuritySettings />} />
-          <Route path="/settings/notifications" element={<NotifSettings />} /> */}
+          <Route path="/settings/notifications" element={<NotifSettings />} />
         </Route>
 
         {/* Admin scaffold */}
