@@ -16,6 +16,30 @@ export default function SignUp() {
     setLoading(true)
     setError(null)
 
+    const { error, data } = await supabase.auth.signUp({
+    email,
+    password,
+    options: { data: { full_name: fullName } },
+  });
+
+  if (error) {
+    setError(error.message);
+  } else {
+    // Manually create profile row using RPC
+    const userId = data.user?.id;
+    if (userId) {
+      const { error: profileError } = await supabase.rpc('create_user_profile', {
+        user_id: userId,
+        user_email: email,
+        user_name: fullName,
+      });
+      if (profileError) console.error('Profile creation failed:', profileError);
+    }
+    navigate('/inventory');
+  }
+  setLoading(false);
+
+
     // 1. Sign up the user
     const { data: authData, error: signUpError } = await supabase.auth.signUp({
       email,
