@@ -1,6 +1,6 @@
 // src/guards/AuthGuard.tsx
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
-import { useAuth } from '../hooks/useAuth'
+import { useAuth } from '../contexts/AuthContext';
 
 export default function AuthGuard() {
   const { user, loading } = useAuth()

@@ -1,6 +1,6 @@
 // src/guards/AdminGuard.tsx
 import { Navigate, Outlet } from 'react-router-dom'
-import { useAuth } from '../hooks/useAuth'
+import { useAuth } from '../contexts/AuthContext';
 
 export default function AdminGuard() {
   const { user, isAdmin, loading } = useAuth()
