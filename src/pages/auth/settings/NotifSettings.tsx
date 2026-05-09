@@ -1,44 +1,42 @@
 // src/pages/auth/settings/NotifSettings.tsx
-import { useState, useEffect } from 'react';
-import SidebarSettings from '../../../components/layout/SidebarSettings';
-import { useAuth } from '../../../contexts/AuthContext';
-import { profilesApi } from '../../../api/profilesApi';
-import type { UpdateNotifPrefsPayload } from '../../../types/api';
-
+import { useState, useEffect } from 'react'
+import SidebarSettings from '../../../components/layout/SidebarSettings'
+import { useAuth } from '../../../contexts/AuthContext'
+import { profilesApi } from '../../../api/profilesApi'
+import type { UpdateNotifPrefsPayload } from '../../../types/api'
 
 export default function NotifSettings() {
-  const { user, profile } = useAuth();
-  const [matchNotif, setMatchNotif] = useState(true);
-  const [claimNotif, setClaimNotif] = useState(true);
-  const [messageNotif, setMessageNotif] = useState(false);
-  const [frequency, setFrequency] = useState<'realtime' | 'daily' | 'weekly'>('realtime');
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const { user, profile } = useAuth()
+  const [matchNotif, setMatchNotif] = useState(true)
+  const [claimNotif, setClaimNotif] = useState(true)
+  const [messageNotif, setMessageNotif] = useState(false)
+  const [frequency, setFrequency] = useState<'realtime' | 'daily' | 'weekly'>('realtime')
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
 
-  // Load current preferences from profile
   useEffect(() => {
     if (profile) {
-      setMatchNotif(profile.notif_matches);
-      setClaimNotif(profile.notif_claims ?? true);
-      setMessageNotif(profile.notif_messages ?? false);
-      setFrequency(profile.notif_frequency as 'realtime' | 'daily' | 'weekly');
+      setMatchNotif(profile.notif_matches)
+      setClaimNotif(profile.notif_claims ?? true)
+      setMessageNotif(profile.notif_messages ?? false)
+      setFrequency(profile.notif_frequency as 'realtime' | 'daily' | 'weekly')
     }
-  }, [profile]);
+  }, [profile])
 
   const handleSave = async () => {
-    if (!user) return;
-    setSaving(true);
+    if (!user) return
+    setSaving(true)
     const payload: UpdateNotifPrefsPayload = {
       notif_matches: matchNotif,
       notif_claims: claimNotif,
       notif_messages: messageNotif,
       notif_frequency: frequency,
-    };
-    await profilesApi.updateNotifPrefs(user.id, payload);
-    setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2500);
-  };
+    }
+    await profilesApi.updateNotifPrefs(user.id, payload)
+    setSaving(false)
+    setSaved(true)
+    setTimeout(() => setSaved(false), 2500)
+  }
 
   return (
     <SidebarSettings>
@@ -52,10 +50,9 @@ export default function NotifSettings() {
           </p>
         </header>
 
-        {/* Main card */}
         <div className="bg-surface-container-lowest rounded-xl p-6 shadow-sm space-y-8">
           <div className="space-y-6">
-            {/* Match Alerts */}
+            {/* Match Alerts Toggle */}
             <div className="flex items-start justify-between">
               <div className="flex gap-4">
                 <div className="w-1 bg-primary rounded-full self-stretch" />
@@ -66,40 +63,43 @@ export default function NotifSettings() {
                   </p>
                 </div>
               </div>
-              <label className="relative inline-flex items-center cursor-pointer" aria-label="Toggle match notifications">
+              <label className="relative inline-flex items-center cursor-pointer">
                 <input
                   type="checkbox"
+                  className="sr-only peer"
                   checked={matchNotif}
                   onChange={(e) => setMatchNotif(e.target.checked)}
-                  className="sr-only peer"
+                  aria-label="Toggle new match alerts"
                 />
-                <div className="w-12 h-6 bg-surface-container-highest peer-focus:ring-2 peer-focus:ring-primary-container rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                <div className="w-11 h-6 bg-surface-container-highest rounded-full peer-checked:bg-primary after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full peer-focus:ring-2 peer-focus:ring-primary-container"></div>
               </label>
             </div>
 
-            {/* Claim Updates */}
+            {/* Claim Updates Toggle */}
             <div className="flex items-start justify-between">
               <div className="flex gap-4">
                 <div className="w-1 bg-outline-variant/30 rounded-full self-stretch" />
                 <div>
                   <h4 className="font-semibold text-on-surface">Claim Updates</h4>
                   <p className="text-sm text-on-surface-variant max-w-sm">
-                    Updates regarding your ongoing claims, verification requests, and administrative news.
+                    Updates regarding your ongoing claims, verification requests, and administrative
+                    news.
                   </p>
                 </div>
               </div>
-              <label className="relative inline-flex items-center cursor-pointer" aria-label="Toggle claim notifications">
+              <label className="relative inline-flex items-center cursor-pointer">
                 <input
                   type="checkbox"
+                  className="sr-only peer"
                   checked={claimNotif}
                   onChange={(e) => setClaimNotif(e.target.checked)}
-                  className="sr-only peer"
+                  aria-label="Toggle claim update" // ← fixes the warning
                 />
-                <div className="w-12 h-6 bg-surface-container-highest peer-focus:ring-2 peer-focus:ring-primary-container rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+                <div className="w-11 h-6 bg-surface-container-highest rounded-full peer-checked:bg-primary after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full peer-focus:ring-2 peer-focus:ring-primary-container"></div>
               </label>
             </div>
 
-            {/* Direct Message Alerts */}
+            {/* Direct Message Alerts Toggle */}
             <div className="flex items-start justify-between">
               <div className="flex gap-4">
                 <div className="w-1 bg-outline-variant/30 rounded-full self-stretch" />
@@ -113,22 +113,24 @@ export default function NotifSettings() {
               <label className="relative inline-flex items-center cursor-pointer">
                 <input
                   type="checkbox"
-                  placeholder='xxxxx'
+                  className="sr-only peer"
                   checked={messageNotif}
                   onChange={(e) => setMessageNotif(e.target.checked)}
-                  className="sr-only peer"
+                  aria-label="Toggle new match alerts" // ← fixes the warning
                 />
-                <div className="w-12 h-6 bg-surface-container-highest peer-focus:ring-2 peer-focus:ring-primary-container rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+                <div className="w-11 h-6 bg-surface-container-highest rounded-full peer-checked:bg-primary after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full peer-focus:ring-2 peer-focus:ring-primary-container"></div>
               </label>
             </div>
           </div>
         </div>
 
-        {/* Frequency Settings */}
+        {/* Frequency Settings – unchanged */}
         <div className="bg-surface-container-low rounded-xl p-8 border border-outline-variant/10">
           <div className="mb-6">
             <h3 className="font-headline font-bold text-on-surface">Digest Frequency</h3>
-            <p className="text-sm text-on-surface-variant">How often should we send you summary reports?</p>
+            <p className="text-sm text-on-surface-variant">
+              How often should we send you summary reports?
+            </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {(['realtime', 'daily', 'weekly'] as const).map((option) => (
@@ -141,11 +143,17 @@ export default function NotifSettings() {
                     : 'bg-surface-container-highest/30 hover:bg-surface-container-highest'
                 }`}
               >
-                <span className={`font-bold ${frequency === option ? 'text-primary' : 'text-on-surface'}`}>
+                <span
+                  className={`font-bold ${frequency === option ? 'text-primary' : 'text-on-surface'}`}
+                >
                   {option.charAt(0).toUpperCase() + option.slice(1)}
                 </span>
                 <span className="text-[10px] uppercase tracking-wider text-on-surface-variant mt-1">
-                  {option === 'realtime' ? 'Recommended' : option === 'daily' ? 'Summary' : 'Archive'}
+                  {option === 'realtime'
+                    ? 'Recommended'
+                    : option === 'daily'
+                      ? 'Summary'
+                      : 'Archive'}
                 </span>
               </button>
             ))}
@@ -164,5 +172,5 @@ export default function NotifSettings() {
         </div>
       </div>
     </SidebarSettings>
-  );
+  )
 }
