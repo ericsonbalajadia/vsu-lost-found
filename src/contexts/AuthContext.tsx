@@ -31,7 +31,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   });
 
   const isMounted = useRef(true);
-  const activeProfileFetch = useRef<Promise<Profile | null> | null>(null);
+  
 
   const fetchProfile = useCallback(async (userId: string, timeoutMs = 8000): Promise<Profile | null> => {
     console.log('[Auth] fetching profile for', userId);
