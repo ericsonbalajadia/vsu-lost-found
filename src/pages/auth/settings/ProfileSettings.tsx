@@ -1,62 +1,111 @@
 // src/pages/auth/settings/ProfileSettings.tsx
-import { useState, useEffect } from 'react';
-import SidebarSettings from '../../../components/layout/SidebarSettings';
-import { useAuth } from '../../../contexts/AuthContext';
-import { profilesApi } from '../../../api/profilesApi';
-import type { UpdateProfilePayload } from '../../../types/api';
-
+import { useState, useEffect } from 'react'
+import SidebarSettings from '../../../components/layout/SidebarSettings'
+import { useAuth } from '../../../contexts/AuthContext'
+import { profilesApi } from '../../../api/profilesApi'
+import type { UpdateProfilePayload } from '../../../types/api'
 
 export default function ProfileSettings() {
-  const { user, profile } = useAuth();
-  const [fullName, setFullName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [building, setBuilding] = useState('General Campus');
-  const [bio, setBio] = useState('');
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { user, profile, loading, refreshProfile } = useAuth()
+  const [fullName, setFullName] = useState('')
+  const [phone, setPhone] = useState('')
+  const [building, setBuilding] = useState('General Campus')
+  const [bio, setBio] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   // Populate form when profile loads
   useEffect(() => {
     if (profile) {
-      setFullName(profile.full_name);
-      setPhone(profile.phone ?? '');
-      setBuilding(profile.campus_building);
-      setBio(profile.bio ?? '');
+      setFullName(profile.full_name)
+      setPhone(profile.phone ?? '')
+      setBuilding(profile.campus_building)
+      setBio(profile.bio ?? '')
     }
-  }, [profile]);
+  }, [profile])
 
   const handleSave = async () => {
-    if (!user || !profile) return;
-    setSaving(true);
-    setError(null);
+    if (!user || !profile) return
+    setSaving(true)
+    setError(null)
     try {
       const payload: UpdateProfilePayload = {
         full_name: fullName,
         phone: phone || undefined,
         campus_building: building,
         bio: bio || undefined,
-      };
-      await profilesApi.updateProfile(user.id, payload);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2500);
+      }
+      await profilesApi.updateProfile(user.id, payload)
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2500)
     } catch (err) {
-      setError('Failed to update profile. Please try again.');
+      setError('Failed to update profile. Please try again.')
     } finally {
-      setSaving(false);
+      setSaving(false)
     }
-  };
+  }
 
-  // If profile is missing, show error (should not happen after proper sign-up)
+  // Simple skeleton for profile form
+  const ProfileSkeleton = () => (
+    <div className="animate-pulse space-y-8">
+      <div className="h-8 bg-surface-container-high rounded w-1/3" />
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="lg:col-span-4 space-y-6">
+          <div className="bg-surface-container-lowest p-8 rounded-xl">
+            <div className="w-32 h-32 mx-auto rounded-full bg-surface-container-high" />
+            <div className="h-4 bg-surface-container-high rounded mt-4 w-3/4 mx-auto" />
+            <div className="h-3 bg-surface-container-high rounded mt-2 w-1/2 mx-auto" />
+            <div className="h-10 bg-surface-container-high rounded-xl mt-6" />
+          </div>
+          <div className="h-40 bg-surface-container-high rounded-xl" />
+        </div>
+        <div className="lg:col-span-8 space-y-6">
+          <div className="bg-surface-container-lowest p-8 rounded-xl space-y-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="space-y-2">
+                  <div className="h-3 bg-surface-container-high rounded w-1/3" />
+                  <div className="h-12 bg-surface-container-high rounded-xl" />
+                </div>
+              ))}
+              <div className="col-span-2 space-y-2">
+                <div className="h-3 bg-surface-container-high rounded w-1/4" />
+                <div className="h-24 bg-surface-container-high rounded-xl" />
+              </div>
+            </div>
+            <div className="h-12 bg-surface-container-high rounded-xl w-32 ml-auto" />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+
   if (!profile) {
     return (
       <SidebarSettings>
-        <div className="p-8 text-center">
-          <p className="text-error">Profile not found. Please contact support.</p>
-        </div>
+        <ProfileSkeleton />
       </SidebarSettings>
-    );
+    )
   }
+
+  // if (!profile) {
+  //   return (
+  //     <SidebarSettings>
+  //       <div className="p-8 text-center">
+  //         <p className="text-error mb-4">
+  //           Unable to load your profile. This may be a temporary issue.
+  //         </p>
+  //         <button
+  //           onClick={() => refreshProfile()}
+  //           className="px-6 py-2 bg-primary text-white rounded-xl hover:opacity-90 transition-all"
+  //         >
+  //           Retry
+  //         </button>
+  //       </div>
+  //     </SidebarSettings>
+  //   )
+  // }
 
   return (
     <SidebarSettings>
@@ -67,7 +116,8 @@ export default function ProfileSettings() {
             Personal Profile
           </h1>
           <p className="text-on-surface-variant max-w-xl leading-relaxed">
-            This information helps identify and return your items. Keep your contact details up-to-date.
+            This information helps identify and return your items. Keep your contact details
+            up-to-date.
           </p>
         </div>
 
@@ -80,17 +130,21 @@ export default function ProfileSettings() {
               <div className="absolute top-0 left-0 w-1 h-full bg-primary" />
               <div className="w-32 h-32 mx-auto mb-6 rounded-full overflow-hidden bg-surface-variant ring-4 ring-surface-container">
                 {profile.avatar_url ? (
-                  <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                  <img
+                    src={profile.avatar_url}
+                    alt="Avatar"
+                    className="w-full h-full object-cover"
+                  />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-primary-container text-primary text-4xl">
                     {profile.full_name?.[0]?.toUpperCase() || 'U'}
                   </div>
                 )}
               </div>
-              <h3 className="text-xl font-bold text-on-surface font-headline">{profile.full_name}</h3>
-              <p className="text-sm text-on-surface-variant font-medium mb-6">
-                {profile.email}
-              </p>
+              <h3 className="text-xl font-bold text-on-surface font-headline">
+                {profile.full_name}
+              </h3>
+              <p className="text-sm text-on-surface-variant font-medium mb-6">{profile.email}</p>
               <button className="w-full py-3 px-6 bg-surface-container-highest text-on-surface font-semibold rounded-xl hover:bg-surface-container-high transition-colors text-sm">
                 Change Avatar
               </button>
@@ -104,8 +158,8 @@ export default function ProfileSettings() {
               </div>
               <h4 className="text-lg font-bold font-headline mb-2">Trust Score</h4>
               <p className="text-sm opacity-90 leading-snug">
-                Your reputation grows when you successfully return items (+10) and decreases if you submit false claims (-10). 
-                Higher trust helps owners prioritise genuine claimants.
+                Your reputation grows when you successfully return items (+10) and decreases if you
+                submit false claims (-10). Higher trust helps owners prioritise genuine claimants.
               </p>
               <div className="mt-4 text-xs opacity-70 flex items-center gap-2">
                 <span className="material-symbols-outlined text-sm">info</span>
@@ -222,7 +276,9 @@ export default function ProfileSettings() {
                 />
               </div>
               <div>
-                <p className="text-xs font-bold text-primary uppercase tracking-widest mb-1">Campus Hub</p>
+                <p className="text-xs font-bold text-primary uppercase tracking-widest mb-1">
+                  Campus Hub
+                </p>
                 <h4 className="text-lg font-bold text-on-surface font-headline leading-tight">
                   {building || 'Science & Engineering Center'}
                 </h4>
@@ -235,5 +291,5 @@ export default function ProfileSettings() {
         </div>
       </div>
     </SidebarSettings>
-  );
+  )
 }
