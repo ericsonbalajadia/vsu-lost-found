@@ -6,11 +6,7 @@ import { profilesApi } from '../../../api/profilesApi'
 import type { UpdateProfilePayload } from '../../../types/api'
 
 export default function ProfileSettings() {
-<<<<<<< HEAD
   const { user, profile} = useAuth()
-=======
-  const { user, profile, loading, refreshProfile } = useAuth()
->>>>>>> origin/feature/auth-profile
   const [fullName, setFullName] = useState('')
   const [phone, setPhone] = useState('')
   const [building, setBuilding] = useState('General Campus')
