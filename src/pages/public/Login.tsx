@@ -2,21 +2,22 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
-import { useAuth } from '../../contexts/AuthContext'; 
+import { useAuth } from '../../contexts/AuthContext';
 
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/inventory';
-  const { user } = useAuth();   // ✅ listen to auth state
+  const { user } = useAuth();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
-  // ✅ Redirect when user becomes authenticated (after context updates)
+  // Redirect when user becomes authenticated
   useEffect(() => {
     if (user) {
       navigate(from, { replace: true });
@@ -35,7 +36,6 @@ export default function Login() {
       setError(signInError.message);
     }
     setLoading(false);
-    // No manual navigation – the useEffect will handle it
   };
 
   const handleGoogleLogin = async () => {
@@ -48,106 +48,119 @@ export default function Login() {
   };
 
   return (
-    <div className="bg-surface text-on-surface min-h-screen flex overflow-x-hidden">
-      {/* Hero Side (Left) */}
-      <section className="hidden lg:flex lg:w-1/2 relative flex-col justify-between p-16 overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <img
-            alt="Academic Architecture"
-            className="w-full h-full object-cover"
-            src="/VSU_GATE_THUMB.jpg"
-          />
-          <div className="absolute inset-0 bg-primary/40 backdrop-blur-[2px] mix-blend-multiply"></div>
-          <div className="absolute inset-0 bg-gradient-to-t from-primary-dim/90 via-transparent to-primary/20"></div>
-        </div>
-        <div className="relative z-10">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-surface-container-lowest rounded-xl flex items-center justify-center shadow-lg">
-              <span className="material-symbols-outlined text-primary font-bold">account_balance</span>
-            </div>
-            <span className="text-white font-headline font-extrabold text-2xl tracking-tighter">Campus Archive</span>
+    <main className="flex-grow flex flex-col md:flex-row h-screen overflow-hidden bg-background">
+      {/* Left Hero Section (Desktop Only) */}
+      <section className="hidden md:flex md:w-1/2 lg:w-3/5 relative overflow-hidden group">
+        <div className="absolute inset-0 bg-primary/40 z-10 transition-colors group-hover:bg-primary/30"></div>
+        <img
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+          src="https://lh3.googleusercontent.com/aida/ADBb0uhd_akot95zeyYIcgsRy5rNpeyLaiof_QgiK43ttqy_C3UrtUR-qEwMI9A8a0NypMbp4XSyQf-04620XgGTJY_CtJWTOWso4GvKcoligrhVcYCDtsPf4vcuHM4IlZqJVqGJ6DBzMNvUgbWkXzd8Co5BiKWXhmfqFUy6sNVSMb0_K3dxt7jSGPjfWrn4CeoH1TGEvgYlN6zhRZAZ8wEy0_XpbXCXYbepiMF77Ph-MAzMllbv5ty5l0NI9pHw8suRcEPeLD1XO85u"
+          alt="VSU Campus"
+        />
+        <div className="relative z-20 flex flex-col justify-center items-start h-full px-16 lg:px-24 max-w-3xl">
+          <div className="mb-12">
+            <img
+              alt="FoundPath Logo"
+              className="h-32 w-32 mb-8"
+              src="https://lh3.googleusercontent.com/aida/ADBb0ui4qrGuDDysIJRTTSJmvXAFtWBUUhiSJuAKYZx7IxSplDEwpnafzSuZSg_oI2tWc1yDx3kTQptO_1m_8JC6XENNO3QdWk7DbG1tsMi9Lrd4f3SvtcVRkm6yKCloFyoPOVOuUXhHWP_kCxAdYnid4XROiNpl3r9BaetfvBnHn_3CkSKf8bhvzbvrDVE-xyi4zpZ2PlFBebygkAvxzWEBgZvNonReydrwBVBjd4Fsj86AxCa_ZYA4P5UbQjIBLdQS0L5Dr1YUQ5-ouw"
+            />
+            <h1 className="text-5xl font-extrabold tracking-tight leading-tight text-white mb-4">
+  <span className="text-yellow-400">FoundPath</span>
+</h1>
+<p className="text-3xl font-bold tracking-tight text-white text-shadow-sm border-l-4 border-yellow-400 pl-6 py-2">
+  Restoring peace of mind, one item at a time.
+</p>
+          </div>
+          <div className="bg-white/10 backdrop-blur-md p-6 rounded-xl border border-white/20 max-w-md">
+            <p className="body-lg text-white">
+              Access the community‑driven lost and found platform. Secure, efficient, and trusted by users everywhere.
+            </p>
           </div>
         </div>
-        <div className="relative z-10 max-w-md">
-          <h1 className="text-white font-headline font-extrabold text-5xl leading-tight tracking-tight mb-6">
-            Restoring peace of mind, one item at a time.
-          </h1>
-          <p className="text-white/80 font-body text-lg leading-relaxed">
-            Welcome to the official lost and found repository. We specialize in professional recovery services to reconnect students with their valued belongings.
-          </p>
-        </div>
-        <div className="relative z-10 flex gap-8">
-          <div className="flex -space-x-3">
-            <div className="w-10 h-10 rounded-full border-2 border-white/20 bg-slate-300"></div>
-            <div className="w-10 h-10 rounded-full border-2 border-white/20 bg-slate-400"></div>
-            <div className="w-10 h-10 rounded-full border-2 border-white/20 bg-slate-500"></div>
-          </div>
-          <p className="text-white/60 text-sm font-medium self-center">Joined by 2,000+ students this semester</p>
+        <div className="absolute bottom-8 left-16 z-20">
+          <p className="label-sm text-white/80 uppercase tracking-widest">Community Recovery Team</p>
         </div>
       </section>
 
-      {/* Login Form Side (Right) */}
-      <main className="w-full lg:w-1/2 flex items-center justify-center p-8 md:p-16 lg:p-24 bg-surface">
-        <div className="w-full max-w-md">
-          {/* Mobile Header Only */}
-          <div className="lg:hidden flex items-center gap-3 mb-12">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-              <span className="material-symbols-outlined text-white text-sm">account_balance</span>
-            </div>
-            <span className="text-on-surface font-headline font-extrabold text-xl tracking-tighter">Campus Archive</span>
+      {/* Right Form Section */}
+      <section className="w-full md:w-1/2 lg:w-2/5 flex flex-col bg-surface-container-lowest overflow-y-auto custom-scrollbar">
+        {/* Mobile Header */}
+        <div className="md:hidden p-6 flex items-center justify-between border-b border-outline-variant">
+          <div className="flex items-center gap-3">
+            <img
+              alt="FoundPath Logo"
+              className="h-10 w-10"
+              src="https://lh3.googleusercontent.com/aida/ADBb0ui4qrGuDDysIJRTTSJmvXAFtWBUUhiSJuAKYZx7IxSplDEwpnafzSuZSg_oI2tWc1yDx3kTQptO_1m_8JC6XENNO3QdWk7DbG1tsMi9Lrd4f3SvtcVRkm6yKCloFyoPOVOuUXhHWP_kCxAdYnid4XROiNpl3r9BaetfvBnHn_3CkSKf8bhvzbvrDVE-xyi4zpZ2PlFBebygkAvxzWEBgZvNonReydrwBVBjd4Fsj86AxCa_ZYA4P5UbQjIBLdQS0L5Dr1YUQ5-ouw"
+            />
+            <span className="title-md"><span className="text-accent-yellow">FoundPath</span></span>
           </div>
+        </div>
 
-          <header className="mb-10">
-            <h2 className="text-on-surface font-headline font-extrabold text-3xl tracking-tight mb-2">Welcome Back</h2>
-            <p className="text-on-surface-variant font-body">Please enter your university credentials to continue.</p>
-          </header>
+        <div className="flex-grow flex flex-col justify-center px-margin-mobile md:px-12 lg:px-20 py-12 max-w-xl mx-auto w-full">
+          <div className="mb-10 text-center md:text-left">
+            <h2 className="text-3xl font-bold tracking-tight text-on-surface mb-2 text-bold">Welcome Back</h2>
+            <p className="body-md text-on-surface-variant">Please log in to manage reports and items.</p>
+          </div>
 
           <form className="space-y-6" onSubmit={handleEmailLogin}>
             {/* Email Field */}
             <div className="space-y-2">
-              <label className="block text-on-surface-variant font-label text-sm font-semibold tracking-wide" htmlFor="email">
+              <label className="block label-sm text-on-surface-variant ml-1" htmlFor="email">
                 University Email
               </label>
               <div className="relative">
-                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">mail</span>
+                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">
+                  alternate_email
+                </span>
                 <input
                   id="email"
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="student@university.edu"
-                  className="w-full pl-12 pr-4 py-3.5 bg-surface-container-highest border-none rounded-xl text-on-surface placeholder:text-on-surface-variant/50 focus:ring-2 focus:ring-primary-container focus:bg-surface-container-lowest transition-all"
+                  placeholder="name@vsu.edu.ph"
+                  className="w-full pl-12 pr-4 py-3 bg-surface-container-low border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all body-md"
                 />
               </div>
             </div>
 
             {/* Password Field */}
             <div className="space-y-2">
-              <div className="flex justify-between items-center">
-                <label className="block text-on-surface-variant font-label text-sm font-semibold tracking-wide" htmlFor="password">
+              <div className="flex justify-between items-center ml-1">
+                <label className="block label-sm text-on-surface-variant" htmlFor="password">
                   Password
                 </label>
-                <a className="text-primary font-label text-xs font-bold hover:underline transition-all" href="#">
+                <a className="label-sm text-primary hover:underline font-bold" href="#">
                   Forgot password?
                 </a>
               </div>
               <div className="relative">
-                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant text-xl">lock</span>
+                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">
+                  lock
+                </span>
                 <input
                   id="password"
-                  type="password"
+                  type={showPassword ? 'text' : 'password'}
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full pl-12 pr-4 py-3.5 bg-surface-container-highest border-none rounded-xl text-on-surface placeholder:text-on-surface-variant/50 focus:ring-2 focus:ring-primary-container focus:bg-surface-container-lowest transition-all"
+                  className="w-full pl-12 pr-12 py-3 bg-surface-container-low border border-outline-variant rounded-xl focus:ring-2 focus:ring-primary focus:border-primary transition-all body-md"
                 />
+                <button
+                  type="button"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-outline hover:text-on-surface"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  <span className="material-symbols-outlined">
+                    {showPassword ? 'visibility' : 'visibility_off'}
+                  </span>
+                </button>
               </div>
             </div>
 
             {/* Remember Me */}
-            <div className="flex items-center">
+            <div className="flex items-center gap-3">
               <input
                 id="remember"
                 type="checkbox"
@@ -155,8 +168,8 @@ export default function Login() {
                 onChange={(e) => setRememberMe(e.target.checked)}
                 className="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary cursor-pointer"
               />
-              <label className="ml-3 text-on-surface-variant font-body text-sm select-none cursor-pointer" htmlFor="remember">
-                Keep me signed in for 30 days
+              <label htmlFor="remember" className="body-md text-on-surface-variant cursor-pointer select-none">
+                Keep me signed in
               </label>
             </div>
 
@@ -171,57 +184,56 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full editorial-gradient text-white font-headline font-bold py-4 rounded-xl shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all duration-150 disabled:opacity-60"
+              className="w-full bg-primary text-on-primary py-4 rounded-xl title-md shadow-sm hover:bg-primary/90 active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-60"
             >
               {loading ? 'Signing in...' : 'Sign In'}
+              {!loading && <span className="material-symbols-outlined">login</span>}
             </button>
           </form>
 
           {/* Divider */}
-          <div className="relative my-10 flex items-center">
-            <div className="flex-grow border-t border-outline-variant/30"></div>
-            <span className="mx-4 text-outline text-xs font-bold uppercase tracking-widest bg-surface px-2">OR</span>
-            <div className="flex-grow border-t border-outline-variant/30"></div>
+          <div className="relative my-10">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-outline-variant" />
+            </div>
+            <div className="relative flex justify-center label-sm">
+              <span className="bg-surface-container-lowest px-4 text-on-surface-variant">OR</span>
+            </div>
           </div>
 
           {/* Google Login */}
           <button
             onClick={handleGoogleLogin}
-            className="w-full flex items-center justify-center gap-3 bg-surface-container-lowest border border-outline-variant/20 py-3.5 rounded-xl text-on-surface font-body font-semibold hover:bg-surface-container-low transition-colors"
+            className="w-full border border-outline-variant py-4 rounded-xl flex items-center justify-center gap-3 hover:bg-surface-container-low transition-colors title-md text-on-surface-variant"
           >
-            <svg className="w-5 h-5" viewBox="0 0 24 24">
-              <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
-              <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
-              <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
-              <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+            <svg className="w-6 h-6" viewBox="0 0 48 48">
+              <path d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" fill="#EA4335"/>
+              <path d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" fill="#4285F4"/>
+              <path d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24s.92 7.54 2.56 10.78l7.97-6.19z" fill="#FBBC05"/>
+              <path d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" fill="#34A853"/>
             </svg>
             Continue with Google
           </button>
 
-          {/* Footer Links */}
-          <footer className="mt-12 text-center space-y-6">
-            <p className="text-on-surface-variant font-body text-sm">
-              Don't have an account?{' '}
-              <Link to="/signup" className="text-primary font-bold hover:underline">
-                Sign up
-              </Link>
-            </p>
-            {/* <div className="flex justify-center gap-6">
-              <a className="text-outline text-xs uppercase tracking-widest font-semibold hover:text-primary transition-colors" href="#">
-                Terms of Service
-              </a>
-              <a className="text-outline text-xs uppercase tracking-widest font-semibold hover:text-primary transition-colors" href="#">
-                Privacy Policy
-              </a>
-            </div> */}
-          </footer>
+          {/* Sign Up Link */}
+          <p className="mt-8 text-center body-md text-on-surface-variant">
+            Don't have an account?{' '}
+            <Link to="/signup" className="text-primary font-bold hover:underline">
+              Sign up
+            </Link>
+          </p>
         </div>
-      </main>
 
-      {/* Floating Help Button
-      <button className="fixed bottom-8 right-8 w-14 h-14 bg-surface-container-lowest shadow-2xl rounded-2xl flex items-center justify-center text-primary hover:bg-primary hover:text-white transition-all duration-300 group">
-        <span className="material-symbols-outlined">help_outline</span>
-      </button> */}
-    </div>
+        {/* Footer */}
+        <footer className="mt-auto py-8 px-12 border-t border-outline-variant flex flex-col md:flex-row items-center justify-between gap-4 label-sm text-on-surface-variant">
+          <p>© 2026 FoundPath. All Rights Reserved.</p>
+          {/* <nav className="flex gap-6">
+            <a className="hover:text-primary transition-colors" href="#">Terms of Service</a>
+            <a className="hover:text-primary transition-colors" href="#">Privacy Policy</a>
+            <a className="hover:text-primary transition-colors" href="#">Campus Map</a>
+          </nav> */}
+        </footer>
+      </section>
+    </main>
   );
 }

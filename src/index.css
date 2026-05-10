@@ -41,6 +41,8 @@
   --color-inverse-on-surface: #9a9d9e;
   --color-inverse-primary: #759efd;
 
+   --color-accent-yellow: #f0d72f;
+
   --font-family-headline: 'Manrope', sans-serif;
   --font-family-body: 'Inter', sans-serif;
 
@@ -125,9 +127,10 @@ body {
   color: var(--text);
 }
 
-h1, h2, h3, h4, h5, h6 {
+/* h1, h2, h3, h4, h5, h6 {
   font-family: var(--heading);
-}
+  font-weight: bold;
+} */
 
 .editorial-gradient {
   background: linear-gradient(135deg, #1b4fa9 0%, #2c5bb6 100%);
