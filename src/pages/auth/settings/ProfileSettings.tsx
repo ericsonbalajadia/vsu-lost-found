@@ -1,111 +1,98 @@
 // src/pages/auth/settings/ProfileSettings.tsx
-import { useState, useEffect } from 'react'
-import SidebarSettings from '../../../components/layout/SidebarSettings'
-import { useAuth } from '../../../contexts/AuthContext'
-import { profilesApi } from '../../../api/profilesApi'
-import type { UpdateProfilePayload } from '../../../types/api'
+import { useState, useEffect } from 'react';
+import SidebarSettings from '../../../components/layout/SidebarSettings';
+import { useAuth } from '../../../contexts/AuthContext';
+import { profilesApi } from '../../../api/profilesApi';
+import type { UpdateProfilePayload } from '../../../types/api';
+
+// Skeleton component defined at top level (no render-time creation)
+const ProfileSkeleton = () => (
+  <div className="animate-pulse space-y-8">
+    <div className="h-8 bg-surface-container-high rounded w-1/3" />
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="lg:col-span-4 space-y-6">
+        <div className="bg-surface-container-lowest p-8 rounded-xl">
+          <div className="w-32 h-32 mx-auto rounded-full bg-surface-container-high" />
+          <div className="h-4 bg-surface-container-high rounded mt-4 w-3/4 mx-auto" />
+          <div className="h-3 bg-surface-container-high rounded mt-2 w-1/2 mx-auto" />
+          <div className="h-10 bg-surface-container-high rounded-xl mt-6" />
+        </div>
+        <div className="h-40 bg-surface-container-high rounded-xl" />
+      </div>
+      <div className="lg:col-span-8 space-y-6">
+        <div className="bg-surface-container-lowest p-8 rounded-xl space-y-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="space-y-2">
+                <div className="h-3 bg-surface-container-high rounded w-1/3" />
+                <div className="h-12 bg-surface-container-high rounded-xl" />
+              </div>
+            ))}
+            <div className="col-span-2 space-y-2">
+              <div className="h-3 bg-surface-container-high rounded w-1/4" />
+              <div className="h-24 bg-surface-container-high rounded-xl" />
+            </div>
+          </div>
+          <div className="h-12 bg-surface-container-high rounded-xl w-32 ml-auto" />
+        </div>
+      </div>
+    </div>
+  </div>
+);
 
 export default function ProfileSettings() {
-  const { user, profile} = useAuth()
-  const [fullName, setFullName] = useState('')
-  const [phone, setPhone] = useState('')
-  const [building, setBuilding] = useState('General Campus')
-  const [bio, setBio] = useState('')
-  const [saving, setSaving] = useState(false)
-  const [saved, setSaved] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+  const { user, profile } = useAuth(); // refreshProfile not needed if no retry button
+  const [fullName, setFullName] = useState('');
+  const [phone, setPhone] = useState('');
+  const [building, setBuilding] = useState('General Campus');
+  const [bio, setBio] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Populate form when profile loads
   useEffect(() => {
     if (profile) {
-      setFullName(profile.full_name)
-      setPhone(profile.phone ?? '')
-      setBuilding(profile.campus_building)
-      setBio(profile.bio ?? '')
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setFullName(profile.full_name);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setPhone(profile.phone ?? '');
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setBuilding(profile.campus_building);
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setBio(profile.bio ?? '');
     }
-  }, [profile])
+  }, [profile]);
 
   const handleSave = async () => {
-    if (!user || !profile) return
-    setSaving(true)
-    setError(null)
+    if (!user || !profile) return;
+    setSaving(true);
+    setError(null);
     try {
       const payload: UpdateProfilePayload = {
         full_name: fullName,
         phone: phone || undefined,
         campus_building: building,
         bio: bio || undefined,
-      }
-      await profilesApi.updateProfile(user.id, payload)
-      setSaved(true)
-      setTimeout(() => setSaved(false), 2500)
-    } catch (err) {
-      setError('Failed to update profile. Please try again.')
+      };
+      await profilesApi.updateProfile(user.id, payload);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2500);
+    } catch (_err) {
+      setError('Failed to update profile. Please try again.');
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
-  // Simple skeleton for profile form
-  const ProfileSkeleton = () => (
-    <div className="animate-pulse space-y-8">
-      <div className="h-8 bg-surface-container-high rounded w-1/3" />
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <div className="lg:col-span-4 space-y-6">
-          <div className="bg-surface-container-lowest p-8 rounded-xl">
-            <div className="w-32 h-32 mx-auto rounded-full bg-surface-container-high" />
-            <div className="h-4 bg-surface-container-high rounded mt-4 w-3/4 mx-auto" />
-            <div className="h-3 bg-surface-container-high rounded mt-2 w-1/2 mx-auto" />
-            <div className="h-10 bg-surface-container-high rounded-xl mt-6" />
-          </div>
-          <div className="h-40 bg-surface-container-high rounded-xl" />
-        </div>
-        <div className="lg:col-span-8 space-y-6">
-          <div className="bg-surface-container-lowest p-8 rounded-xl space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className="space-y-2">
-                  <div className="h-3 bg-surface-container-high rounded w-1/3" />
-                  <div className="h-12 bg-surface-container-high rounded-xl" />
-                </div>
-              ))}
-              <div className="col-span-2 space-y-2">
-                <div className="h-3 bg-surface-container-high rounded w-1/4" />
-                <div className="h-24 bg-surface-container-high rounded-xl" />
-              </div>
-            </div>
-            <div className="h-12 bg-surface-container-high rounded-xl w-32 ml-auto" />
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-
+  // Show skeleton while profile is being fetched (or if missing)
   if (!profile) {
     return (
       <SidebarSettings>
         <ProfileSkeleton />
       </SidebarSettings>
-    )
+    );
   }
-
-  // if (!profile) {
-  //   return (
-  //     <SidebarSettings>
-  //       <div className="p-8 text-center">
-  //         <p className="text-error mb-4">
-  //           Unable to load your profile. This may be a temporary issue.
-  //         </p>
-  //         <button
-  //           onClick={() => refreshProfile()}
-  //           className="px-6 py-2 bg-primary text-white rounded-xl hover:opacity-90 transition-all"
-  //         >
-  //           Retry
-  //         </button>
-  //       </div>
-  //     </SidebarSettings>
-  //   )
-  // }
 
   return (
     <SidebarSettings>
@@ -121,7 +108,7 @@ export default function ProfileSettings() {
           </p>
         </div>
 
-        {/* Bento Grid: Left Column (Avatar & Reputation) + Right Column (Form) */}
+        {/* Bento Grid */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           {/* Left Column – Avatar & Reputation */}
           <div className="lg:col-span-4 space-y-6">
@@ -150,7 +137,7 @@ export default function ProfileSettings() {
               </button>
             </div>
 
-            {/* Reputation Card – Added because original HTML lacked it */}
+            {/* Reputation Card */}
             <div className="bg-primary bg-gradient-to-br from-primary to-primary-dim p-6 rounded-xl text-on-primary shadow-xl">
               <div className="flex items-center justify-between mb-4">
                 <span className="material-symbols-outlined text-4xl">star</span>
@@ -266,7 +253,7 @@ export default function ProfileSettings() {
               </div>
             </div>
 
-            {/* Campus Map Aesthetic (optional – kept from original) */}
+            {/* Campus Map Aesthetic */}
             <div className="bg-surface-container p-6 rounded-xl overflow-hidden flex items-center gap-6">
               <div className="w-24 h-24 rounded-lg bg-surface-variant overflow-hidden flex-shrink-0">
                 <img
@@ -291,5 +278,5 @@ export default function ProfileSettings() {
         </div>
       </div>
     </SidebarSettings>
-  )
+  );
 }

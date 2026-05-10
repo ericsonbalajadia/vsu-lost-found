@@ -1,6 +1,14 @@
+/* eslint-disable react-refresh/only-export-components */
 // src/contexts/AuthContext.tsx
-import React, { createContext, useEffect, useRef, useState, useCallback, useContext } from 'react';
-import type { User, Session } from '@supabase/supabase-js';
+import React, {
+  createContext,
+  useEffect,
+  useRef,
+  useState,
+  useCallback,
+  useContext,
+} from 'react';
+import type { User, Session, PostgrestError } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import type { Profile } from '../types/database';
 
@@ -31,31 +39,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   });
 
   const isMounted = useRef(true);
-  
 
-  const fetchProfile = useCallback(async (userId: string, timeoutMs = 8000): Promise<Profile | null> => {
-    console.log('[Auth] fetching profile for', userId);
-    const timeoutPromise = new Promise<never>((_, reject) =>
-      setTimeout(() => reject(new Error('Profile fetch timeout')), timeoutMs)
-    );
-    try {
-      const fetchPromise = supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .maybeSingle();
-      const { data, error } = await Promise.race([fetchPromise, timeoutPromise]) as any;
-      if (error) {
-        if (error.code === 'PGRST116') return null;
-        throw error;
+  const fetchProfile = useCallback(
+    async (userId: string, timeoutMs = 8000): Promise<Profile | null> => {
+      console.log('[Auth] fetching profile for', userId);
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('Profile fetch timeout')), timeoutMs)
+      );
+      try {
+        const fetchPromise = supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .maybeSingle();
+        const { data, error } = (await Promise.race([
+          fetchPromise,
+          timeoutPromise,
+        ])) as { data: Profile; error: PostgrestError | null };
+        if (error) {
+          if (error.code === 'PGRST116') return null;
+          throw error;
+        }
+        console.log('[Auth] profile loaded');
+        return data as Profile;
+      } catch (err) {
+        console.error('[Auth] profile fetch error:', err);
+        return null;
       }
-      console.log('[Auth] profile loaded');
-      return data as Profile;
-    } catch (err) {
-      console.error('[Auth] profile fetch error:', err);
-      return null;
-    }
-  }, []);
+    },
+    []
+  );
 
   const applySession = useCallback(
     async (session: Session | null) => {
@@ -73,7 +86,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         // Then fetch profile (with timeout) – do not await
         const profile = await fetchProfile(session.user.id);
         if (!isMounted.current) return;
-        setState(prev => ({
+        setState((prev) => ({
           ...prev,
           profile,
           isAdmin: profile?.role === 'admin',
@@ -93,12 +106,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   );
 
   const refreshProfile = useCallback(async () => {
-    const { data: { session } } = await supabase.auth.getSession();
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
     if (session?.user) {
-      setState(prev => ({ ...prev, loading: true }));
+      setState((prev) => ({ ...prev, loading: true }));
       const profile = await fetchProfile(session.user.id);
       if (!isMounted.current) return;
-      setState(prev => ({
+      setState((prev) => ({
         ...prev,
         profile,
         isAdmin: profile?.role === 'admin',
@@ -110,14 +125,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     isMounted.current = true;
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(async (_event, session) => {
       console.log('[Auth] event:', _event);
       await applySession(session);
     });
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (isMounted.current && session) applySession(session);
-    }).catch(err => console.error('[Auth] getSession warm-up error:', err));
+    supabase.auth
+      .getSession()
+      .then(({ data: { session } }) => {
+        if (isMounted.current && session) applySession(session);
+      })
+      .catch((err) => console.error('[Auth] getSession warm-up error:', err));
 
     return () => {
       isMounted.current = false;
@@ -138,6 +158,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (context === undefined) throw new Error('useAuth must be used within an AuthProvider');
+  if (context === undefined)
+    throw new Error('useAuth must be used within an AuthProvider');
   return context;
 }

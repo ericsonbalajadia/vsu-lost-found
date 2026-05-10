@@ -14,14 +14,18 @@ export default function NotifSettings() {
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
 
-  useEffect(() => {
-    if (profile) {
-      setMatchNotif(profile.notif_matches)
-      setClaimNotif(profile.notif_claims ?? true)
-      setMessageNotif(profile.notif_messages ?? false)
-      setFrequency(profile.notif_frequency as 'realtime' | 'daily' | 'weekly')
-    }
-  }, [profile])
+useEffect(() => {
+  if (profile) {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMatchNotif(profile.notif_matches);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setClaimNotif(profile.notif_claims ?? true);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMessageNotif(profile.notif_messages ?? false);
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setFrequency(profile.notif_frequency as 'realtime' | 'daily' | 'weekly');
+  }
+}, [profile]);
 
   const handleSave = async () => {
     if (!user) return
