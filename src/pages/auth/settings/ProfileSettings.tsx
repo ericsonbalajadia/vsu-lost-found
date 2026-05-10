@@ -1,9 +1,10 @@
 // src/pages/auth/settings/ProfileSettings.tsx
-import { useState, useEffect } from 'react';
-import SidebarSettings from '../../../components/layout/SidebarSettings';
-import { useAuth } from '../../../contexts/AuthContext';
-import { profilesApi } from '../../../api/profilesApi';
-import type { UpdateProfilePayload } from '../../../types/api';
+/* eslint-disable react-hooks/set-state-in-effect */
+import { useState, useEffect } from 'react'
+import SidebarSettings from '../../../components/layout/SidebarSettings'
+import { useAuth } from '../../../contexts/AuthContext'
+import { profilesApi } from '../../../api/profilesApi'
+import type { UpdateProfilePayload } from '../../../types/api'
 
 // Skeleton component defined at top level (no render-time creation)
 const ProfileSkeleton = () => (
@@ -38,52 +39,48 @@ const ProfileSkeleton = () => (
       </div>
     </div>
   </div>
-);
+)
 
 export default function ProfileSettings() {
-  const { user, profile } = useAuth(); // refreshProfile not needed if no retry button
-  const [fullName, setFullName] = useState('');
-  const [phone, setPhone] = useState('');
-  const [building, setBuilding] = useState('General Campus');
-  const [bio, setBio] = useState('');
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const { user, profile } = useAuth() // refreshProfile not needed if no retry button
+  const [fullName, setFullName] = useState('')
+  const [phone, setPhone] = useState('')
+  const [building, setBuilding] = useState('General Campus')
+  const [bio, setBio] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   // Populate form when profile loads
   useEffect(() => {
     if (profile) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setFullName(profile.full_name);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setPhone(profile.phone ?? '');
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setBuilding(profile.campus_building);
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setBio(profile.bio ?? '');
     }
   }, [profile]);
 
   const handleSave = async () => {
-    if (!user || !profile) return;
-    setSaving(true);
-    setError(null);
+    if (!user || !profile) return
+    setSaving(true)
+    setError(null)
     try {
       const payload: UpdateProfilePayload = {
         full_name: fullName,
         phone: phone || undefined,
         campus_building: building,
         bio: bio || undefined,
-      };
-      await profilesApi.updateProfile(user.id, payload);
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2500);
-    } catch (_err) {
-      setError('Failed to update profile. Please try again.');
+      }
+      await profilesApi.updateProfile(user.id, payload)
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2500)
+    } catch {
+      setError('Failed to update profile. Please try again.')
     } finally {
-      setSaving(false);
+      setSaving(false)
     }
-  };
+  }
 
   // Show skeleton while profile is being fetched (or if missing)
   if (!profile) {
@@ -91,7 +88,7 @@ export default function ProfileSettings() {
       <SidebarSettings>
         <ProfileSkeleton />
       </SidebarSettings>
-    );
+    )
   }
 
   return (
@@ -278,5 +275,5 @@ export default function ProfileSettings() {
         </div>
       </div>
     </SidebarSettings>
-  );
+  )
 }
