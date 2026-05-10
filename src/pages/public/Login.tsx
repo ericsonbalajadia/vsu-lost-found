@@ -106,7 +106,7 @@ export default function Login() {
             {/* Email Field */}
             <div className="space-y-2">
               <label className="block label-sm text-on-surface-variant ml-1" htmlFor="email">
-                University Email
+                Email
               </label>
               <div className="relative">
                 <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-outline">
