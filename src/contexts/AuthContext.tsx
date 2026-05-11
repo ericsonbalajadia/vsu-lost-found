@@ -8,7 +8,10 @@ import React, {
   useCallback,
   useContext,
 } from 'react';
-import type { User, Session, PostgrestError } from '@supabase/supabase-js';
+import type {
+  User,
+  Session,
+} from '@supabase/supabase-js';
 import { supabase } from '../lib/supabase';
 import type { Profile } from '../types/database';
 
@@ -54,16 +57,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           .select('*')
           .eq('id', userId)
           .maybeSingle();
-        const { data, error } = (await Promise.race([
+        const { data, error }: Awaited<typeof fetchPromise> = await Promise.race([
           fetchPromise,
           timeoutPromise,
-        ])) as { data: Profile; error: PostgrestError | null };
+        ]);
         if (error) {
           if (error.code === 'PGRST116') return null;
           throw error;
         }
         console.log('[Auth] profile loaded');
-        return data as Profile;
+        return data;
       } catch (err) {
         console.error('[Auth] profile fetch error:', err);
         return null;
