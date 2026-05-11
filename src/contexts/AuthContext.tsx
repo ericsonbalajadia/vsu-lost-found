@@ -17,6 +17,7 @@ interface AuthState {
   profile: Profile | null;
   session: Session | null;
   loading: boolean;
+  profileLoading: boolean;
   isAdmin: boolean;
   error: Error | null;
 }
@@ -34,6 +35,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     profile: null,
     session: null,
     loading: true,
+    profileLoading: false,
     isAdmin: false,
     error: null,
   });
@@ -80,6 +82,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           profile: null,
           session,
           loading: false,
+          profileLoading: true,
           isAdmin: false,
           error: null,
         });
@@ -89,6 +92,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setState((prev) => ({
           ...prev,
           profile,
+          profileLoading: false,
           isAdmin: profile?.role === 'admin',
         }));
       } else {
@@ -97,6 +101,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           profile: null,
           session: null,
           loading: false,
+          profileLoading: false,
           isAdmin: false,
           error: null,
         });
@@ -110,7 +115,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       data: { session },
     } = await supabase.auth.getSession();
     if (session?.user) {
-      setState((prev) => ({ ...prev, loading: true }));
+      setState((prev) => ({ ...prev, loading: true, profileLoading: true }));
       const profile = await fetchProfile(session.user.id);
       if (!isMounted.current) return;
       setState((prev) => ({
@@ -118,7 +123,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         profile,
         isAdmin: profile?.role === 'admin',
         loading: false,
+        profileLoading: false,
       }));
+    } else {
+      setState((prev) => ({ ...prev, profileLoading: false }));
     }
   }, [fetchProfile]);
 
