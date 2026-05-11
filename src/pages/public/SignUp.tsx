@@ -10,11 +10,13 @@ export default function SignUp() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [emailConfirmationRequired, setEmailConfirmationRequired] = useState(false);
 
   const handleEmailSignUp = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setError(null);
+    setEmailConfirmationRequired(false);
 
     const { data, error: signUpError } = await supabase.auth.signUp({
       email,
@@ -44,8 +46,11 @@ export default function SignUp() {
       }
     }
 
-    // After successful sign-up, redirect to inventory
-    navigate('/inventory');
+    if (data.session) {
+      navigate('/inventory');
+    } else {
+      setEmailConfirmationRequired(true);
+    }
     setLoading(false);
   };
 
@@ -173,6 +178,12 @@ export default function SignUp() {
       {error && (
         <div className="p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600">
           {error}
+        </div>
+      )}
+
+      {emailConfirmationRequired && (
+        <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl text-sm text-blue-700">
+          Check your email to confirm your account before logging in.
         </div>
       )}
 
