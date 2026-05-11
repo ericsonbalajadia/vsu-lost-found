@@ -1,109 +1,44 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+// src/App.tsx 
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import AuthGuard  from './guards/AuthGuard'
+import AdminGuard from './guards/AdminGuard'
+import ProfileSettings from './pages/auth/settings/ProfileSettings'
+import SecuritySettings from './pages/auth/settings/SecuritySettings'
+import NotifSettings from './pages/auth/settings/NotifSettings'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+// Public pages
+import SignUp from './pages/public/SignUp'
+import Login  from './pages/public/Login'
+
+// Placeholder pages (will be built in Phase 3+)
+const Landing         = () => <div className="p-8 text-center font-headline text-2xl">Landing — Phase 3</div>
+const BrowseGallery   = () => <div className="p-8 text-center font-headline text-2xl">Browse — Phase 3</div>
+const Inventory       = () => <div className="p-8 text-center font-headline text-2xl">Inventory — Phase 3</div>
 
 
-function App() {
-  const [count, setCount] = useState(0)
-
-  console.log('Supabase URL:', supabaseUrl)
-  console.log('Supabase Anon Key:', supabaseAnonKey)
-
+export default function App() {
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.tsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button className="counter" onClick={() => setCount((count) => count + 1)}>
-          Count is {count}
-        </button>
-      </section>
+    <BrowserRouter>
+      <Routes>
+        {/* Public */}
+        <Route path="/"       element={<Landing />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/login"  element={<Login />} />
+        <Route path="/browse" element={<BrowseGallery />} />
 
-      <div className="ticks"></div>
+        {/* Authenticated */}
+        <Route element={<AuthGuard />}>
+          <Route path="/inventory"              element={<Inventory />} />
+          <Route path="/settings/profile"       element={<ProfileSettings />} />
+          <Route path="/settings/security"      element={<SecuritySettings />} />
+          <Route path="/settings/notifications" element={<NotifSettings />} />
+        </Route>
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg className="button-icon" role="presentation" aria-hidden="true">
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg className="button-icon" role="presentation" aria-hidden="true">
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg className="button-icon" role="presentation" aria-hidden="true">
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg className="button-icon" role="presentation" aria-hidden="true">
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+        {/* Admin scaffold */}
+        <Route element={<AdminGuard />}>
+          <Route path="/admin" element={<div className="p-8">Admin — Phase 5+</div>} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   )
 }
-
-export default App
