@@ -133,7 +133,7 @@ export default function NotifSettings() {
                   className="sr-only peer"
                   checked={messageNotif}
                   onChange={(e) => setMessageNotif(e.target.checked)}
-                  aria-label="Toggle new match alerts" // ← fixes the warning
+                  aria-label="Toggle direct message alerts"
                 />
                 <div className="w-11 h-6 bg-surface-container-highest rounded-full peer-checked:bg-primary after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full peer-focus:ring-2 peer-focus:ring-primary-container"></div>
               </label>
