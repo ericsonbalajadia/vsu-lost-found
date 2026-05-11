@@ -34,10 +34,16 @@ async updateProfile(userId: string, payload: UpdateProfilePayload) {
 },
 
   async updateNotifPrefs(userId: string, prefs: UpdateNotifPrefsPayload) {
-    return supabase
+    const { data, error } = await supabase
       .from('profiles')
       .update({ ...prefs, updated_at: new Date().toISOString() })
       .eq('id', userId)
+      .select()
+      .single()
+
+    if (error) throw error
+    if (!data) throw new Error('Notification preferences not found or update failed')
+    return { data, error: null }
   },
 
   async updatePassword(newPassword: string) {
