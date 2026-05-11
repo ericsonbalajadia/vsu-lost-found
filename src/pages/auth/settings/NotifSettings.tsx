@@ -26,17 +26,33 @@ export default function NotifSettings() {
 
   const handleSave = async () => {
     if (!user) return
+
     setSaving(true)
+    setSaved(false)
+
     const payload: UpdateNotifPrefsPayload = {
       notif_matches: matchNotif,
       notif_claims: claimNotif,
       notif_messages: messageNotif,
       notif_frequency: frequency,
     }
-    await profilesApi.updateNotifPrefs(user.id, payload)
-    setSaving(false)
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2500)
+
+    try {
+      const result = await profilesApi.updateNotifPrefs(user.id, payload)
+      const error = result && typeof result === 'object' && 'error' in result ? result.error : null
+
+      if (error) {
+        throw error
+      }
+
+      setSaved(true)
+      setTimeout(() => setSaved(false), 2500)
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Failed to save notification preferences.'
+      window.alert(message)
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
