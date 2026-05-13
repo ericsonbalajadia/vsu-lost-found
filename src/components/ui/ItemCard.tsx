@@ -2,7 +2,7 @@
 import { Link } from 'react-router-dom'
 import type { Item } from '../../types/database'
 import StatusRibbon from './StatusRibbon'
-import { useAuth } from '../../contexts/AuthContext'   
+import { useAuth } from '../../contexts/AuthContext'
 
 interface ItemCardProps {
   item: Item
@@ -11,7 +11,9 @@ interface ItemCardProps {
 function formatDate(dateStr: string | null): string {
   if (!dateStr) return 'Unknown date'
   return new Date(dateStr).toLocaleDateString('en-PH', {
-    month: 'short', day: 'numeric', year: 'numeric'
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
   })
 }
 
@@ -25,8 +27,12 @@ export default function ItemCard({ item }: ItemCardProps) {
         <img
           src={item.image_url ?? '/placeholder-image.svg'}
           alt={item.title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-          onError={e => { (e.target as HTMLImageElement).src = '/placeholder-image.svg' }}
+          className={`w-full h-full transition-transform duration-500 group-hover:scale-110 ${
+            item.image_url ? 'object-cover' : 'object-contain'
+          }`}
+          onError={(e) => {
+            ;(e.target as HTMLImageElement).src = '/placeholder-image.svg'
+          }}
         />
         <StatusRibbon type={item.type} status={item.status} />
       </div>
@@ -39,9 +45,7 @@ export default function ItemCard({ item }: ItemCardProps) {
               {item.category}
             </span>
             {item.reference_number && (
-              <span className="text-[10px] text-outline font-mono">
-                {item.reference_number}
-              </span>
+              <span className="text-[10px] text-outline font-mono">{item.reference_number}</span>
             )}
           </div>
           <h3 className="text-xl font-bold text-on-surface leading-tight line-clamp-1">
@@ -57,7 +61,9 @@ export default function ItemCard({ item }: ItemCardProps) {
         <div className="space-y-1">
           <div className="flex items-center gap-2 text-xs text-outline">
             <span className="material-symbols-outlined text-sm">location_on</span>
-            <span className="font-medium">{item.location_building ?? item.location_name ?? 'VSU Campus'}</span>
+            <span className="font-medium">
+              {item.location_building ?? item.location_name ?? 'VSU Campus'}
+            </span>
           </div>
           <div className="flex items-center gap-2 text-xs text-outline">
             <span className="material-symbols-outlined text-sm">calendar_today</span>
@@ -71,7 +77,9 @@ export default function ItemCard({ item }: ItemCardProps) {
               {item.profiles.avatar_url ? (
                 <img src={item.profiles.avatar_url} alt="" className="w-full h-full object-cover" />
               ) : (
-                <span className="material-symbols-outlined text-[10px] text-primary flex items-center justify-center h-full">person</span>
+                <span className="material-symbols-outlined text-[10px] text-primary flex items-center justify-center h-full">
+                  person
+                </span>
               )}
             </div>
             <span>{item.profiles.full_name}</span>
