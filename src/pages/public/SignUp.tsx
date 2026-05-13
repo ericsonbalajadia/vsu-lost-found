@@ -64,7 +64,7 @@ export default function SignUp() {
   };
 
   return (
-    <main className="flex w-full min-h-screen overflow-hidden bg-surface text-on-surface">
+    <main className="flex flex-col md:flex-row h-screen overflow-hidden bg-background">
       {/* Left Side: Hero Brand Presence (Hidden on mobile) */}
 <section className="hidden md:flex md:w-1/2 lg:w-3/5 relative overflow-hidden group">
   <div className="absolute inset-0 bg-primary/40 z-10  transition-colors group-hover:bg-primary/30"></div>
@@ -99,7 +99,7 @@ export default function SignUp() {
       <img
         alt="FoundPath Logo"
         className="h-10 w-10"
-        src="https://lh3.googleusercontent.com/aida/ADBb0ui4qrGuDDysIJRTTSJmvXAFtWBUUhiSJuAKYZx7IxSplDEwpnafzSuZSg_oI2tWc1yDx3kTQptO_1m_8JC6XENNO3QdWk7DbG1tsMi9Lrd4f3SvtcVRkm6yKCloFyoPOVOuUXhHWP_kCxAdYnid4XROiNpl3r9BaetfvBnHn_3CkSKf8bhvzbvrDVE-xyi4zpZ2PlFBebygkAvxzWEBgZvNonReydrwBVBjd4Fsj86AxCa_ZYA4P5UbQjIBLdQS0L5Dr1YUQ5-ouw"
+        src="./FoundPath.png"
       />
       <span className="text-on-surface font-headline font-extrabold text-xl tracking-tighter text-yellow-500">FoundPath</span>
     </div>
