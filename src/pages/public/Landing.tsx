@@ -12,7 +12,7 @@ export default function Landing() {
 
   useEffect(() => {
     const fetchPreview = async () => {
-      const { data } = await itemsApi.getAll({ type: 'found', limit: 6 });
+      const { data } = await itemsApi.getAll({ limit: 12 });
       const typedItems = (data as any[])?.map(item => ({
         ...item,
         profiles: item.profiles?.[0]
