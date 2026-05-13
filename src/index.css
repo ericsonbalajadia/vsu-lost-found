@@ -68,7 +68,7 @@
   --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
   --mono: ui-monospace, Consolas, monospace;
 
-  font: 18px/145% var(--sans);
+  font: 14px/145% var(--sans);
   letter-spacing: 0.18px;
   color-scheme: light dark;
   color: var(--text);
@@ -93,7 +93,7 @@
   --color-outline-variant: #acb3b6;
 
   @media (max-width: 1024px) {
-    font-size: 16px;
+    font-size: 12px;
   }
 }
 
