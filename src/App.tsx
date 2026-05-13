@@ -9,11 +9,16 @@ import NotifSettings from './pages/auth/settings/NotifSettings'
 // Public pages
 import SignUp from './pages/public/SignUp'
 import Login  from './pages/public/Login'
+import Landing from './pages/public/Landing'
+
+// Authenticated pages
+import Inventory       from './pages/auth/Inventory'
+import Report          from './pages/auth/Report'
+import MyItems         from './pages/auth/MyItems'
+
 
 // Placeholder pages (will be built in Phase 3+)
-const Landing         = () => <div className="p-8 text-center font-headline text-2xl">Landing — Phase 3</div>
 const BrowseGallery   = () => <div className="p-8 text-center font-headline text-2xl">Browse — Phase 3</div>
-const Inventory       = () => <div className="p-8 text-center font-headline text-2xl">Inventory — Phase 3</div>
 
 
 export default function App() {
@@ -29,6 +34,8 @@ export default function App() {
         {/* Authenticated */}
         <Route element={<AuthGuard />}>
           <Route path="/inventory"              element={<Inventory />} />
+          <Route path="/report"                 element={<Report />} />
+          <Route path="/my-items"               element={<MyItems />} />
           <Route path="/settings/profile"       element={<ProfileSettings />} />
           <Route path="/settings/security"      element={<SecuritySettings />} />
           <Route path="/settings/notifications" element={<NotifSettings />} />
