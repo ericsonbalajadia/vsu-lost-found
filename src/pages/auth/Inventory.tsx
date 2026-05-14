@@ -4,21 +4,15 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { itemsApi } from '../../api/itemsApi';
 import type{ ItemFilters } from '../../api/itemsApi';
 import type { Item, ItemCategory, ItemType } from '../../types/database';
-import { useAuth } from '../../contexts/AuthContext';
 import ItemCard from '../../components/ui/ItemCard';
 import { ItemGridSkeleton } from '../../components/ui/SkeletonLoader';
 import AuthenticatedLayout from '../../components/layout/AuthenticatedLayout';
 
-const CATEGORIES: ItemCategory[] = [
-  'Electronics', 'Personal Accessories', 'Books & Stationery',
-  'Keys', 'Clothing', 'ID & Documents', 'Other',
-];
 
 export default function Inventory() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
-  const { user } = useAuth();
 
   const typeParam = searchParams.get('type') as ItemType | null;
   const catParam = searchParams.get('category') as ItemCategory | null;

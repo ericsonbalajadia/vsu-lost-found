@@ -18,7 +18,7 @@ const tabs: { key: TabKey; label: string }[] = [
 ];
 
 export default function MyItems() {
-  const { user, profile } = useAuth();
+  const { user } = useAuth();
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<TabKey>('all');
