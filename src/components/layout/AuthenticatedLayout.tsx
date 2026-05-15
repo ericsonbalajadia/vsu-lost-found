@@ -1,19 +1,21 @@
 // src/components/layout/AuthenticatedLayout.tsx
 import { useState, useEffect } from 'react';
-import type{ ReactNode } from 'react'
+import type { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 
 const navItems = [
   { path: '/inventory', label: 'Dashboard', icon: 'dashboard' },
-  { path: '/my-items', label: 'My Reported Items', icon: 'inventory_2' },
+  { path: '/my-items', label: 'My Items', icon: 'inventory_2' },
+  { path: '/report', label: 'Report', icon: 'add_circle' },
+  { path: '/settings/profile', label: 'Settings', icon: 'settings' },
 ];
 
 export default function AuthenticatedLayout({ children }: { children: ReactNode }) {
   const { signOut } = useAuth();
   const location = useLocation();
 
-  // Sidebar collapsed state (persisted in localStorage)
+  // Sidebar collapsed state (persisted in localStorage) – only for desktop
   const [collapsed, setCollapsed] = useState(() => {
     const saved = localStorage.getItem('sidebarCollapsed');
     return saved === 'true';
@@ -25,15 +27,23 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
 
   const toggleSidebar = () => setCollapsed(prev => !prev);
 
+  // Helper to check if a nav item is active
+  const isActive = (path: string) => {
+    if (path === '/settings/profile') {
+      return location.pathname.startsWith('/settings');
+    }
+    return location.pathname === path;
+  };
+
   return (
     <div className="flex h-screen overflow-hidden bg-background">
-      {/* SideNavBar */}
+      {/* Desktop Sidebar – hidden on mobile */}
       <aside
         className={`hidden md:flex flex-col h-full bg-surface-container-lowest border-r border-outline-variant/10 shrink-0 transition-all duration-300 ${
           collapsed ? 'w-20' : 'w-72'
         }`}
       >
-        {/* Logo area – adapts to collapsed state */}
+        {/* Logo area */}
         <div className={`p-6 mb-2 flex items-center gap-3 ${collapsed ? 'justify-center' : ''}`}>
           <img
             alt="FoundPath Logo"
@@ -45,24 +55,24 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
           )}
         </div>
 
-        {/* Main navigation */}
+        {/* Main desktop navigation */}
         <nav className="flex-1 px-4">
           <ul className="space-y-1.5">
-            {navItems.map(item => {
-              const isActive = location.pathname === item.path;
+            {navItems.slice(0, 2).map(item => {
+              const active = isActive(item.path);
               return (
                 <li key={item.path}>
                   <Link
                     to={item.path}
                     className={`flex items-center px-4 py-3 gap-3 rounded-xl transition-all duration-200 font-headline font-semibold text-sm ${
-                      isActive
+                      active
                         ? 'bg-primary/10 text-primary'
                         : 'text-on-surface-variant hover:text-primary hover:bg-primary/5'
                     } ${collapsed ? 'justify-center' : ''}`}
                   >
                     <span
                       className="material-symbols-outlined"
-                      style={isActive ? { fontVariationSettings: "'FILL' 1" } : undefined}
+                      style={active ? { fontVariationSettings: "'FILL' 1" } : undefined}
                     >
                       {item.icon}
                     </span>
@@ -74,7 +84,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
           </ul>
         </nav>
 
-        {/* Bottom section: Settings + Logout */}
+        {/* Desktop bottom section: Settings + Logout (only Desktop) */}
         <div className="p-6">
           <nav className={`px-4 pb-6 border-t border-outline-variant/10 pt-6 ${collapsed ? 'px-0' : ''}`}>
             <ul className="space-y-1.5">
@@ -92,7 +102,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
               <li>
                 <button
                   onClick={signOut}
-                   aria-label="Log Out"
+                  aria-label="Log Out"
                   className={`w-full flex items-center px-4 py-3 gap-3 hover:text-error hover:bg-error/5 rounded-xl transition-all duration-200 font-headline font-semibold text-sm text-error ${
                     collapsed ? 'justify-center' : ''
                   }`}
@@ -108,13 +118,13 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 bg-background overflow-hidden">
-        {/* TopAppBar – with toggle button */}
+        {/* TopAppBar – with toggle button (hidden on mobile) */}
         <header className="h-16 bg-surface-container-lowest/80 backdrop-blur-md border-b border-outline-variant/10 sticky top-0 z-50 w-full flex items-center justify-between px-6 lg:px-10 shrink-0">
           <div className="flex items-center gap-4">
             <button
               onClick={toggleSidebar}
               aria-label="Toggle sidebar"
-              className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors text-on-surface-variant group"
+              className="hidden md:flex w-10 h-10 items-center justify-center rounded-full hover:bg-surface-container transition-colors text-on-surface-variant group"
             >
               <svg
                 className="lucide lucide-panel-right group-hover:text-primary transition-colors"
@@ -134,17 +144,19 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
             </button>
             <div className="hidden md:flex flex-col">
               <span className="font-display text-sm font-extrabold text-primary">
-                {location.pathname === '/inventory' ? 'Inventory' : 'My Items'}
+                {location.pathname === '/inventory' ? 'Inventory' : 
+                 location.pathname === '/my-items' ? 'My Items' : 
+                 location.pathname === '/report' ? 'Report' : 'Dashboard'}
               </span>
             </div>
           </div>
           <div className="flex items-center gap-1 pr-2">
-            <button  aria-label="Notifications" className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors text-on-surface-variant relative">
+            <button aria-label="Notifications" className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors text-on-surface-variant relative">
               <span className="material-symbols-outlined text-[22px]">notifications</span>
               <span className="absolute top-2.5 right-2.5 w-1.5 h-1.5 bg-error rounded-full ring-1 ring-surface-container-lowest" />
             </button>
             <div className="h-6 w-[1px] bg-outline-variant/30 mx-2 self-center" />
-            <button  aria-label="User Profile" className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-surface-container transition-colors group ml-1">
+            <button aria-label="User Profile" className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-surface-container transition-colors group ml-1">
               <img
                 alt="User Avatar"
                 className="w-8 h-8 rounded-full object-cover ring-2 ring-surface-container-high shadow-sm"
@@ -154,9 +166,44 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
           </div>
         </header>
 
-        {/* Scrollable content */}
-        <div className="flex-1 overflow-y-auto">{children}</div>
+        {/* Scrollable content – add bottom padding on mobile to avoid bottom nav overlap */}
+        <div className="flex-1 overflow-y-auto pb-20 md:pb-0">
+          {children}
+        </div>
       </main>
+
+      {/* Mobile Bottom Navigation – visible only on small screens */}
+      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-surface-container-lowest border-t border-outline-variant/10 md:hidden flex justify-around items-center h-16 px-4">
+        {navItems.map(item => {
+          const active = isActive(item.path);
+          return (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={`flex flex-col items-center justify-center gap-1 transition-colors ${
+                active ? 'text-primary' : 'text-on-surface-variant'
+              }`}
+            >
+              <span
+                className="material-symbols-outlined text-2xl"
+                style={active ? { fontVariationSettings: "'FILL' 1" } : undefined}
+              >
+                {item.icon}
+              </span>
+              <span className="text-[11px] font-medium">{item.label}</span>
+            </Link>
+          );
+        })}
+        {/* Logout button in mobile nav */}
+        <button
+          onClick={signOut}
+          aria-label="Log Out"
+          className="flex flex-col items-center justify-center gap-1 text-on-surface-variant hover:text-error transition-colors"
+        >
+          <span className="material-symbols-outlined text-2xl">logout</span>
+          <span className="text-[11px] font-medium">Logout</span>
+        </button>
+      </nav>
     </div>
   );
 }
