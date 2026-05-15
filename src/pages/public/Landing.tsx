@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import { itemsApi } from '../../api/itemsApi';
 import type { Item } from '../../types/database';
 import ItemCard from '../../components/ui/ItemCard';
-import { ItemGridSkeleton } from '../../components/ui/SkeletonLoader';
+import { getSkeletonCards } from '../../components/ui/SkeletonLoader';
 
 export default function Landing() {
   const [previewItems, setPreviewItems] = useState<Item[]>([]);
@@ -87,7 +87,7 @@ export default function Landing() {
             </div>
 
             {loading ? (
-              <ItemGridSkeleton count={6} />
+              <>{getSkeletonCards(6)}{' '}</>
             ) : previewItems.length === 0 ? (
               <p className="text-center text-on-surface-variant">No items found. Check back later.</p>
             ) : (

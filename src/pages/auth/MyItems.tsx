@@ -5,7 +5,7 @@ import { useAuth } from '../../contexts/AuthContext';
 import { itemsApi } from '../../api/itemsApi';
 import type { Item } from '../../types/database';
 import ItemCard from '../../components/ui/ItemCard';
-import { ItemGridSkeleton } from '../../components/ui/SkeletonLoader';
+import { getSkeletonCards } from '../../components/ui/SkeletonLoader';
 import AuthenticatedLayout from '../../components/layout/AuthenticatedLayout';
 
 type TabKey = 'all' | 'found' | 'lost' | 'resolved';
@@ -110,7 +110,7 @@ export default function MyItems() {
                 </Link>
 
                 {loading ? (
-                  <ItemGridSkeleton count={6} />
+                  <>{getSkeletonCards(6)}{' '}</>
                 ) : filteredItems.length === 0 ? (
                   <div className="col-span-full text-center py-12">
                     <p className="text-on-surface-variant">No items match your current filter.</p>
