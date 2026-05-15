@@ -1,5 +1,5 @@
 // src/components/layout/AuthenticatedLayout.tsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
@@ -26,6 +26,21 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
   }, [collapsed]);
 
   const toggleSidebar = () => setCollapsed(prev => !prev);
+
+  // Dropdown state for avatar menu
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Helper to check if a nav item is active
   const isActive = (path: string) => {
@@ -156,13 +171,63 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
               <span className="absolute top-2.5 right-2.5 w-1.5 h-1.5 bg-error rounded-full ring-1 ring-surface-container-lowest" />
             </button>
             <div className="h-6 w-[1px] bg-outline-variant/30 mx-2 self-center" />
-            <button aria-label="User Profile" className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-surface-container transition-colors group ml-1">
-              <img
-                alt="User Avatar"
-                className="w-8 h-8 rounded-full object-cover ring-2 ring-surface-container-high shadow-sm"
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuBq-pYJZb16ybDcp-MiDfG3MpFohQ2WPKL2Eu46UlDcH1n5EicTaJ0yG1-eSG9E87aUMMspOUgy9_NGwas70Tihj2LYXNVivkOkIQn6jL0dcKwIZLJVadFZUz7NxA4XV-SJ2LcVrtKg4t9898t1JrOIX8IQkYORzh4WtuX3FWMhZUTm0vGkJ567ORnG3q32Srs8o7ibe5Lxjrpjgd2rF9zp6fOxDEBzcFY4oBqRAm1elYZBfW-5Png59aww-aTxwl7hfn43g5NRsZ8"
-              />
-            </button>
+            
+            {/* Avatar with dropdown */}
+            <div className="relative" ref={dropdownRef}>
+              <button
+                onClick={() => setDropdownOpen(!dropdownOpen)}
+                aria-label="User menu"
+                className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-surface-container transition-colors group ml-1"
+              >
+                <img
+                  alt="User Avatar"
+                  className="w-8 h-8 rounded-full object-cover ring-2 ring-surface-container-high shadow-sm"
+                  src="https://lh3.googleusercontent.com/aida-public/AB6AXuBq-pYJZb16ybDcp-MiDfG3MpFohQ2WPKL2Eu46UlDcH1n5EicTaJ0yG1-eSG9E87aUMMspOUgy9_NGwas70Tihj2LYXNVivkOkIQn6jL0dcKwIZLJVadFZUz7NxA4XV-SJ2LcVrtKg4t9898t1JrOIX8IQkYORzh4WtuX3FWMhZUTm0vGkJ567ORnG3q32Srs8o7ibe5Lxjrpjgd2rF9zp6fOxDEBzcFY4oBqRAm1elYZBfW-5Png59aww-aTxwl7hfn43g5NRsZ8"
+                />
+              </button>
+              
+              {dropdownOpen && (
+                <div className="absolute right-0 mt-2 w-56 rounded-xl bg-surface-container-lowest/90 backdrop-blur-md shadow-lg border border-outline-variant/20 z-50 overflow-hidden">
+                  <div className="py-2">
+                    <Link
+                      to="/settings/profile"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 text-sm text-on-surface hover:bg-primary/5 transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-xl">account_circle</span>
+                      <span>My Profile</span>
+                    </Link>
+                    <Link
+                      to="/settings/profile"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 text-sm text-on-surface hover:bg-primary/5 transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-xl">settings</span>
+                      <span>Settings</span>
+                    </Link>
+                    <Link
+                      to="/help"
+                      onClick={() => setDropdownOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 text-sm text-on-surface hover:bg-primary/5 transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-xl">help</span>
+                      <span>Help</span>
+                    </Link>
+                    <div className="border-t border-outline-variant/20 my-1" />
+                    <button
+                      onClick={() => {
+                        setDropdownOpen(false);
+                        signOut();
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-sm text-error hover:bg-error/5 transition-colors"
+                    >
+                      <span className="material-symbols-outlined text-xl">logout</span>
+                      <span>Logout</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </header>
 
