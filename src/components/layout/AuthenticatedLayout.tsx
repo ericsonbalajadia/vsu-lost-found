@@ -1,36 +1,55 @@
 // src/components/layout/AuthenticatedLayout.tsx
-import type { ReactNode } from 'react'
-import { Link, useLocation } from 'react-router-dom'
-import { useAuth } from '../../contexts/AuthContext'
+import { useState, useEffect } from 'react';
+import type{ ReactNode } from 'react'
+import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 
 const navItems = [
   { path: '/inventory', label: 'Dashboard', icon: 'dashboard' },
   { path: '/my-items', label: 'My Reported Items', icon: 'inventory_2' },
-  // 'Confirm Claimant' (Phase 4) can be added later
-]
+];
 
 export default function AuthenticatedLayout({ children }: { children: ReactNode }) {
-  const { signOut } = useAuth()
-  const location = useLocation()
+  const { signOut } = useAuth();
+  const location = useLocation();
+
+  // Sidebar collapsed state (persisted in localStorage)
+  const [collapsed, setCollapsed] = useState(() => {
+    const saved = localStorage.getItem('sidebarCollapsed');
+    return saved === 'true';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('sidebarCollapsed', String(collapsed));
+  }, [collapsed]);
+
+  const toggleSidebar = () => setCollapsed(prev => !prev);
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       {/* SideNavBar */}
-      <aside className="hidden md:flex flex-col h-full w-72 bg-surface-container-lowest border-r border-outline-variant/10 shrink-0">
-        <div className="p-6 mb-2 flex items-center gap-3">
+      <aside
+        className={`hidden md:flex flex-col h-full bg-surface-container-lowest border-r border-outline-variant/10 shrink-0 transition-all duration-300 ${
+          collapsed ? 'w-20' : 'w-72'
+        }`}
+      >
+        {/* Logo area – adapts to collapsed state */}
+        <div className={`p-6 mb-2 flex items-center gap-3 ${collapsed ? 'justify-center' : ''}`}>
           <img
             alt="FoundPath Logo"
             className="h-10 w-auto object-contain"
-            src="/FoundPath.png" // replace with your actual logo
+            src="/FoundPath.png"
           />
-          <span className="font-headline font-bold text-xl tracking-tight text-primary">
-            FoundPath
-          </span>
+          {!collapsed && (
+            <span className="font-headline font-bold text-xl tracking-tight text-primary">FoundPath</span>
+          )}
         </div>
+
+        {/* Main navigation */}
         <nav className="flex-1 px-4">
           <ul className="space-y-1.5">
-            {navItems.map((item) => {
-              const isActive = location.pathname === item.path
+            {navItems.map(item => {
+              const isActive = location.pathname === item.path;
               return (
                 <li key={item.path}>
                   <Link
@@ -39,7 +58,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
                       isActive
                         ? 'bg-primary/10 text-primary'
                         : 'text-on-surface-variant hover:text-primary hover:bg-primary/5'
-                    }`}
+                    } ${collapsed ? 'justify-center' : ''}`}
                   >
                     <span
                       className="material-symbols-outlined"
@@ -47,32 +66,39 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
                     >
                       {item.icon}
                     </span>
-                    <span>{item.label}</span>
+                    {!collapsed && <span>{item.label}</span>}
                   </Link>
                 </li>
-              )
+              );
             })}
           </ul>
         </nav>
+
+        {/* Bottom section: Settings + Logout */}
         <div className="p-6">
-          <nav className="px-4 pb-6 border-t border-outline-variant/10 pt-6">
+          <nav className={`px-4 pb-6 border-t border-outline-variant/10 pt-6 ${collapsed ? 'px-0' : ''}`}>
             <ul className="space-y-1.5">
               <li>
                 <Link
                   to="/settings/profile"
-                  className="flex items-center px-4 py-3 gap-3 text-on-surface-variant hover:text-primary hover:bg-primary/5 rounded-xl transition-all duration-200 font-headline font-semibold text-sm"
+                  className={`flex items-center px-4 py-3 gap-3 text-on-surface-variant hover:text-primary hover:bg-primary/5 rounded-xl transition-all duration-200 font-headline font-semibold text-sm ${
+                    collapsed ? 'justify-center' : ''
+                  }`}
                 >
                   <span className="material-symbols-outlined">settings</span>
-                  <span>Settings</span>
+                  {!collapsed && <span>Settings</span>}
                 </Link>
               </li>
               <li>
                 <button
                   onClick={signOut}
-                  className="w-full flex items-center px-4 py-3 gap-3 hover:text-error hover:bg-error/5 rounded-xl transition-all duration-200 font-headline font-semibold text-sm text-error"
+                   aria-label="Log Out"
+                  className={`w-full flex items-center px-4 py-3 gap-3 hover:text-error hover:bg-error/5 rounded-xl transition-all duration-200 font-headline font-semibold text-sm text-error ${
+                    collapsed ? 'justify-center' : ''
+                  }`}
                 >
                   <span className="material-symbols-outlined">logout</span>
-                  <span>Log Out</span>
+                  {!collapsed && <span>Log Out</span>}
                 </button>
               </li>
             </ul>
@@ -82,13 +108,13 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 bg-background overflow-hidden">
-        {/* TopAppBar */}
+        {/* TopAppBar – with toggle button */}
         <header className="h-16 bg-surface-container-lowest/80 backdrop-blur-md border-b border-outline-variant/10 sticky top-0 z-50 w-full flex items-center justify-between px-6 lg:px-10 shrink-0">
           <div className="flex items-center gap-4">
             <button
-              type="button"
+              onClick={toggleSidebar}
               aria-label="Toggle sidebar"
-              className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors text-on-surface-variant group md:hidden"
+              className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors text-on-surface-variant group"
             >
               <svg
                 className="lucide lucide-panel-right group-hover:text-primary transition-colors"
@@ -102,8 +128,8 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
                 width="24"
                 xmlns="http://www.w3.org/2000/svg"
               >
-                <rect height="18" rx="2" width="18" x="3" y="3"></rect>
-                <path d="M15 3v18"></path>
+                <rect height="18" rx="2" width="18" x="3" y="3" />
+                <path d="M15 3v18" />
               </svg>
             </button>
             <div className="hidden md:flex flex-col">
@@ -113,12 +139,12 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
             </div>
           </div>
           <div className="flex items-center gap-1 pr-2">
-            <button className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors text-on-surface-variant relative">
+            <button  aria-label="Notifications" className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors text-on-surface-variant relative">
               <span className="material-symbols-outlined text-[22px]">notifications</span>
-              <span className="absolute top-2.5 right-2.5 w-1.5 h-1.5 bg-error rounded-full ring-1 ring-surface-container-lowest"></span>
+              <span className="absolute top-2.5 right-2.5 w-1.5 h-1.5 bg-error rounded-full ring-1 ring-surface-container-lowest" />
             </button>
-            <div className="h-6 w-[1px] bg-outline-variant/30 mx-2 self-center"></div>
-            <button className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-surface-container transition-colors group ml-1">
+            <div className="h-6 w-[1px] bg-outline-variant/30 mx-2 self-center" />
+            <button  aria-label="User Profile" className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-surface-container transition-colors group ml-1">
               <img
                 alt="User Avatar"
                 className="w-8 h-8 rounded-full object-cover ring-2 ring-surface-container-high shadow-sm"
@@ -132,5 +158,5 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
         <div className="flex-1 overflow-y-auto">{children}</div>
       </main>
     </div>
-  )
+  );
 }
