@@ -37,7 +37,7 @@ interface LocationPickerProps {
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
-const VSU_CENTER: [number, number] = [10.6765, 124.7923];
+const VSU_CENTER: [number, number] = [10.74705, 124.79633];
 const DEFAULT_ZOOM = 17;
 const NOMINATIM_URL = "https://nominatim.openstreetmap.org/reverse";
 
