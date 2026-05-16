@@ -28,6 +28,10 @@ const typeOptions = [
   { value: 'lost', label: 'Lost Item' },
 ]
 
+const MAX_IMAGES = 5
+const MAX_FILE_SIZE_MB = 10
+const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024
+
 export default function Report() {
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -43,8 +47,11 @@ export default function Report() {
   const [incidentTime, setIncidentTime] = useState('')
   const [securityQ, setSecurityQ] = useState('')
   const [samaritanNotes, setSamaritanNotes] = useState('')
-  const [imageFile, setImageFile] = useState<File | null>(null)
-  const [imagePreview, setImagePreview] = useState<string | null>(null)
+
+  // Multi‑image state
+  const [imageFiles, setImageFiles] = useState<File[]>([])
+  const [imagePreviews, setImagePreviews] = useState<string[]>([])
+  const [imageError, setImageError] = useState<string | null>(null)
 
   // UI state
   const [submitting, setSubmitting] = useState(false)
@@ -52,11 +59,12 @@ export default function Report() {
   const [insight, setInsight] = useState<string | null>(null)
   const [validationError, setValidationError] = useState<string | null>(null)
 
+  // Revoke all object URLs on unmount
   useEffect(() => {
     return () => {
-      if (imagePreview) URL.revokeObjectURL(imagePreview)
+      imagePreviews.forEach((preview) => URL.revokeObjectURL(preview))
     }
-  }, [imagePreview])
+  }, [imagePreviews])
 
   const handleBuildingChange = useCallback(async (b: string) => {
     setBuilding(b)
@@ -68,20 +76,45 @@ export default function Report() {
     }
   }, [])
 
-  // Then the useEffect that uses it
-useEffect(() => {
-  if (location?.building && location.building !== building) {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    handleBuildingChange(location.building);
-  }
-}, [location, building, handleBuildingChange]);
+  useEffect(() => {
+    if (location?.building && location.building !== building) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      handleBuildingChange(location.building)
+    }
+  }, [location, building, handleBuildingChange])
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    if (imagePreview) URL.revokeObjectURL(imagePreview)
-    setImageFile(file)
-    setImagePreview(URL.createObjectURL(file))
+    const files = Array.from(e.target.files || [])
+    const remainingSlots = MAX_IMAGES - imageFiles.length
+    const newFiles: File[] = []
+    const oversizedFiles: string[] = []
+
+    for (const file of files.slice(0, remainingSlots)) {
+      if (file.size > MAX_FILE_SIZE_BYTES) {
+        oversizedFiles.push(file.name)
+      } else {
+        newFiles.push(file)
+      }
+    }
+
+    if (oversizedFiles.length > 0) {
+      setImageError(`File(s) too large (max ${MAX_FILE_SIZE_MB}MB): ${oversizedFiles.join(', ')}`)
+      return
+    }
+    setImageError(null)
+
+    if (newFiles.length === 0) return
+
+    const newPreviews = newFiles.map((file) => URL.createObjectURL(file))
+    setImageFiles((prev) => [...prev, ...newFiles])
+    setImagePreviews((prev) => [...prev, ...newPreviews])
+  }
+
+  const removeImage = (index: number) => {
+    URL.revokeObjectURL(imagePreviews[index])
+    setImageFiles((prev) => prev.filter((_, i) => i !== index))
+    setImagePreviews((prev) => prev.filter((_, i) => i !== index))
+    setImageError(null)
   }
 
   const validateForm = (): boolean => {
@@ -106,6 +139,7 @@ useEffect(() => {
     setError(null)
 
     try {
+      // 1. Insert item record
       const payload: CreateItemPayload = {
         reporter_id: user.id,
         title: title.trim(),
@@ -125,9 +159,17 @@ useEffect(() => {
       const { data: newItem, error: insertError } = await itemsApi.create(payload)
       if (insertError || !newItem) throw new Error(insertError?.message ?? 'Failed to create item')
 
-      if (imageFile) {
-        const imageUrl = await storageApi.uploadItemImage(imageFile, user.id, newItem.id)
-        await supabase.from('items').update({ image_url: imageUrl }).eq('id', newItem.id)
+      // 2. Upload all images if any
+      let imageUrls: string[] = []
+      if (imageFiles.length > 0) {
+        imageUrls = await storageApi.uploadMultipleItemImages(imageFiles, user.id, newItem.id)
+        await supabase
+          .from('items')
+          .update({
+            image_urls: imageUrls,
+            image_url: imageUrls[0] || null,
+          })
+          .eq('id', newItem.id)
       }
 
       navigate(`/items/${newItem.id}`)
@@ -453,50 +495,67 @@ useEffect(() => {
                   Visuals
                 </h3>
               </div>
-              <label
-                htmlFor="image-upload"
-                className="group relative flex-grow min-h-[140px] md:min-h-[160px] rounded-xl bg-surface-container-highest flex flex-col items-center justify-center border-2 border-dashed border-outline-variant/50 hover:border-primary/50 transition-all cursor-pointer overflow-hidden mb-4"
-              >
-                {imagePreview ? (
-                  <img
-                    src={imagePreview}
-                    alt="Item preview"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
+
+              {imageError && (
+                <div className="mb-3 text-xs text-error bg-error-container/20 p-2 rounded-lg">
+                  {imageError}
+                </div>
+              )}
+
+              {imageFiles.length < MAX_IMAGES && (
+                <label
+                  htmlFor="image-upload"
+                  className="group relative flex-grow min-h-[140px] md:min-h-[160px] rounded-xl bg-surface-container-highest flex flex-col items-center justify-center border-2 border-dashed border-outline-variant/50 hover:border-primary/50 transition-all cursor-pointer overflow-hidden mb-4"
+                >
                   <div className="z-10 flex flex-col items-center group-hover:scale-105 transition-transform p-4 text-center">
                     <span className="material-symbols-outlined text-3xl text-on-surface-variant mb-2">
                       upload_file
                     </span>
                     <p className="text-xs font-medium text-on-surface-variant">
-                      Drop image or click to upload
+                      Drop images or click to upload
                     </p>
                     <p className="text-[10px] text-on-surface-variant/60 mt-1">
-                      PNG, JPG up to 10MB
+                      Up to {MAX_IMAGES} images, max {MAX_FILE_SIZE_MB}MB each
                     </p>
                   </div>
-                )}
-                <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </label>
+                  <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                </label>
+              )}
               <input
                 id="image-upload"
                 type="file"
                 accept="image/*"
+                multiple
                 className="sr-only"
                 onChange={handleImageChange}
-                aria-label="Upload item image"
+                aria-label="Upload item images"
               />
-              {imagePreview && (
-                <div className="flex space-x-2 mt-2">
-                  <div className="w-10 h-10 md:w-12 md:h-12 rounded-md bg-surface-variant/30 flex items-center justify-center border border-outline-variant/20 overflow-hidden">
-                    <img
-                      src={imagePreview}
-                      alt="Thumbnail"
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                </div>
-              )}
+
+{/* Thumbnail gallery */}
+{imagePreviews.length > 0 && (
+  <div className="flex flex-wrap gap-2 mt-2">
+    {imagePreviews.map((preview, idx) => (
+      <div
+        key={idx}
+        className="relative w-16 h-16 rounded-md bg-surface-variant/30 border border-outline-variant/20 overflow-hidden group"
+      >
+        <img
+          src={preview}
+          alt={`Preview ${idx + 1}`}
+          className="w-full h-full object-cover"
+        />
+        <button
+          type="button"
+          onClick={() => removeImage(idx)}
+          className="absolute top-0 right-0 w-5 h-5 bg-error/80 text-white rounded-full flex items-center justify-center hover:bg-error transition-colors md:opacity-0 md:group-hover:opacity-100 opacity-100"
+          aria-label="Remove image"
+        >
+          <span className="material-symbols-outlined text-xs">close</span>
+        </button>
+      </div>
+    ))}
+  </div>
+)}
             </section>
 
             {/* Submit Button */}
