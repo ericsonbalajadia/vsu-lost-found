@@ -1,89 +1,110 @@
 // src/components/layout/AuthenticatedLayout.tsx
-import { useState, useEffect, useRef } from 'react'
-import type { ReactNode } from 'react'
-import { Link, useLocation } from 'react-router-dom'
-import { useAuth } from '../../contexts/AuthContext'
-//import NotificationBell from '../ui/NotificationBell'; // optional – if you have it
+import { useState, useEffect, useRef } from 'react';
+import type { ReactNode } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { useAuth } from '../../contexts/AuthContext';
 
 const navItems = [
   { path: '/inventory', label: 'Dashboard', icon: 'dashboard' },
   { path: '/my-items', label: 'My Items', icon: 'inventory_2' },
   { path: '/report', label: 'Report', icon: 'add_circle' },
   { path: '/settings/profile', label: 'Settings', icon: 'settings' },
-]
+];
 
 export default function AuthenticatedLayout({ children }: { children: ReactNode }) {
-  const { signOut } = useAuth()
-  const location = useLocation()
+  const { signOut } = useAuth();
+  const location = useLocation();
 
-  // Sidebar collapsed state (persisted in localStorage)
+  // Sidebar collapsed state
   const [collapsed, setCollapsed] = useState(() => {
-    const saved = localStorage.getItem('sidebarCollapsed')
-    return saved === 'true'
-  })
+    const saved = localStorage.getItem('sidebarCollapsed');
+    return saved === 'true';
+  });
 
   useEffect(() => {
-    localStorage.setItem('sidebarCollapsed', String(collapsed))
-  }, [collapsed])
+    localStorage.setItem('sidebarCollapsed', String(collapsed));
+  }, [collapsed]);
 
-  const toggleSidebar = () => setCollapsed((prev) => !prev)
+  const toggleSidebar = () => setCollapsed(prev => !prev);
 
-  // Dropdown state for avatar menu
-  const [dropdownOpen, setDropdownOpen] = useState(false)
-  const dropdownRef = useRef<HTMLDivElement>(null)
+  // Avatar dropdown state
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setDropdownOpen(false)
+        setDropdownOpen(false);
       }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
-  // Helper to check active sidebar item
+  // Close dropdown on Escape key and scroll
+  useEffect(() => {
+    if (!dropdownOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setDropdownOpen(false);
+      }
+    };
+
+    const scrollContainer = document.querySelector('.flex-1.overflow-y-auto');
+    const handleScroll = () => {
+      setDropdownOpen(false);
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    if (scrollContainer) {
+      scrollContainer.addEventListener('scroll', handleScroll);
+    }
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+      if (scrollContainer) {
+        scrollContainer.removeEventListener('scroll', handleScroll);
+      }
+    };
+  }, [dropdownOpen]);
+
   const isActive = (path: string) => {
     if (path === '/settings/profile') {
-      return location.pathname.startsWith('/settings')
+      return location.pathname.startsWith('/settings');
     }
-    return location.pathname === path
-  }
+    return location.pathname === path;
+  };
 
-  // Determine page title for top bar
   const getPageTitle = () => {
-    const path = location.pathname
-    if (path === '/inventory') return 'Inventory'
-    if (path === '/my-items') return 'My Items'
-    if (path === '/report') return 'Report'
-    if (path.startsWith('/settings')) return 'Settings'
-    return 'Dashboard'
-  }
+    const path = location.pathname;
+    if (path === '/inventory') return 'Inventory';
+    if (path === '/my-items') return 'My Items';
+    if (path === '/report') return 'Report';
+    if (path.startsWith('/settings')) return 'Settings';
+    return 'Dashboard';
+  };
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       {/* Desktop Sidebar – hidden on mobile */}
       <aside
         className={`hidden md:flex flex-col h-full bg-surface-container-lowest border-r border-outline-variant/50 shrink-0 transition-all duration-300 ${
-          collapsed ? 'w-20' : 'w-60'
+          collapsed ? 'w-20' : 'w-64'
         }`}
       >
-        {/* Logo area */}
         <div className={`p-6 mb-2 flex items-center gap-3 ${collapsed ? 'justify-center' : ''}`}>
           <img alt="FoundPath Logo" className="h-10 w-auto object-contain" src="/FoundPath.png" />
           {!collapsed && (
-            <span className="font-headline font-bold text-xl tracking-tight text-primary">
-              FoundPath
-            </span>
+            <span className="font-headline font-bold text-xl tracking-tight text-primary">FoundPath</span>
           )}
         </div>
 
-        {/* Main desktop navigation */}
         <nav className="flex-1 px-4">
           <ul className="space-y-1.5">
-            {navItems.slice(0, 2).map((item) => {
-              const active = isActive(item.path)
+            {navItems.slice(0, 2).map(item => {
+              const active = isActive(item.path);
               return (
                 <li key={item.path}>
                   <Link
@@ -103,16 +124,13 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
                     {!collapsed && <span>{item.label}</span>}
                   </Link>
                 </li>
-              )
+              );
             })}
           </ul>
         </nav>
 
-        {/* Desktop bottom section: Settings + Logout (only Desktop) */}
         <div className="p-6">
-          <nav
-            className={`px-4 pb-6 border-t border-outline-variant/50 pt-6 ${collapsed ? 'px-0' : ''}`}
-          >
+          <nav className={`px-4 pb-6 border-t border-outline-variant/50 pt-6 ${collapsed ? 'px-0' : ''}`}>
             <ul className="space-y-1.5">
               <li>
                 <Link
@@ -144,7 +162,6 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
 
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 bg-background overflow-hidden">
-        {/* TopAppBar – with toggle button and page title, no extra nav */}
         <header className="h-16 bg-surface-container-lowest/80 backdrop-blur-md border-b border-outline-variant/10 sticky top-0 z-50 w-full flex items-center justify-between px-6 lg:px-10 shrink-0">
           <div className="flex items-center gap-4">
             <button
@@ -169,14 +186,11 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
               </svg>
             </button>
             <div className="hidden md:flex flex-col">
-              <span className="font-display text-sm font-extrabold text-primary">
-                {getPageTitle()}
-              </span>
+              <span className="font-display text-sm font-extrabold text-primary">{getPageTitle()}</span>
             </div>
           </div>
           <div className="flex items-center gap-1 pr-2">
-            {/* <NotificationBell /> {/* Replace with your bell component if available */}
-            {/* Temporary notification bell – replace with <NotificationBell /> when ready */}
+            {/* Temporary notification bell placeholder */}
             <button
               aria-label="Notifications"
               className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container transition-colors text-on-surface-variant relative"
@@ -230,8 +244,8 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
                     <div className="border-t border-outline-variant/20 my-1" />
                     <button
                       onClick={() => {
-                        setDropdownOpen(false)
-                        signOut()
+                        setDropdownOpen(false);
+                        signOut();
                       }}
                       className="w-full flex items-center gap-3 px-4 py-3 text-sm text-error hover:bg-error/5 transition-colors"
                     >
@@ -245,14 +259,13 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
           </div>
         </header>
 
-        {/* Scrollable content – bottom padding for mobile bottom nav */}
         <div className="flex-1 overflow-y-auto pb-20 md:pb-0">{children}</div>
       </main>
 
-      {/* Mobile Bottom Navigation – visible only on small screens */}
+      {/* Mobile Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 z-50 bg-surface-container-lowest border-t border-outline-variant/10 md:hidden flex justify-around items-center h-16 px-4">
-        {navItems.map((item) => {
-          const active = isActive(item.path)
+        {navItems.map(item => {
+          const active = isActive(item.path);
           return (
             <Link
               key={item.path}
@@ -269,9 +282,8 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
               </span>
               <span className="text-[11px] font-medium">{item.label}</span>
             </Link>
-          )
+          );
         })}
-        {/* Logout button in mobile nav */}
         <button
           onClick={signOut}
           aria-label="Log Out"
@@ -282,5 +294,5 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
         </button>
       </nav>
     </div>
-  )
+  );
 }
