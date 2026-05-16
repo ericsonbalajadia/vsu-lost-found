@@ -87,3 +87,7 @@ export type NotifType =
   | 'item_resolved'
   | 'message'
   | 'system'
+
+export interface RawItemWithProfileArray extends Omit<Item, 'profiles'> {
+  profiles: Profile[] | null;
+}

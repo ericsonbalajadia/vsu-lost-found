@@ -1,103 +1,109 @@
 // src/pages/auth/Report.tsx
-import { useState, useCallback, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import { itemsApi } from '../../api/itemsApi';
-import { storageApi } from '../../api/storageApi';
-import { supabase } from '../../lib/supabase';
-import LocationPicker from '../../components/forms/LocationPicker';
-import type { LocationData } from '../../components/forms/LocationPicker';
-import type { ItemCategory, ItemType, CreateItemPayload } from '../../types/database';
-import AuthenticatedLayout from '../../components/layout/AuthenticatedLayout';
-import CustomSelect from '../../components/ui/CustomSelect';
-import Breadcrumbs from '../../components/ui/Breadcrumbs';
+import { useState, useCallback, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
+import { useAuth } from '../../contexts/AuthContext'
+import { itemsApi } from '../../api/itemsApi'
+import { storageApi } from '../../api/storageApi'
+import { supabase } from '../../lib/supabase'
+import LocationPicker from '../../components/forms/LocationPicker'
+import type { LocationData } from '../../components/forms/LocationPicker'
+import type { ItemCategory, ItemType, CreateItemPayload } from '../../types/database'
+import AuthenticatedLayout from '../../components/layout/AuthenticatedLayout'
+import CustomSelect from '../../components/ui/CustomSelect'
+import Breadcrumbs from '../../components/ui/Breadcrumbs'
 
 const CATEGORIES: ItemCategory[] = [
-  'Electronics', 'Personal Accessories', 'Books & Stationery',
-  'Keys', 'Clothing', 'ID & Documents', 'Other',
-];
+  'Electronics',
+  'Personal Accessories',
+  'Books & Stationery',
+  'Keys',
+  'Clothing',
+  'ID & Documents',
+  'Other',
+]
 
-const categoryOptions = CATEGORIES.map(c => ({ value: c, label: c }));
+const categoryOptions = CATEGORIES.map((c) => ({ value: c, label: c }))
 const typeOptions = [
   { value: 'found', label: 'Found Item' },
   { value: 'lost', label: 'Lost Item' },
-];
+]
 
 export default function Report() {
-  const { user } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth()
+  const navigate = useNavigate()
 
   // Form state
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [category, setCategory] = useState<ItemCategory>('Electronics');
-  const [type, setType] = useState<ItemType>('found');
-  const [building, setBuilding] = useState('');
-  const [location, setLocation] = useState<LocationData | null>(null);
-  const [incidentDate, setIncidentDate] = useState('');
-  const [incidentTime, setIncidentTime] = useState('');
-  const [securityQ, setSecurityQ] = useState('');
-  const [samaritanNotes, setSamaritanNotes] = useState('');
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [title, setTitle] = useState('')
+  const [description, setDescription] = useState('')
+  const [category, setCategory] = useState<ItemCategory>('Electronics')
+  const [type, setType] = useState<ItemType>('found')
+  const [building, setBuilding] = useState('')
+  const [location, setLocation] = useState<LocationData | null>(null)
+  const [incidentDate, setIncidentDate] = useState('')
+  const [incidentTime, setIncidentTime] = useState('')
+  const [securityQ, setSecurityQ] = useState('')
+  const [samaritanNotes, setSamaritanNotes] = useState('')
+  const [imageFile, setImageFile] = useState<File | null>(null)
+  const [imagePreview, setImagePreview] = useState<string | null>(null)
 
   // UI state
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [insight, setInsight] = useState<string | null>(null);
-  const [validationError, setValidationError] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const [insight, setInsight] = useState<string | null>(null)
+  const [validationError, setValidationError] = useState<string | null>(null)
 
   useEffect(() => {
     return () => {
-      if (imagePreview) URL.revokeObjectURL(imagePreview);
-    };
-  }, [imagePreview]);
-
-  useEffect(() => {
-    if (location?.building && location.building !== building) {
-      setBuilding(location.building);
-      handleBuildingChange(location.building);
+      if (imagePreview) URL.revokeObjectURL(imagePreview)
     }
-  }, [location]);
+  }, [imagePreview])
 
   const handleBuildingChange = useCallback(async (b: string) => {
-    setBuilding(b);
+    setBuilding(b)
     if (b && b.trim() !== '') {
-      const { data } = await itemsApi.getInsights(b);
-      if (data) setInsight((data as { message: string }).message);
+      const { data } = await itemsApi.getInsights(b)
+      if (data) setInsight((data as { message: string }).message)
     } else {
-      setInsight(null);
+      setInsight(null)
     }
-  }, []);
+  }, [])
+
+  // Then the useEffect that uses it
+useEffect(() => {
+  if (location?.building && location.building !== building) {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    handleBuildingChange(location.building);
+  }
+}, [location, building, handleBuildingChange]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (imagePreview) URL.revokeObjectURL(imagePreview);
-    setImageFile(file);
-    setImagePreview(URL.createObjectURL(file));
-  };
+    const file = e.target.files?.[0]
+    if (!file) return
+    if (imagePreview) URL.revokeObjectURL(imagePreview)
+    setImageFile(file)
+    setImagePreview(URL.createObjectURL(file))
+  }
 
   const validateForm = (): boolean => {
     if (!title.trim()) {
-      setValidationError('Item name is required.');
-      return false;
+      setValidationError('Item name is required.')
+      return false
     }
     if (type === 'found' && !securityQ.trim()) {
-      setValidationError('Security question is required for found items.');
-      return false;
+      setValidationError('Security question is required for found items.')
+      return false
     }
-    setValidationError(null);
-    return true;
-  };
+    setValidationError(null)
+    return true
+  }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (!user) return;
-    if (!validateForm()) return;
+    e.preventDefault()
+    if (!user) return
+    if (!validateForm()) return
 
-    setSubmitting(true);
-    setError(null);
+    setSubmitting(true)
+    setError(null)
 
     try {
       const payload: CreateItemPayload = {
@@ -114,25 +120,25 @@ export default function Report() {
         incident_time: incidentTime || undefined,
         security_question: type === 'found' ? securityQ.trim() || undefined : undefined,
         samaritan_notes: type === 'found' ? samaritanNotes.trim() || undefined : undefined,
-      };
-
-      const { data: newItem, error: insertError } = await itemsApi.create(payload);
-      if (insertError || !newItem) throw new Error(insertError?.message ?? 'Failed to create item');
-
-      if (imageFile) {
-        const imageUrl = await storageApi.uploadItemImage(imageFile, user.id, newItem.id);
-        await supabase.from('items').update({ image_url: imageUrl }).eq('id', newItem.id);
       }
 
-      navigate(`/items/${newItem.id}`);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.');
-    } finally {
-      setSubmitting(false);
-    }
-  };
+      const { data: newItem, error: insertError } = await itemsApi.create(payload)
+      if (insertError || !newItem) throw new Error(insertError?.message ?? 'Failed to create item')
 
-  const today = new Date().toISOString().split('T')[0];
+      if (imageFile) {
+        const imageUrl = await storageApi.uploadItemImage(imageFile, user.id, newItem.id)
+        await supabase.from('items').update({ image_url: imageUrl }).eq('id', newItem.id)
+      }
+
+      navigate(`/items/${newItem.id}`)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const today = new Date().toISOString().split('T')[0]
 
   return (
     <AuthenticatedLayout>
@@ -144,7 +150,8 @@ export default function Report() {
             File New Report
           </h2>
           <p className="text-sm sm:text-base text-on-surface-variant max-w-2xl leading-relaxed">
-            Submit details of a lost or found item. Your precision helps reunite belongings with their owners.
+            Submit details of a lost or found item. Your precision helps reunite belongings with
+            their owners.
           </p>
         </div>
 
@@ -162,11 +169,16 @@ export default function Report() {
               <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary" />
               <div className="flex items-center space-x-3 mb-4 md:mb-6">
                 <span className="material-symbols-outlined text-primary">inventory_2</span>
-                <h3 className="font-headline text-lg md:text-xl font-bold tracking-tight">Item Identity</h3>
+                <h3 className="font-headline text-lg md:text-xl font-bold tracking-tight">
+                  Item Identity
+                </h3>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                 <div>
-                  <label htmlFor="title" className="block text-sm font-medium text-on-surface-variant mb-2">
+                  <label
+                    htmlFor="title"
+                    className="block text-sm font-medium text-on-surface-variant mb-2"
+                  >
                     Item Name <span className="text-error text-sm font-bold ml-0.5">*</span>
                   </label>
                   <input
@@ -174,7 +186,7 @@ export default function Report() {
                     type="text"
                     required
                     value={title}
-                    onChange={e => setTitle(e.target.value)}
+                    onChange={(e) => setTitle(e.target.value)}
                     placeholder="e.g. Silver Keychain"
                     className="w-full bg-surface-container-highest border-none rounded-lg px-4 py-3 focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary-container transition-all"
                   />
@@ -183,20 +195,23 @@ export default function Report() {
                   <CustomSelect
                     id="category"
                     value={category}
-                    onChange={val => setCategory(val as ItemCategory)}
+                    onChange={(val) => setCategory(val as ItemCategory)}
                     options={categoryOptions}
                     label="Category"
                     required
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <label htmlFor="description" className="block text-sm font-medium text-on-surface-variant mb-2">
+                  <label
+                    htmlFor="description"
+                    className="block text-sm font-medium text-on-surface-variant mb-2"
+                  >
                     Description
                   </label>
                   <textarea
                     id="description"
                     value={description}
-                    onChange={e => setDescription(e.target.value)}
+                    onChange={(e) => setDescription(e.target.value)}
                     rows={3}
                     placeholder="Describe distinguishing features, colour, brand..."
                     className="w-full bg-surface-container-highest border-none rounded-lg px-4 py-3 focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary-container transition-all resize-none"
@@ -210,31 +225,39 @@ export default function Report() {
               <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary" />
               <div className="flex items-center space-x-3 mb-4 md:mb-6">
                 <span className="material-symbols-outlined text-primary">event</span>
-                <h3 className="font-headline text-lg md:text-xl font-bold tracking-tight">Date &amp; Time</h3>
+                <h3 className="font-headline text-lg md:text-xl font-bold tracking-tight">
+                  Date &amp; Time
+                </h3>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-6">
                 <div>
-                  <label htmlFor="incidentDate" className="block text-sm font-medium text-on-surface-variant mb-2">
+                  <label
+                    htmlFor="incidentDate"
+                    className="block text-sm font-medium text-on-surface-variant mb-2"
+                  >
                     Date
                   </label>
                   <input
                     id="incidentDate"
                     type="date"
                     value={incidentDate}
-                    onChange={e => setIncidentDate(e.target.value)}
+                    onChange={(e) => setIncidentDate(e.target.value)}
                     max={today}
                     className="w-full bg-surface-container-highest border-none rounded-lg px-4 py-3 focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary-container transition-all"
                   />
                 </div>
                 <div>
-                  <label htmlFor="incidentTime" className="block text-sm font-medium text-on-surface-variant mb-2">
+                  <label
+                    htmlFor="incidentTime"
+                    className="block text-sm font-medium text-on-surface-variant mb-2"
+                  >
                     Time
                   </label>
                   <input
                     id="incidentTime"
                     type="time"
                     value={incidentTime}
-                    onChange={e => setIncidentTime(e.target.value)}
+                    onChange={(e) => setIncidentTime(e.target.value)}
                     className="w-full bg-surface-container-highest border-none rounded-lg px-4 py-3 focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary-container transition-all"
                   />
                 </div>
@@ -246,29 +269,40 @@ export default function Report() {
               <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary" />
               <div className="flex items-center space-x-3 mb-4 md:mb-6">
                 <span className="material-symbols-outlined text-primary">location_on</span>
-                <h3 className="font-headline text-lg md:text-xl font-bold tracking-tight">Location</h3>
+                <h3 className="font-headline text-lg md:text-xl font-bold tracking-tight">
+                  Location
+                </h3>
               </div>
               <div className="space-y-4 md:space-y-6">
                 <div>
-                  <label htmlFor="building" className="block text-sm font-medium text-on-surface-variant mb-2">
+                  <label
+                    htmlFor="building"
+                    className="block text-sm font-medium text-on-surface-variant mb-2"
+                  >
                     Campus Building (type manually or use detected name)
                   </label>
                   <input
                     id="building"
                     type="text"
                     value={building}
-                    onChange={e => handleBuildingChange(e.target.value)}
+                    onChange={(e) => handleBuildingChange(e.target.value)}
                     placeholder="e.g. Main Library, Science Building, etc."
                     className="w-full bg-surface-container-highest border-none rounded-lg px-4 py-3 focus:bg-surface-container-lowest focus:ring-2 focus:ring-primary-container transition-all"
                   />
                 </div>
                 {insight && (
                   <div className="p-3 md:p-4 bg-primary-container/10 border border-primary/20 rounded-xl flex items-start gap-3 transition-all hover:bg-primary-container/20">
-                    <span className="material-symbols-outlined text-primary text-xl mt-0.5">info</span>
+                    <span className="material-symbols-outlined text-primary text-xl mt-0.5">
+                      info
+                    </span>
                     <p className="text-sm text-primary font-medium">{insight}</p>
                   </div>
                 )}
-                <LocationPicker onChange={setLocation} height="300px" className="mt-2 rounded-xl overflow-hidden" />
+                <LocationPicker
+                  onChange={setLocation}
+                  height="300px"
+                  className="mt-2 rounded-xl overflow-hidden"
+                />
               </div>
             </section>
 
@@ -277,14 +311,16 @@ export default function Report() {
               <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary" />
               <div className="flex items-center space-x-3 mb-4 md:mb-6">
                 <span className="material-symbols-outlined text-primary">category</span>
-                <h3 className="font-headline text-lg md:text-xl font-bold tracking-tight">Report Categorization</h3>
+                <h3 className="font-headline text-lg md:text-xl font-bold tracking-tight">
+                  Report Categorization
+                </h3>
               </div>
               <div className="space-y-6 md:space-y-8">
                 <div>
                   <CustomSelect
                     id="reportType"
                     value={type}
-                    onChange={val => setType(val as ItemType)}
+                    onChange={(val) => setType(val as ItemType)}
                     options={typeOptions}
                     label="Report Type"
                     required
@@ -295,7 +331,9 @@ export default function Report() {
                   <div className="bg-primary-container/10 p-4 md:p-6 rounded-xl border border-primary/10 transition-all hover:bg-primary-container/20">
                     <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
                       <div className="flex items-center space-x-3">
-                        <span className="material-symbols-outlined text-primary">verified_user</span>
+                        <span className="material-symbols-outlined text-primary">
+                          verified_user
+                        </span>
                         <h4 className="font-headline text-base md:text-lg font-bold tracking-tight">
                           Ownership Verification
                         </h4>
@@ -305,30 +343,38 @@ export default function Report() {
                       </span>
                     </div>
                     <p className="text-xs text-on-surface-variant mb-4 leading-relaxed">
-                      To protect privacy, potential owners must answer a specific question before we release the item's location. Choose something only the owner would know.
+                      To protect privacy, potential owners must answer a specific question before we
+                      release the item's location. Choose something only the owner would know.
                     </p>
                     <div className="mb-4">
-                      <label htmlFor="securityQ" className="block text-sm font-medium text-on-surface-variant mb-2">
-                        Security Question <span className="text-error text-sm font-bold ml-0.5">*</span>
+                      <label
+                        htmlFor="securityQ"
+                        className="block text-sm font-medium text-on-surface-variant mb-2"
+                      >
+                        Security Question{' '}
+                        <span className="text-error text-sm font-bold ml-0.5">*</span>
                       </label>
                       <input
                         id="securityQ"
                         type="text"
                         value={securityQ}
-                        onChange={e => setSecurityQ(e.target.value)}
+                        onChange={(e) => setSecurityQ(e.target.value)}
                         placeholder="e.g. What is the lock screen wallpaper?"
                         className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary-container transition-all"
                       />
                     </div>
                     <div>
-                      <label htmlFor="samaritanNotes" className="block text-sm font-medium text-on-surface-variant mb-2">
+                      <label
+                        htmlFor="samaritanNotes"
+                        className="block text-sm font-medium text-on-surface-variant mb-2"
+                      >
                         Your Private Notes (Samaritan Notes)
                       </label>
                       <textarea
                         id="samaritanNotes"
                         rows={3}
                         value={samaritanNotes}
-                        onChange={e => setSamaritanNotes(e.target.value)}
+                        onChange={(e) => setSamaritanNotes(e.target.value)}
                         placeholder="Write the correct answer or any details that help you verify claimants (only you can see this)"
                         className="w-full bg-surface-container-lowest border border-outline-variant/30 rounded-lg px-4 py-3 focus:ring-2 focus:ring-primary-container transition-all resize-none"
                       />
@@ -347,7 +393,9 @@ export default function Report() {
               <div className="flex items-center justify-between mb-4 md:mb-6">
                 <div className="flex items-center space-x-3">
                   <span className="material-symbols-outlined text-primary">description</span>
-                  <h3 className="font-headline text-base md:text-lg font-bold tracking-tight">Report Summary</h3>
+                  <h3 className="font-headline text-base md:text-lg font-bold tracking-tight">
+                    Report Summary
+                  </h3>
                 </div>
                 <span className="text-[10px] font-bold text-primary/60 uppercase tracking-widest border border-primary/20 px-2 py-0.5 rounded">
                   Preview
@@ -358,29 +406,39 @@ export default function Report() {
                   <p className="text-[10px] font-bold text-on-surface-variant/50 uppercase tracking-tighter mb-1">
                     Item
                   </p>
-                  <p className="text-xs font-semibold text-on-surface leading-snug">{title || '—'}</p>
+                  <p className="text-xs font-semibold text-on-surface leading-snug">
+                    {title || '—'}
+                  </p>
                   <p className="text-[10px] text-on-surface-variant/70">{category}</p>
                 </div>
                 <div>
                   <p className="text-[10px] font-bold text-on-surface-variant/50 uppercase tracking-tighter mb-1">
                     Date &amp; Time
                   </p>
-                  <p className="text-xs font-semibold text-on-surface leading-snug">{incidentDate || '—'}</p>
+                  <p className="text-xs font-semibold text-on-surface leading-snug">
+                    {incidentDate || '—'}
+                  </p>
                   <p className="text-[10px] text-on-surface-variant/70">{incidentTime || ''}</p>
                 </div>
                 <div>
                   <p className="text-[10px] font-bold text-on-surface-variant/50 uppercase tracking-tighter mb-1">
                     Location
                   </p>
-                  <p className="text-xs font-semibold text-on-surface leading-snug">{building || '—'}</p>
+                  <p className="text-xs font-semibold text-on-surface leading-snug">
+                    {building || '—'}
+                  </p>
                 </div>
                 <div>
                   <p className="text-[10px] font-bold text-on-surface-variant/50 uppercase tracking-tighter mb-1">
                     Type
                   </p>
                   <div className="flex items-center gap-1.5">
-                    <span className={`w-1.5 h-1.5 rounded-full ${type === 'found' ? 'bg-primary' : 'bg-error'}`} />
-                    <p className="text-xs font-semibold text-on-surface leading-snug capitalize">{type} Item</p>
+                    <span
+                      className={`w-1.5 h-1.5 rounded-full ${type === 'found' ? 'bg-primary' : 'bg-error'}`}
+                    />
+                    <p className="text-xs font-semibold text-on-surface leading-snug capitalize">
+                      {type} Item
+                    </p>
                   </div>
                 </div>
               </div>
@@ -391,19 +449,31 @@ export default function Report() {
               <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary" />
               <div className="flex items-center space-x-3 mb-4">
                 <span className="material-symbols-outlined text-primary">add_a_photo</span>
-                <h3 className="font-headline text-base md:text-lg font-bold tracking-tight">Visuals</h3>
+                <h3 className="font-headline text-base md:text-lg font-bold tracking-tight">
+                  Visuals
+                </h3>
               </div>
               <label
                 htmlFor="image-upload"
                 className="group relative flex-grow min-h-[140px] md:min-h-[160px] rounded-xl bg-surface-container-highest flex flex-col items-center justify-center border-2 border-dashed border-outline-variant/50 hover:border-primary/50 transition-all cursor-pointer overflow-hidden mb-4"
               >
                 {imagePreview ? (
-                  <img src={imagePreview} alt="Item preview" className="w-full h-full object-cover" />
+                  <img
+                    src={imagePreview}
+                    alt="Item preview"
+                    className="w-full h-full object-cover"
+                  />
                 ) : (
                   <div className="z-10 flex flex-col items-center group-hover:scale-105 transition-transform p-4 text-center">
-                    <span className="material-symbols-outlined text-3xl text-on-surface-variant mb-2">upload_file</span>
-                    <p className="text-xs font-medium text-on-surface-variant">Drop image or click to upload</p>
-                    <p className="text-[10px] text-on-surface-variant/60 mt-1">PNG, JPG up to 10MB</p>
+                    <span className="material-symbols-outlined text-3xl text-on-surface-variant mb-2">
+                      upload_file
+                    </span>
+                    <p className="text-xs font-medium text-on-surface-variant">
+                      Drop image or click to upload
+                    </p>
+                    <p className="text-[10px] text-on-surface-variant/60 mt-1">
+                      PNG, JPG up to 10MB
+                    </p>
                   </div>
                 )}
                 <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -419,7 +489,11 @@ export default function Report() {
               {imagePreview && (
                 <div className="flex space-x-2 mt-2">
                   <div className="w-10 h-10 md:w-12 md:h-12 rounded-md bg-surface-variant/30 flex items-center justify-center border border-outline-variant/20 overflow-hidden">
-                    <img src={imagePreview} alt="Thumbnail" className="w-full h-full object-cover" />
+                    <img
+                      src={imagePreview}
+                      alt="Thumbnail"
+                      className="w-full h-full object-cover"
+                    />
                   </div>
                 </div>
               )}
@@ -437,7 +511,10 @@ export default function Report() {
                 disabled={submitting}
                 className="w-full bg-primary text-on-primary py-3 md:py-4 rounded-xl font-bold text-sm md:text-base shadow-lg hover:shadow-primary/30 hover:scale-[1.01] active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-60"
               >
-                <span className="material-symbols-outlined text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+                <span
+                  className="material-symbols-outlined text-xl"
+                  style={{ fontVariationSettings: "'FILL' 1" }}
+                >
                   send
                 </span>
                 <span>{submitting ? 'Submitting...' : 'Submit Report'}</span>
@@ -450,5 +527,5 @@ export default function Report() {
         </form>
       </div>
     </AuthenticatedLayout>
-  );
+  )
 }

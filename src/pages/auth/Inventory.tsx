@@ -1,4 +1,5 @@
 // src/pages/auth/Inventory.tsx
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useState, useEffect } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { itemsApi } from '../../api/itemsApi'
@@ -48,6 +49,7 @@ export default function Inventory() {
       if (catParam) filters.category = catParam
       if (searchQuery) filters.search = searchQuery
       const { data } = await itemsApi.getAll(filters)
+
       const typedItems =
         (data as any[])?.map((item) => ({
           ...item,

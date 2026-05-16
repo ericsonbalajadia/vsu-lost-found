@@ -1,27 +1,29 @@
 // src/pages/public/Landing.tsx
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { itemsApi } from '../../api/itemsApi';
-import type { Item } from '../../types/database';
-import ItemCard from '../../components/ui/ItemCard';
-import { getSkeletonCards } from '../../components/ui/SkeletonLoader';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState, useEffect } from 'react'
+import { Link } from 'react-router-dom'
+import { itemsApi } from '../../api/itemsApi'
+import type { Item } from '../../types/database'
+import ItemCard from '../../components/ui/ItemCard'
+import { getSkeletonCards } from '../../components/ui/SkeletonLoader'
 
 export default function Landing() {
-  const [previewItems, setPreviewItems] = useState<Item[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [previewItems, setPreviewItems] = useState<Item[]>([])
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const fetchPreview = async () => {
-      const { data } = await itemsApi.getAll({ limit: 12 });
-      const typedItems = (data as any[])?.map(item => ({
-        ...item,
-        profiles: item.profiles?.[0]
-      })) ?? [];
-      setPreviewItems(typedItems as Item[]);
-      setLoading(false);
-    };
-    fetchPreview();
-  }, []);
+      const { data } = await itemsApi.getAll({ limit: 12 })
+      const typedItems =
+        (data as any[])?.map((item) => ({
+          ...item,
+          profiles: item.profiles?.[0],
+        })) ?? []
+      setPreviewItems(typedItems as Item[])
+      setLoading(false)
+    }
+    fetchPreview()
+  }, [])
 
   return (
     <div className="min-h-screen bg-surface">
@@ -32,10 +34,16 @@ export default function Landing() {
             FoundPath
           </div>
           <div className="hidden md:flex items-center space-x-8">
-            <Link to="/login" className="text-on-surface-variant hover:text-primary transition-colors font-body text-label-md">
+            <Link
+              to="/login"
+              className="text-on-surface-variant hover:text-primary transition-colors font-body text-label-md"
+            >
               Sign In
             </Link>
-            <Link to="/signup" className="bg-primary text-on-primary px-6 py-2 rounded-xl font-headline font-bold text-label-md hover:scale-95 transition-transform">
+            <Link
+              to="/signup"
+              className="bg-primary text-on-primary px-6 py-2 rounded-xl font-headline font-bold text-label-md hover:scale-95 transition-transform"
+            >
               Get Started
             </Link>
           </div>
@@ -59,13 +67,20 @@ export default function Landing() {
                 Restoring Peace of Mind, <span className="text-primary">One Item at a Time</span>
               </h1>
               <p className="font-body text-lg md:text-xl text-on-surface-variant mb-10 leading-relaxed">
-                A secure, community‑driven recovery ecosystem designed to transform the stress of lost belongings into a seamless, professional experience.
+                A secure, community‑driven recovery ecosystem designed to transform the stress of
+                lost belongings into a seamless, professional experience.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Link to="/inventory" className="bg-primary text-on-primary px-8 py-4 rounded-xl font-headline font-bold text-lg hover:scale-95 transition-all shadow-xl">
+                <Link
+                  to="/inventory"
+                  className="bg-primary text-on-primary px-8 py-4 rounded-xl font-headline font-bold text-lg hover:scale-95 transition-all shadow-xl"
+                >
                   Browse Inventory
                 </Link>
-                <Link to="/report" className="bg-surface-container-highest text-on-surface px-8 py-4 rounded-xl font-headline font-bold text-lg hover:bg-surface-container-high transition-all">
+                <Link
+                  to="/report"
+                  className="bg-surface-container-highest text-on-surface px-8 py-4 rounded-xl font-headline font-bold text-lg hover:bg-surface-container-high transition-all"
+                >
                   Report Found Item
                 </Link>
               </div>
@@ -78,21 +93,32 @@ export default function Landing() {
           <div className="max-w-7xl mx-auto px-6">
             <div className="flex justify-between items-end mb-16">
               <div>
-                <h2 className="font-headline text-3xl font-bold text-on-surface tracking-tight">Latest Discoveries</h2>
-                <p className="font-body text-on-surface-variant mt-2">Recently archived items awaiting their owners.</p>
+                <h2 className="font-headline text-3xl font-bold text-on-surface tracking-tight">
+                  Latest Discoveries
+                </h2>
+                <p className="font-body text-on-surface-variant mt-2">
+                  Recently archived items awaiting their owners.
+                </p>
               </div>
-              <Link to="/inventory" className="hidden md:flex items-center gap-2 text-primary font-bold hover:gap-3 transition-all">
+              <Link
+                to="/inventory"
+                className="hidden md:flex items-center gap-2 text-primary font-bold hover:gap-3 transition-all"
+              >
                 View Archive <span className="material-symbols-outlined">arrow_forward</span>
               </Link>
             </div>
 
             {loading ? (
-              <>{getSkeletonCards(6)}{' '}</>
+              <>{getSkeletonCards(6)} </>
             ) : previewItems.length === 0 ? (
-              <p className="text-center text-on-surface-variant">No items found. Check back later.</p>
+              <p className="text-center text-on-surface-variant">
+                No items found. Check back later.
+              </p>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {previewItems.map(item => <ItemCard key={item.id} item={item} />)}
+                {previewItems.map((item) => (
+                  <ItemCard key={item.id} item={item} />
+                ))}
               </div>
             )}
           </div>
@@ -102,31 +128,47 @@ export default function Landing() {
         <section className="py-24 bg-surface-container-low">
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center mb-16">
-              <h2 className="font-headline text-3xl font-bold text-on-surface tracking-tight mb-4">The Archive Standards</h2>
+              <h2 className="font-headline text-3xl font-bold text-on-surface tracking-tight mb-4">
+                The Archive Standards
+              </h2>
               <div className="w-20 h-1 bg-primary mx-auto rounded-full"></div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
               {/* Feature cards – similar to HTML but with updated colours */}
               <div className="text-center px-4">
                 <div className="w-16 h-16 bg-surface-container-highest rounded-full flex items-center justify-center mx-auto mb-6">
-                  <span className="material-symbols-outlined text-primary text-3xl">verified_user</span>
+                  <span className="material-symbols-outlined text-primary text-3xl">
+                    verified_user
+                  </span>
                 </div>
                 <h3 className="font-headline text-xl font-bold mb-4">Secure Verification</h3>
-                <p className="font-body text-on-surface-variant leading-relaxed">Multi‑point identity verification ensuring items only return to their rightful owners.</p>
+                <p className="font-body text-on-surface-variant leading-relaxed">
+                  Multi‑point identity verification ensuring items only return to their rightful
+                  owners.
+                </p>
               </div>
               <div className="text-center px-4">
                 <div className="w-16 h-16 bg-surface-container-highest rounded-full flex items-center justify-center mx-auto mb-6">
-                  <span className="material-symbols-outlined text-primary text-3xl">alternate_email</span>
+                  <span className="material-symbols-outlined text-primary text-3xl">
+                    alternate_email
+                  </span>
                 </div>
                 <h3 className="font-headline text-xl font-bold mb-4">Email Coordination</h3>
-                <p className="font-body text-on-surface-variant leading-relaxed">Automated notifications and secure messaging threads between finders and owners.</p>
+                <p className="font-body text-on-surface-variant leading-relaxed">
+                  Automated notifications and secure messaging threads between finders and owners.
+                </p>
               </div>
               <div className="text-center px-4">
                 <div className="w-16 h-16 bg-surface-container-highest rounded-full flex items-center justify-center mx-auto mb-6">
-                  <span className="material-symbols-outlined text-primary text-3xl">account_balance</span>
+                  <span className="material-symbols-outlined text-primary text-3xl">
+                    account_balance
+                  </span>
                 </div>
                 <h3 className="font-headline text-xl font-bold mb-4">Campus Integration</h3>
-                <p className="font-body text-on-surface-variant leading-relaxed">Seamlessly connected to university IDs and campus security protocols for total peace of mind.</p>
+                <p className="font-body text-on-surface-variant leading-relaxed">
+                  Seamlessly connected to university IDs and campus security protocols for total
+                  peace of mind.
+                </p>
               </div>
             </div>
           </div>
@@ -140,16 +182,38 @@ export default function Landing() {
         <div className="flex flex-col md:flex-row justify-between items-center w-full px-8 py-12 max-w-7xl mx-auto">
           <div className="mb-8 md:mb-0">
             <div className="font-headline font-bold text-on-surface text-xl mb-2">FoundPath</div>
-            <p className="text-on-surface-variant text-sm max-w-xs">© 2025 FoundPath. Community Recovery Network.</p>
+            <p className="text-on-surface-variant text-sm max-w-xs">
+              © 2025 FoundPath. Community Recovery Network.
+            </p>
           </div>
           <div className="flex flex-wrap justify-center gap-6 md:gap-12">
-            <a className="text-on-surface-variant hover:text-on-surface transition-colors text-sm" href="#">Campus Safety</a>
-            <a className="text-on-surface-variant hover:text-on-surface transition-colors text-sm" href="#">Privacy Policy</a>
-            <a className="text-on-surface-variant hover:text-on-surface transition-colors text-sm" href="#">Terms of Service</a>
-            <a className="text-on-surface-variant hover:text-on-surface transition-colors text-sm" href="#">Help Center</a>
+            <a
+              className="text-on-surface-variant hover:text-on-surface transition-colors text-sm"
+              href="#"
+            >
+              Campus Safety
+            </a>
+            <a
+              className="text-on-surface-variant hover:text-on-surface transition-colors text-sm"
+              href="#"
+            >
+              Privacy Policy
+            </a>
+            <a
+              className="text-on-surface-variant hover:text-on-surface transition-colors text-sm"
+              href="#"
+            >
+              Terms of Service
+            </a>
+            <a
+              className="text-on-surface-variant hover:text-on-surface transition-colors text-sm"
+              href="#"
+            >
+              Help Center
+            </a>
           </div>
         </div>
       </footer>
     </div>
-  );
+  )
 }

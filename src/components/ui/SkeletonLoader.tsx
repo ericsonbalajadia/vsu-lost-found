@@ -1,4 +1,5 @@
 // src/components/ui/SkeletonLoader.tsx
+/* eslint-disable react-refresh/only-export-components */
 export function ItemCardSkeleton() {
   return (
     <div className="bg-surface-container-lowest rounded-xl overflow-hidden animate-pulse w-full">
