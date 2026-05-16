@@ -9,7 +9,7 @@ import ItemCard from '../../components/ui/ItemCard'
 import { getSkeletonCards } from '../../components/ui/SkeletonLoader'
 import AuthenticatedLayout from '../../components/layout/AuthenticatedLayout'
 
-// Reusable “Add New Entry” card to avoid duplication
+// Reusable “Add New Entry” card
 const AddEntryCard = () => (
   <Link
     to="/report"
@@ -36,6 +36,7 @@ export default function Inventory() {
   const [searchParams, setSearchParams] = useSearchParams()
   const [items, setItems] = useState<Item[]>([])
   const [loading, setLoading] = useState(true)
+  const [mobileSearchOpen, setMobileSearchOpen] = useState(false)
 
   const typeParam = searchParams.get('type') as ItemType | null
   const catParam = searchParams.get('category') as ItemCategory | null
@@ -83,8 +84,9 @@ export default function Inventory() {
       </div>
 
       {/* Sticky search & filter bar */}
-      <div className="sticky top-0 z-10 bg-background px-8 md:px-12 py-4 shadow-sm">
-        <div className="flex flex-col md:flex-row gap-4 items-center">
+      <div className="sticky top-0 z-10 bg-background shadow-sm">
+        {/* Desktop layout */}
+        <div className="hidden md:flex flex-col md:flex-row gap-4 items-center px-8 md:px-12 py-4">
           <div className="relative flex-1 w-full group">
             <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">
               search
@@ -111,6 +113,61 @@ export default function Inventory() {
                 {t === 'all' ? 'All Items' : t.charAt(0).toUpperCase() + t.slice(1)}
               </button>
             ))}
+          </div>
+        </div>
+
+        {/* Mobile layout – full width, solid background */}
+        <div className="md:hidden px-0">
+          <div className="bg-surface-container-lowest rounded-xl p-2 shadow-sm">
+            <div className="flex items-center gap-2">
+              {mobileSearchOpen ? (
+                <div className="relative flex-1 group">
+                  <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">
+                    search
+                  </span>
+                  <input
+                    type="text"
+                    placeholder="Search items..."
+                    value={searchQuery}
+                    onChange={(e) => setFilter('q', e.target.value || null)}
+                    autoFocus
+                    className="w-full pl-12 pr-10 py-3 bg-surface-container-highest border-none rounded-xl focus:ring-2 focus:ring-primary-container focus:bg-surface-container-lowest transition-all text-on-surface placeholder:text-outline"
+                  />
+                  <button
+                    onClick={() => setMobileSearchOpen(false)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-on-surface-variant"
+                    aria-label="Close search"
+                  >
+                    <span className="material-symbols-outlined text-xl">close</span>
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => setMobileSearchOpen(true)}
+                  className="p-3 bg-surface-container-high rounded-full text-on-surface-variant"
+                  aria-label="Open search"
+                >
+                  <span className="material-symbols-outlined">search</span>
+                </button>
+              )}
+
+              {/* Filter pills – scrollable horizontally */}
+              <div className="flex flex-nowrap gap-2 overflow-x-auto pb-1">
+                {(['all', 'found', 'lost'] as const).map((t) => (
+                  <button
+                    key={t}
+                    onClick={() => setFilter('type', t === 'all' ? null : t)}
+                    className={`flex-shrink-0 px-5 py-2 rounded-full text-sm font-headline transition-all whitespace-nowrap ${
+                      (typeParam ?? 'all') === t
+                        ? 'bg-primary text-on-primary font-bold shadow-sm'
+                        : 'bg-surface-container-high text-on-surface-variant font-semibold hover:bg-surface-container-highest'
+                    }`}
+                  >
+                    {t === 'all' ? 'All' : t.charAt(0).toUpperCase() + t.slice(1)}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </div>
