@@ -2,6 +2,7 @@
 import { Link, useLocation } from 'react-router-dom';
 
 const navItems = [
+  { to: '/inventory',    icon: 'dashboard',   label: 'Dashboard' },
   { to: '/settings/profile',       icon: 'dashboard',     label: 'Overview' },
   { to: '/settings/security',      icon: 'shield',        label: 'Security' },
   { to: '/settings/notifications', icon: 'notifications', label: 'Notifications' },
