@@ -10,6 +10,7 @@ import StatusRibbon from './StatusRibbon'
 import ClaimItemModal from '../modals/ClaimItemModal'
 import ContactOwnerModal from '../modals/ContactOwnerModal'
 import ClaimantItemModal from '../modals/ClaimantItemModal'
+import SamaritanItemModal from '../modals/SamaritanItemModal'
 
 interface ItemCardProps {
   item: Item
@@ -39,6 +40,7 @@ export default function ItemCard({ item, onRefresh }: ItemCardProps) {
 
   const [existingClaim, setExistingClaim] = useState<any>(null)
   const [claimantModalOpen, setClaimantModalOpen] = useState(false)
+  const [samaritanModalOpen, setSamaritanModalOpen] = useState(false)
 
   useEffect(() => {
     if (user && item.type === 'found' && item.status === 'active') {
@@ -163,6 +165,7 @@ export default function ItemCard({ item, onRefresh }: ItemCardProps) {
           <div className="mt-auto pt-2">
             {user ? (
               existingClaim ? (
+                // User has a claim on this item (but is not the owner)
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span
@@ -179,8 +182,7 @@ export default function ItemCard({ item, onRefresh }: ItemCardProps) {
                       {existingClaim.status === 'declined' && 'Claim Declined'}
                     </span>
                     <button
-                      type="button"
-                      onClick={handleViewDetails}
+                      onClick={() => navigate(`/items/${item.id}`)}
                       className="text-primary text-sm font-bold hover:underline"
                     >
                       View Details
@@ -202,6 +204,13 @@ export default function ItemCard({ item, onRefresh }: ItemCardProps) {
                 >
                   <span className="material-symbols-outlined text-sm">contact_mail</span>
                   Contact Owner
+                </button>
+              ) : isOwner ? (
+                <button
+                  onClick={() => setSamaritanModalOpen(true)}
+                  className="block w-full py-3 bg-primary hover:bg-primary-dim text-white font-bold rounded-xl text-center text-sm transition-all"
+                >
+                  View Details
                 </button>
               ) : (
                 <Link
@@ -245,6 +254,12 @@ export default function ItemCard({ item, onRefresh }: ItemCardProps) {
           onRefresh={onRefresh}
         />
       )}
+      <SamaritanItemModal
+        isOpen={samaritanModalOpen}
+        onClose={() => setSamaritanModalOpen(false)}
+        item={item}
+        onRefresh={onRefresh}
+      />
     </>
   )
 }
