@@ -5,11 +5,12 @@ import type { CreateItemPayload, ItemCategory, ItemType } from '../types/databas
 // SAFE FIELDS — never select samaritan_notes in public queries
 const PUBLIC_ITEM_FIELDS = `
   id, reference_number, title, description, category, type, status,
+  reporter_id, 
   location_lat, location_lng, location_name, location_building,
   incident_date, incident_time, security_question, image_url, image_urls,
   created_at, updated_at,
   profiles!reporter_id ( id, full_name, reputation, avatar_url, campus_building )
-`
+`;
 
 export interface ItemFilters {
   type?: ItemType
