@@ -99,6 +99,12 @@ CREATE POLICY "Samaritan updates claims on own items"
     )
   );
 
+-- Allow claimants to update their own pending claims (e.g., edit answer)
+CREATE POLICY "Claimants update own pending claims"
+  ON claims FOR UPDATE
+  USING (auth.uid() = claimant_id AND status = 'pending')
+  WITH CHECK (auth.uid() = claimant_id AND status = 'pending');
+
 CREATE POLICY "Admin full access claims"
   ON claims FOR ALL USING (auth_is_admin());
 
