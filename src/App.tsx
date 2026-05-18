@@ -50,7 +50,7 @@ export default function App() {
             <Route path="/settings/security" element={<SecuritySettings />} />
             <Route path="/settings/notifications" element={<NotifSettings />} />
             <Route path="/items/:id" element={<ItemDetail />} />
-            <Route path="/user/items/:id" element={<SamaritanItemDetail />} />
+            {/* <Route path="/user/items/:id" element={<SamaritanItemDetail />} /> */}
             <Route path="/user/claims" element={<SamaritanClaimsQueue />} />
             <Route path="/user/claims/:id/resolved" element={<HandshakeConfirmed />} />
             <Route path="/claims/:id/handshake" element={<ClaimantHandshake />} />
