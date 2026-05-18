@@ -39,7 +39,7 @@ export const claimsApi = {
   async getExistingClaim(itemId: string, claimantId: string) {
     return supabase
       .from('claims')
-      .select('id, ticket_number, status')
+      .select('id, ticket_number, status, answer')
       .eq('item_id', itemId)
       .eq('claimant_id', claimantId)
       .maybeSingle()
@@ -81,7 +81,7 @@ export const claimsApi = {
       .from('claims')
       .update({ answer })
       .eq('id', claimId)
-      .select('id, ticket_number, answer, status')
+      .select('id, ticket_number, answer, status, answer')
       .single()
   },
 }
