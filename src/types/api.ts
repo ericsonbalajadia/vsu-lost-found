@@ -24,3 +24,9 @@ export interface UpdateNotifPrefsPayload {
   notif_messages?: boolean
   notif_frequency?: 'realtime' | 'daily' | 'weekly'
 }
+
+export interface SubmitClaimPayload {
+  item_id: string;
+  claimant_id: string;
+  answer: string;
+}
