@@ -8,18 +8,25 @@ export function openEmailThread({
   toEmail: string;
   itemTitle: string;
   itemRef: string;
-  claimTicket: string;
+  claimTicket?: string;
 }) {
-  const subject = encodeURIComponent(
-    `FoundPath — Re: ${itemTitle} (${itemRef} / ${claimTicket})`
-  );
-  const body = encodeURIComponent(
-    `Hi,\\n\\nI am contacting you regarding:\\n` +
-    `  Item: ${itemTitle}\\n` +
-    `  Reference: ${itemRef}\\n` +
-    `  Claim Ticket: ${claimTicket}\\n\\n` +
-    `Please include these reference numbers in all correspondence.\\n\\n` +
-    `Regards`
-  );
-  window.location.href = `mailto:${toEmail}?subject=${subject}&body=${body}`;
+  // Use regular hyphen instead of em dash for better compatibility
+  let subject = `FoundPath - Re: ${itemTitle} (${itemRef}`;
+  if (claimTicket) {
+    subject += ` / ${claimTicket}`;
+  }
+  subject += `)`;
+
+  let body = `Hi,\n\nI am contacting you regarding:\n`;
+  body += `  Item: ${itemTitle}\n`;
+  body += `  Reference: ${itemRef}\n`;
+  if (claimTicket) {
+    body += `  Claim Ticket: ${claimTicket}\n`;
+  }
+  body += `\nPlease include these reference numbers in all correspondence.\n\nRegards`;
+
+  const mailtoUrl = `mailto:${toEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+
+  // Try native mailto
+  window.location.href = mailtoUrl;
 }
