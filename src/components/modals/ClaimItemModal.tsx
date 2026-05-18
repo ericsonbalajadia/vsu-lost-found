@@ -22,10 +22,11 @@ interface ClaimItemModalProps {
   isOpen: boolean;
   onClose: () => void;
   item: Item;
+  userId: string; 
   onSuccess: () => void; // refresh parent or just close
 }
 
-export default function ClaimItemModal({ isOpen, onClose, item, onSuccess }: ClaimItemModalProps) {
+export default function ClaimItemModal({ isOpen, onClose, item, userId, onSuccess }: ClaimItemModalProps) {
   const [answer, setAnswer] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const hasLocation = !!(item.location_lat && item.location_lng);
@@ -44,7 +45,7 @@ export default function ClaimItemModal({ isOpen, onClose, item, onSuccess }: Cla
     try {
       await claimsApi.submit({
         item_id: item.id,
-        claimant_id: '', // will be set by RLS / auth.uid()
+        claimant_id: userId, // will be set by RLS / auth.uid()
         answer: answer.trim(),
       });
       toast.success('Claim submitted! The Samaritan will review your answer.');
