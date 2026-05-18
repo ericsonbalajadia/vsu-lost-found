@@ -1,6 +1,6 @@
 // src/components/ui/ItemCard.tsx
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { formatTime } from '../../utils/formatTime'
 import { claimsApi } from '../../api/claimsApi'
@@ -9,6 +9,7 @@ import type { Item } from '../../types/database'
 import StatusRibbon from './StatusRibbon'
 import ClaimItemModal from '../modals/ClaimItemModal'
 import ContactOwnerModal from '../modals/ContactOwnerModal'
+import ClaimantItemModal from '../modals/ClaimantItemModal'
 
 interface ItemCardProps {
   item: Item
@@ -26,23 +27,27 @@ function formatDate(dateStr: string | null): string {
 
 export default function ItemCard({ item, onRefresh }: ItemCardProps) {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [showClaimModal, setShowClaimModal] = useState(false)
   const [showContactModal, setShowContactModal] = useState(false)
   const [checkingClaim, setCheckingClaim] = useState(false)
-  const [hasPendingClaim, setHasPendingClaim] = useState(false);
-
+  const [hasPendingClaim, setHasPendingClaim] = useState(false)
 
   const isOwner = user?.id === item.reporter_id
-  const canClaim = item.type === 'found' && item.status === 'active' && !isOwner && !hasPendingClaim;
+  const canClaim = item.type === 'found' && item.status === 'active' && !isOwner && !hasPendingClaim
   const canContact = item.type === 'lost' && item.status === 'active' && !isOwner
 
+  const [existingClaim, setExistingClaim] = useState<any>(null)
+  const [claimantModalOpen, setClaimantModalOpen] = useState(false)
+
   useEffect(() => {
-  if (user && item.type === 'found' && item.status === 'active') {
-    claimsApi.getExistingClaim(item.id, user.id).then(({ data }) => {
-      if (data) setHasPendingClaim(true);
-    });
-  }
-}, [user, item.id]);
+    if (user && item.type === 'found' && item.status === 'active') {
+      claimsApi.getExistingClaim(item.id, user.id).then(({ data }) => {
+        setExistingClaim(data)
+        if (data) setHasPendingClaim(true)
+      })
+    }
+  }, [user, item.id])
 
   const handleClaimClick = async () => {
     if (!user) return
@@ -64,10 +69,18 @@ export default function ItemCard({ item, onRefresh }: ItemCardProps) {
     }
   }
 
-const handleClaimSuccess = () => {
-  if (onRefresh) onRefresh();
-  else window.location.reload(); // fallback
-};
+  const handleClaimSuccess = () => {
+    if (onRefresh) onRefresh()
+    else window.location.reload() // fallback
+  }
+
+  const handleViewDetails = () => {
+    if (existingClaim) {
+      setClaimantModalOpen(true)
+    } else {
+      navigate(`/items/${item.id}`)
+    }
+  }
 
   return (
     <>
@@ -149,7 +162,32 @@ const handleClaimSuccess = () => {
 
           <div className="mt-auto pt-2">
             {user ? (
-              canClaim ? (
+              existingClaim ? (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span
+                      className={`text-xs font-semibold px-2 py-1 rounded-full ${
+                        existingClaim.status === 'pending'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : existingClaim.status === 'accepted'
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-red-100 text-red-800'
+                      }`}
+                    >
+                      {existingClaim.status === 'pending' && 'Claim Pending'}
+                      {existingClaim.status === 'accepted' && 'Claim Accepted'}
+                      {existingClaim.status === 'declined' && 'Claim Declined'}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={handleViewDetails}
+                      className="text-primary text-sm font-bold hover:underline"
+                    >
+                      View Details
+                    </button>
+                  </div>
+                </div>
+              ) : canClaim ? (
                 <button
                   onClick={handleClaimClick}
                   disabled={checkingClaim}
@@ -190,7 +228,7 @@ const handleClaimSuccess = () => {
         isOpen={showClaimModal}
         onClose={() => setShowClaimModal(false)}
         item={item}
-        userId={user?.id || ''} 
+        userId={user?.id || ''}
         onSuccess={handleClaimSuccess}
       />
       <ContactOwnerModal
@@ -198,6 +236,15 @@ const handleClaimSuccess = () => {
         onClose={() => setShowContactModal(false)}
         item={item}
       />
+      {existingClaim && (
+        <ClaimantItemModal
+          isOpen={claimantModalOpen}
+          onClose={() => setClaimantModalOpen(false)}
+          item={item}
+          claim={existingClaim}
+          onRefresh={onRefresh}
+        />
+      )}
     </>
   )
 }
