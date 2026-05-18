@@ -3,6 +3,8 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { formatTime } from '../../utils/formatTime';
+import { claimsApi } from '../../api/claimsApi';
+import toast from 'react-hot-toast';
 import type { Item } from '../../types/database';
 import StatusRibbon from './StatusRibbon';
 import ClaimItemModal from '../modals/ClaimItemModal';
@@ -26,10 +28,28 @@ export default function ItemCard({ item, onRefresh }: ItemCardProps) {
   const { user } = useAuth();
   const [showClaimModal, setShowClaimModal] = useState(false);
   const [showContactModal, setShowContactModal] = useState(false);
+  const [checkingClaim, setCheckingClaim] = useState(false);
 
   const isOwner = user?.id === item.reporter_id;
   const canClaim = item.type === 'found' && item.status === 'active' && !isOwner;
   const canContact = item.type === 'lost' && item.status === 'active' && !isOwner;
+
+  const handleClaimClick = async () => {
+    if (!user) return;
+    setCheckingClaim(true);
+    try {
+      const { data: existingClaim } = await claimsApi.getExistingClaim(item.id, user.id);
+      if (existingClaim) {
+        toast.error('You already have a pending claim for this item.');
+        return;
+      }
+      setShowClaimModal(true);
+    } catch {
+      toast.error('Unable to verify claim status. Please try again.');
+    } finally {
+      setCheckingClaim(false);
+    }
+  };
 
   const handleClaimSuccess = () => {
     if (onRefresh) onRefresh();
@@ -115,11 +135,12 @@ export default function ItemCard({ item, onRefresh }: ItemCardProps) {
             {user ? (
               canClaim ? (
                 <button
-                  onClick={() => setShowClaimModal(true)}
-                  className="block w-full py-3 bg-primary hover:bg-primary-dim text-white font-bold rounded-xl text-center text-sm transition-all flex items-center justify-center gap-2"
+                  onClick={handleClaimClick}
+                  disabled={checkingClaim}
+                  className="block w-full py-3 bg-primary hover:bg-primary-dim text-white font-bold rounded-xl text-center text-sm transition-all flex items-center justify-center gap-2 disabled:opacity-50"
                 >
                   <span className="material-symbols-outlined text-sm">verified_user</span>
-                  Claim Item
+                  {checkingClaim ? 'Checking...' : 'Claim Item'}
                 </button>
               ) : canContact ? (
                 <button
