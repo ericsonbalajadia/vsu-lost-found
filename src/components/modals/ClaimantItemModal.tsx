@@ -1,36 +1,36 @@
 // src/components/modals/ClaimantItemModal.tsx
-import { useState, useEffect } from 'react'
-import { createPortal } from 'react-dom'
-import { Link } from 'react-router-dom'
-import { supabase } from '../../lib/supabase'
-import { claimsApi } from '../../api/claimsApi'
-import { formatTime } from '../../utils/formatTime'
-import ImageCarousel from '../ui/ImageCarousel'
-import { MapContainer, TileLayer, Marker } from 'react-leaflet'
-import L from 'leaflet'
-import 'leaflet/dist/leaflet.css'
-import toast from 'react-hot-toast'
-import type { Item } from '../../types/database'
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import { Link } from 'react-router-dom';
+import { supabase } from '../../lib/supabase';
+import { claimsApi } from '../../api/claimsApi';
+import { formatTime } from '../../utils/formatTime';
+import ImageCarousel from '../ui/ImageCarousel';
+import { MapContainer, TileLayer, Marker } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import toast from 'react-hot-toast';
+import type { Item } from '../../types/database';
 
 // Fix Leaflet icon
-delete (L.Icon.Default.prototype as any)._getIconUrl
+delete (L.Icon.Default.prototype as any)._getIconUrl;
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
   iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-})
+});
 
 interface ClaimantItemModalProps {
-  isOpen: boolean
-  onClose: () => void
-  item: Item
+  isOpen: boolean;
+  onClose: () => void;
+  item: Item;
   claim: {
-    id: string
-    ticket_number: string
-    answer: string
-    status: string
-  }
-  onRefresh?: () => void
+    id: string;
+    ticket_number: string;
+    answer: string;
+    status: string;
+  };
+  onRefresh?: () => void;
 }
 
 export default function ClaimantItemModal({
@@ -40,20 +40,27 @@ export default function ClaimantItemModal({
   claim,
   onRefresh,
 }: ClaimantItemModalProps) {
-  const [answer, setAnswer] = useState(claim.answer)
-  const [saving, setSaving] = useState(false)
-  const [reporterEmail, setReporterEmail] = useState('')
-  const hasLocation = !!(item.location_lat && item.location_lng)
-  const isPending = claim.status === 'pending'
-  const isAccepted = claim.status === 'accepted'
-  const isDeclined = claim.status === 'declined'
+  const [answer, setAnswer] = useState(claim.answer);
+  const [originalAnswer, setOriginalAnswer] = useState(claim.answer);
+  const [isDirty, setIsDirty] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [reporterEmail, setReporterEmail] = useState('');
+  const hasLocation = !!(item.location_lat && item.location_lng);
+  const isPending = claim.status === 'pending';
+  const isAccepted = claim.status === 'accepted';
+  const isDeclined = claim.status === 'declined';
 
+  // Reset state when modal opens
   useEffect(() => {
-    if (isOpen) setAnswer(claim.answer)
-  }, [isOpen, claim.answer])
+    if (isOpen) {
+      setAnswer(claim.answer);
+      setOriginalAnswer(claim.answer);
+      setIsDirty(false);
+    }
+  }, [isOpen, claim.answer]);
 
   // Fetch reporter email for declined claims
-  useEffect(() => {
+useEffect(() => {
     if (isDeclined && item.reporter_id) {
       const fetchReporterEmail = async () => {
         try {
@@ -61,36 +68,50 @@ export default function ClaimantItemModal({
             .from('profiles')
             .select('email')
             .eq('id', item.reporter_id)
-            .single()
+            .single();
 
-          if (data) setReporterEmail(data.email)
+          if (data) setReporterEmail(data.email);
         } catch {
-          console.error('Failed to fetch reporter email')
+          console.error('Failed to fetch reporter email');
         }
-      }
+      };
 
-      fetchReporterEmail()
+      fetchReporterEmail();
     }
-  }, [isDeclined, item.reporter_id])
+  }, [isDeclined, item.reporter_id]);
+
+  const handleAnswerChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const newValue = e.target.value;
+    setAnswer(newValue);
+    setIsDirty(newValue !== originalAnswer);
+  };
 
   const handleSave = async () => {
     if (!answer.trim()) {
-      toast.error('Answer cannot be empty')
-      return
+      toast.error('Answer cannot be empty');
+      return;
     }
-    setSaving(true)
+    setSaving(true);
     try {
-      await claimsApi.update(claim.id, answer)
-      toast.success('Answer updated')
-      if (onRefresh) onRefresh()
+      await claimsApi.update(claim.id, answer);
+      toast.success('Answer updated');
+      setOriginalAnswer(answer);
+      setIsDirty(false);
+      if (onRefresh) onRefresh();
     } catch (err: any) {
-      toast.error(err.message || 'Failed to update')
+      toast.error(err.message || 'Failed to update');
     } finally {
-      setSaving(false)
+      setSaving(false);
     }
-  }
+  };
 
-  if (!isOpen) return null
+  const handleCancel = () => {
+    setAnswer(originalAnswer);
+    setIsDirty(false);
+    toast('Changes discarded');
+  };
+
+  if (!isOpen) return null;
 
   return createPortal(
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 md:p-8 bg-slate-900/40 backdrop-blur-sm">
@@ -116,11 +137,7 @@ export default function ClaimantItemModal({
               <ImageCarousel images={item.image_urls} alt={item.title} />
             </div>
           ) : item.image_url ? (
-            <img
-              src={item.image_url}
-              alt={item.title}
-              className="w-full max-h-56 object-cover rounded-xl"
-            />
+            <img src={item.image_url} alt={item.title} className="w-full max-h-56 object-cover rounded-xl" />
           ) : null}
 
           {/* Title & description */}
@@ -149,15 +166,11 @@ export default function ClaimantItemModal({
             </div>
             <div>
               <p className="text-[10px] uppercase text-outline font-bold">Time</p>
-              <p className="font-medium">
-                {item.incident_time ? formatTime(item.incident_time) : '—'}
-              </p>
+              <p className="font-medium">{item.incident_time ? formatTime(item.incident_time) : '—'}</p>
             </div>
             <div>
               <p className="text-[10px] uppercase text-outline font-bold">Location</p>
-              <p className="font-medium truncate">
-                {item.location_building || item.location_name || '—'}
-              </p>
+              <p className="font-medium truncate">{item.location_building || item.location_name || '—'}</p>
             </div>
             <div>
               <p className="text-[10px] uppercase text-outline font-bold">Reference</p>
@@ -196,26 +209,20 @@ export default function ClaimantItemModal({
             {/* Status badge */}
             <div className="flex items-center gap-2">
               <span className="text-xs text-outline">Status:</span>
-              <span
-                className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold uppercase ${
-                  isPending
-                    ? 'bg-yellow-100 text-yellow-800'
-                    : isAccepted
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-red-100 text-red-800'
-                }`}
-              >
+              <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold uppercase ${
+                isPending ? 'bg-yellow-100 text-yellow-800' :
+                isAccepted ? 'bg-green-100 text-green-800' :
+                'bg-red-100 text-red-800'
+              }`}>
                 {isPending ? 'Pending Review' : isAccepted ? 'Accepted' : 'Declined'}
               </span>
             </div>
 
-            {/* SECURITY QUESTION (reference for the claimant) */}
+            {/* SECURITY QUESTION (reference) */}
             <div className="bg-primary-container/10 rounded-xl p-4 border border-primary/20">
               <div className="flex items-center gap-2 mb-2">
                 <span className="material-symbols-outlined text-primary text-sm">help</span>
-                <h3 className="text-xs font-bold text-primary uppercase tracking-wider">
-                  Security Question (Reference)
-                </h3>
+                <h3 className="text-xs font-bold text-primary uppercase tracking-wider">Security Question (Reference)</h3>
               </div>
               <p className="text-sm italic text-on-surface">
                 "{item.security_question || 'No question provided by the Samaritan.'}"
@@ -224,10 +231,7 @@ export default function ClaimantItemModal({
 
             {/* Answer section */}
             <div>
-              <label
-                htmlFor="claimant-answer"
-                className="block text-sm font-bold text-on-surface mb-1"
-              >
+              <label htmlFor="claimant-answer" className="block text-sm font-bold text-on-surface mb-1">
                 Your Answer
               </label>
               {isPending ? (
@@ -235,18 +239,27 @@ export default function ClaimantItemModal({
                   <textarea
                     id="claimant-answer"
                     value={answer}
-                    onChange={(e) => setAnswer(e.target.value)}
+                    onChange={handleAnswerChange}
                     rows={5}
                     placeholder="Describe the details that prove ownership..."
                     className="w-full bg-surface-container-low border border-surface-container-high rounded-xl p-3 text-sm focus:ring-2 focus:ring-primary/30 focus:border-primary/50 transition resize-none"
                   />
-                  <button
-                    onClick={handleSave}
-                    disabled={saving}
-                    className="mt-3 w-full bg-primary hover:bg-primary-dim text-white py-2 rounded-xl font-bold text-sm transition disabled:opacity-50"
-                  >
-                    {saving ? 'Saving...' : 'Save Changes'}
-                  </button>
+                  <div className="flex gap-3 mt-3">
+                    <button
+                      onClick={handleSave}
+                      disabled={saving || !isDirty || !answer.trim()}
+                      className="flex-1 bg-primary hover:bg-primary-dim text-white py-2 rounded-xl font-bold text-sm transition disabled:opacity-50"
+                    >
+                      {saving ? 'Saving...' : 'Save Changes'}
+                    </button>
+                    <button
+                      onClick={handleCancel}
+                      disabled={!isDirty}
+                      className="flex-1 bg-surface-container-high hover:bg-surface-container-highest text-on-surface py-2 rounded-xl font-bold text-sm transition disabled:opacity-50"
+                    >
+                      Cancel
+                    </button>
+                  </div>
                 </>
               ) : (
                 <div className="bg-surface-container-low p-3 rounded-xl text-sm whitespace-pre-wrap">
@@ -255,14 +268,11 @@ export default function ClaimantItemModal({
               )}
             </div>
 
-            {/* Filler notes / helpful tips */}
+            {/* Filler notes */}
             <div className="bg-surface-container-low rounded-xl p-4 text-xs text-on-surface-variant space-y-2">
               <div className="flex items-start gap-2">
                 <span className="material-symbols-outlined text-[16px] text-primary">info</span>
-                <p>
-                  <span className="font-semibold text-primary">Note:</span> The Samaritan will
-                  review your answer manually. Be as specific as possible.
-                </p>
+                <p><span className="font-semibold text-primary">Note:</span> The Samaritan will review your answer manually. Be as specific as possible.</p>
               </div>
               <div className="flex items-start gap-2">
                 <span className="material-symbols-outlined text-[16px] text-primary">schedule</span>
@@ -270,9 +280,7 @@ export default function ClaimantItemModal({
               </div>
               {isPending && (
                 <div className="flex items-start gap-2">
-                  <span className="material-symbols-outlined text-[16px] text-warning">
-                    warning
-                  </span>
+                  <span className="material-symbols-outlined text-[16px] text-warning">warning</span>
                   <p>You can edit your answer until the Samaritan reviews it.</p>
                 </div>
               )}
@@ -302,5 +310,5 @@ export default function ClaimantItemModal({
       </div>
     </div>,
     document.body
-  )
+  );
 }
