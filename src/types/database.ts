@@ -117,3 +117,13 @@ export interface Notification {
   is_read: boolean;
   created_at: string;
 }
+
+export interface LostItemFinder {
+  id: string;
+  lost_item_id: string;
+  finder_id: string;
+  message: string | null;
+  created_at: string;
+  // joined fields
+  finder?: Profile;
+}
