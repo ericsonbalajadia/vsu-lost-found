@@ -182,7 +182,7 @@ export default function ItemCard({ item, onRefresh }: ItemCardProps) {
                       {existingClaim.status === 'declined' && 'Claim Declined'}
                     </span>
                     <button
-                      onClick={() => navigate(`/items/${item.id}`)}
+                      onClick={handleViewDetails}
                       className="text-primary text-sm font-bold hover:underline"
                     >
                       View Details
