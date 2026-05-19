@@ -116,9 +116,11 @@ export default function Landing() {
               </p>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {previewItems.map((item) => (
-                  <ItemCard key={item.id} item={item} />
-                ))}
+                {previewItems && previewItems.length > 0 ? (
+                  previewItems.map((item) => (
+                    <ItemCard key={item.id} item={item} />
+                  ))
+                ) : null}
               </div>
             )}
           </div>
