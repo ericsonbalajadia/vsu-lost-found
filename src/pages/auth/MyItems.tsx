@@ -101,6 +101,7 @@ export default function MyItems() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {/* "Add New Entry" card – always visible */}
                 <Link
+                  key="add-report-card"
                   to="/report"
                   className="bg-surface-container-low/30 group rounded-3xl overflow-hidden border-2 border-dashed border-outline-variant/40 hover:border-primary/50 hover:bg-primary/[0.02] transition-all duration-500 flex flex-col items-center justify-center p-8 text-center cursor-pointer min-h-[460px]"
                 >
@@ -126,7 +127,7 @@ export default function MyItems() {
                 {loading ? (
                   <>{getSkeletonCards(6)} </>
                 ) : filteredItems.length === 0 ? (
-                  <div className="col-span-full text-center py-12">
+                  <div key="no-items" className="col-span-full text-center py-12">
                     <p className="text-on-surface-variant">No items match your current filter.</p>
                   </div>
                 ) : (
