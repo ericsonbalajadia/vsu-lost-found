@@ -188,7 +188,7 @@ export default function ItemCard({ item, onRefresh }: ItemCardProps) {
                       onClick={handleViewDetails}
                       className="text-primary text-sm font-bold hover:underline"
                     >
-                      View Details
+                      View Claim
                     </button>
                   </div>
                 </div>
@@ -205,25 +205,24 @@ export default function ItemCard({ item, onRefresh }: ItemCardProps) {
                   onClick={() => setShowContactModal(true)}
                   className="block w-full py-3 bg-secondary hover:bg-secondary-dim text-on-secondary font-bold rounded-xl text-center text-sm transition-all flex items-center justify-center gap-2"
                 >
-                  <span className="material-symbols-outlined text-sm">contact_mail</span>
-                  Contact Owner
+                  <span className="material-symbols-outlined text-sm">contact_mail</span>I Found
+                  This
                 </button>
               ) : isOwner ? (
-                // Lost item → open modal with potential finders
+                // Owner of the item
                 item.type === 'lost' ? (
                   <button
                     onClick={() => setLostFindersModalOpen(true)}
                     className="block w-full py-3 bg-primary hover:bg-primary-dim text-white font-bold rounded-xl text-center text-sm transition-all"
                   >
-                    View Details
+                    Potential Finders
                   </button>
                 ) : (
-                  // Found item → open Samaritan modal (manage claims)
                   <button
                     onClick={() => setSamaritanModalOpen(true)}
                     className="block w-full py-3 bg-primary hover:bg-primary-dim text-white font-bold rounded-xl text-center text-sm transition-all"
                   >
-                    View Details
+                    Manage Claims
                   </button>
                 )
               ) : (
