@@ -1,7 +1,6 @@
 // src/components/modals/SamaritanItemModal.tsx
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { claimsApi } from '../../api/claimsApi'
 import { formatTime } from '../../utils/formatTime'
@@ -9,6 +8,7 @@ import ImageCarousel from '../ui/ImageCarousel'
 import { MapContainer, TileLayer, Marker } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import HandshakeModal from './HandshakeModal'
 import toast from 'react-hot-toast'
 import type { Item } from '../../types/database'
 
@@ -23,6 +23,7 @@ interface Claim {
   id: string
   ticket_number: string
   answer: string
+  status: string
   created_at: string
   profiles: {
     full_name: string
@@ -39,56 +40,52 @@ interface SamaritanItemModalProps {
   onRefresh?: () => void
 }
 
-export default function SamaritanItemModal({
-  isOpen,
-  onClose,
-  item,
-  onRefresh,
-}: SamaritanItemModalProps) {
-  const navigate = useNavigate()
+export default function SamaritanItemModal({ isOpen, onClose, item, onRefresh }: SamaritanItemModalProps) {
   const [claims, setClaims] = useState<Claim[]>([])
   const [loading, setLoading] = useState(true)
   const [processingId, setProcessingId] = useState<string | null>(null)
   const [showRejectConfirm, setShowRejectConfirm] = useState<string | null>(null)
+  const [handshakeClaimId, setHandshakeClaimId] = useState<string | null>(null)
   const hasLocation = !!(item.location_lat && item.location_lng)
+
+  const fetchClaims = async () => {
+    setLoading(true)
+    const { data, error } = await supabase
+      .from('claims')
+      .select(`
+        id,
+        ticket_number,
+        answer,
+        status,
+        created_at,
+        profiles!claimant_id (
+          full_name,
+          email,
+          avatar_url,
+          reputation
+        )
+      `)
+      .eq('item_id', item.id)
+      .in('status', ['pending', 'accepted'])
+      .order('created_at', { ascending: false })
+    if (!error && data) setClaims(data as Claim[])
+    setLoading(false)
+  }
 
   useEffect(() => {
     if (!isOpen || !item.id) return
-    const fetchClaims = async () => {
-      setLoading(true)
-      const { data, error } = await supabase
-        .from('claims')
-        .select(
-          `
-          id,
-          ticket_number,
-          answer,
-          created_at,
-          profiles!claimant_id (
-            full_name,
-            email,
-            avatar_url,
-            reputation
-          )
-        `
-        )
-        .eq('item_id', item.id)
-        .eq('status', 'pending')
-        .order('created_at', { ascending: false })
-
-      if (!error && data) setClaims(data as Claim[])
-      setLoading(false)
-    }
     fetchClaims()
   }, [isOpen, item.id])
 
   const handleAccept = async (claimId: string) => {
     setProcessingId(claimId)
     try {
-      await claimsApi.acceptBySamaritan(claimId, item.reporter_id)
-      toast.success('Claim accepted. Redirecting to handshake...')
-      onClose()
-      navigate(`/user/claims/${claimId}/resolved`)
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Not authenticated')
+      await claimsApi.acceptBySamaritan(claimId, user.user.id)
+      toast.success('Claim accepted. Handshake modal opened.')
+      await fetchClaims() // refresh to show the accepted claim with "View Handshake" button
+      setHandshakeClaimId(claimId)
     } catch {
       toast.error('Failed to accept claim')
     } finally {
@@ -99,9 +96,11 @@ export default function SamaritanItemModal({
   const handleReject = async (claimId: string) => {
     setProcessingId(claimId)
     try {
-      await claimsApi.penalize(claimId, item.reporter_id)
+      const { data: user } = await supabase.auth.getUser()
+      if (!user.user) throw new Error('Not authenticated')
+      await claimsApi.penalize(claimId, user.user.id)
       toast.success('Claim rejected and claimant penalized (-10 reputation).')
-      setClaims((prev) => prev.filter((c) => c.id !== claimId))
+      await fetchClaims()
       if (onRefresh) onRefresh()
     } catch {
       toast.error('Failed to reject claim')
@@ -109,6 +108,11 @@ export default function SamaritanItemModal({
       setProcessingId(null)
       setShowRejectConfirm(null)
     }
+  }
+
+  const handleHandshakeClose = () => {
+    setHandshakeClaimId(null)
+    fetchClaims() // refresh after complete handover if needed
   }
 
   if (!isOpen) return null
@@ -125,7 +129,7 @@ export default function SamaritanItemModal({
 
         <div className="flex-1 overflow-y-auto">
           <div className="flex flex-col md:flex-row">
-            {/* LEFT COLUMN – responsive widths */}
+            {/* LEFT COLUMN – ITEM DETAILS */}
             <div className="w-full md:w-[420px] shrink-0 border-r border-outline-variant/10 overflow-y-auto bg-surface-container-low/30 p-5 md:p-8 space-y-6 md:space-y-8">
               <div className="relative group">
                 {item.image_urls && item.image_urls.length > 0 ? (
@@ -157,18 +161,12 @@ export default function SamaritanItemModal({
                 <div className="space-y-3 md:space-y-4">
                   <div className="bg-surface-container-lowest px-3 py-2 md:px-4 md:py-3 rounded-xl flex items-center gap-3 md:gap-4 ring-1 ring-outline-variant/10">
                     <div className="w-7 h-7 md:w-9 md:h-9 rounded-lg bg-primary/5 flex items-center justify-center text-primary">
-                      <span className="material-symbols-outlined text-[16px] md:text-[20px]">
-                        calendar_today
-                      </span>
+                      <span className="material-symbols-outlined text-[16px] md:text-[20px]">calendar_today</span>
                     </div>
                     <div>
-                      <p className="text-[8px] md:text-[10px] uppercase font-bold text-outline tracking-wider">
-                        Date Found
-                      </p>
+                      <p className="text-[8px] md:text-[10px] uppercase font-bold text-outline tracking-wider">Date Found</p>
                       <p className="font-bold text-xs md:text-sm text-on-surface">
-                        {item.incident_date
-                          ? new Date(item.incident_date).toLocaleDateString()
-                          : 'Not specified'}
+                        {item.incident_date ? new Date(item.incident_date).toLocaleDateString() : 'Not specified'}
                       </p>
                     </div>
                   </div>
@@ -176,31 +174,21 @@ export default function SamaritanItemModal({
                   {item.incident_time && (
                     <div className="bg-surface-container-lowest px-3 py-2 md:px-4 md:py-3 rounded-xl flex items-center gap-3 md:gap-4 ring-1 ring-outline-variant/10">
                       <div className="w-7 h-7 md:w-9 md:h-9 rounded-lg bg-primary/5 flex items-center justify-center text-primary">
-                        <span className="material-symbols-outlined text-[16px] md:text-[20px]">
-                          schedule
-                        </span>
+                        <span className="material-symbols-outlined text-[16px] md:text-[20px]">schedule</span>
                       </div>
                       <div>
-                        <p className="text-[8px] md:text-[10px] uppercase font-bold text-outline tracking-wider">
-                          Time Found
-                        </p>
-                        <p className="font-bold text-xs md:text-sm text-on-surface">
-                          {formatTime(item.incident_time)}
-                        </p>
+                        <p className="text-[8px] md:text-[10px] uppercase font-bold text-outline tracking-wider">Time Found</p>
+                        <p className="font-bold text-xs md:text-sm text-on-surface">{formatTime(item.incident_time)}</p>
                       </div>
                     </div>
                   )}
 
                   <div className="bg-surface-container-lowest px-3 py-2 md:px-4 md:py-3 rounded-xl flex items-center gap-3 md:gap-4 ring-1 ring-outline-variant/10">
                     <div className="w-7 h-7 md:w-9 md:h-9 rounded-lg bg-primary/5 flex items-center justify-center text-primary">
-                      <span className="material-symbols-outlined text-[16px] md:text-[20px]">
-                        location_on
-                      </span>
+                      <span className="material-symbols-outlined text-[16px] md:text-[20px]">location_on</span>
                     </div>
                     <div>
-                      <p className="text-[8px] md:text-[10px] uppercase font-bold text-outline tracking-wider">
-                        Location
-                      </p>
+                      <p className="text-[8px] md:text-[10px] uppercase font-bold text-outline tracking-wider">Location</p>
                       <p className="font-bold text-xs md:text-sm text-on-surface">
                         {item.location_building || item.location_name || 'General Campus'}
                       </p>
@@ -232,33 +220,25 @@ export default function SamaritanItemModal({
               <div className="flex-1 border-t-2 border-dashed border-outline-variant/40"></div>
             </div>
 
-            {/* RIGHT COLUMN – responsive width */}
+            {/* RIGHT COLUMN – CLAIMS QUEUE */}
             <div className="w-full md:w-[480px] bg-surface-container-low border-l border-outline-variant/20 flex flex-col overflow-hidden">
-              {/* Sticky header */}
               <div className="px-5 pt-16 pb-4 md:px-8 md:pt-20 md:pb-6 border-b border-outline-variant/10 shrink-0 bg-background/80 backdrop-blur-sm z-10">
                 <div className="flex flex-wrap md:flex-nowrap items-start justify-between gap-3 mb-2">
                   <div>
                     <h3 className="text-xl md:text-2xl font-extrabold text-on-surface font-headline tracking-tight">
                       Confirmed Claimant
                     </h3>
-                    <p className="text-xs md:text-sm text-on-surface-variant mt-1 leading-relaxed font-body">
-                      Review and manage verified claimant information and coordinate the return
-                      thread.
+                    <p className="text-xs md:text-sm text-on-surface-variant mt-1 leading-relaxed">
+                      Review and manage verified claimant information and coordinate the return thread.
                     </p>
                   </div>
                   <div className="bg-surface-container-lowest px-3 py-1.5 md:px-4 md:py-2 rounded-xl flex items-center gap-2 md:gap-3 ring-1 ring-outline-variant/10 shrink-0">
                     <div className="w-6 h-6 md:w-7 md:h-7 rounded-lg bg-primary/5 flex items-center justify-center text-primary">
-                      <span className="material-symbols-outlined text-[14px] md:text-[18px]">
-                        check_circle
-                      </span>
+                      <span className="material-symbols-outlined text-[14px] md:text-[18px]">check_circle</span>
                     </div>
                     <div>
-                      <p className="text-[8px] md:text-[10px] uppercase font-bold text-outline tracking-wider">
-                        Active Claims
-                      </p>
-                      <p className="font-bold text-xs md:text-sm text-on-surface">
-                        {claims.length} Pending
-                      </p>
+                      <p className="text-[8px] md:text-[10px] uppercase font-bold text-outline tracking-wider">Active Claims</p>
+                      <p className="font-bold text-xs md:text-sm text-on-surface">{claims.length} Total</p>
                     </div>
                   </div>
                 </div>
@@ -267,102 +247,93 @@ export default function SamaritanItemModal({
                   <div className="mt-3 md:mt-4 bg-primary-container/10 p-3 md:p-4 rounded-xl border border-primary/20">
                     <div className="flex items-center gap-2 text-primary mb-1">
                       <span className="material-symbols-outlined text-sm">lock</span>
-                      <p className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest">
-                        Your Private Notes
-                      </p>
+                      <p className="text-[9px] md:text-[10px] font-bold uppercase tracking-widest">Your Private Notes</p>
                     </div>
-                    <p className="text-xs md:text-sm italic text-on-surface">
-                      “{item.samaritan_notes}”
-                    </p>
+                    <p className="text-xs md:text-sm italic text-on-surface">“{item.samaritan_notes}”</p>
                   </div>
                 )}
               </div>
 
-              {/* Scrollable list of claims */}
               <div className="flex-1 overflow-y-auto space-y-4 md:space-y-6 p-4 md:p-6">
                 {loading ? (
                   <div className="text-center py-12 text-on-surface-variant">Loading claims...</div>
                 ) : claims.length === 0 ? (
-                  <div className="text-center py-12 text-on-surface-variant">
-                    No pending claims for this item.
-                  </div>
+                  <div className="text-center py-12 text-on-surface-variant">No claims for this item.</div>
                 ) : (
-                  claims.map((claim) => (
-                    <div
-                      key={claim.id}
-                      className="bg-white rounded-2xl p-4 md:p-6 border border-outline-variant/10 shadow-sm transition-all hover:shadow-md hover:border-primary/20"
-                    >
-                      <div className="flex gap-3 md:gap-5">
-                        <div className="shrink-0">
-                          {claim.profiles[0]?.avatar_url ? (
-                            <img
-                              src={claim.profiles[0].avatar_url}
-                              alt={claim.profiles[0].full_name}
-                              className="w-10 h-10 md:w-14 md:h-14 rounded-xl object-cover ring-1 ring-outline-variant/10 shadow-sm"
-                            />
-                          ) : (
-                            <div className="w-10 h-10 md:w-14 md:h-14 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold text-lg md:text-xl ring-1 ring-primary/20">
-                              <span className="material-symbols-outlined text-base md:text-2xl">
-                                person
-                              </span>
-                            </div>
-                          )}
-                        </div>
-
-                        <div className="flex-1 space-y-3 md:space-y-5">
-                          <div className="flex flex-wrap justify-between items-start gap-2">
-                            <div>
-                              <h4 className="text-base md:text-lg font-extrabold text-on-surface font-headline leading-tight">
-                                {claim.profiles[0]?.full_name || 'Unknown'}
-                              </h4>
-                              <div className="flex items-center gap-1 text-on-surface-variant/70 text-[9px] md:text-[11px] font-medium mt-0.5">
-                                <span className="material-symbols-outlined text-[10px] md:text-[14px]">
-                                  schedule
-                                </span>
-                                Submitted {new Date(claim.created_at).toLocaleString()}
+                  claims.map((claim) => {
+                    const isAccepted = claim.status === 'accepted'
+                    return (
+                      <div key={claim.id} className="bg-white rounded-2xl p-4 md:p-6 border border-outline-variant/10 shadow-sm">
+                        <div className="flex gap-3 md:gap-5">
+                          <div className="shrink-0">
+                            {claim.profiles[0]?.avatar_url ? (
+                              <img
+                                src={claim.profiles[0].avatar_url}
+                                alt={claim.profiles[0].full_name}
+                                className="w-10 h-10 md:w-14 md:h-14 rounded-xl object-cover ring-1 ring-outline-variant/10"
+                              />
+                            ) : (
+                              <div className="w-10 h-10 md:w-14 md:h-14 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-bold text-lg md:text-xl">
+                                <span className="material-symbols-outlined text-base md:text-2xl">person</span>
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex-1 space-y-3 md:space-y-5">
+                            <div className="flex flex-wrap justify-between items-start gap-2">
+                              <div>
+                                <h4 className="text-base md:text-lg font-extrabold text-on-surface font-headline leading-tight">
+                                  {claim.profiles[0]?.full_name || 'Unknown'}
+                                </h4>
+                                <div className="flex items-center gap-1 text-on-surface-variant/70 text-[9px] md:text-[11px] font-medium mt-0.5">
+                                  <span className="material-symbols-outlined text-[10px] md:text-[14px]">schedule</span>
+                                  Submitted {new Date(claim.created_at).toLocaleString()}
+                                </div>
+                              </div>
+                              <div className="flex gap-2">
+                                {isAccepted ? (
+                                  <button
+                                    onClick={() => setHandshakeClaimId(claim.id)}
+                                    className="px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-[10px] md:text-xs font-bold bg-primary text-white shadow-sm hover:bg-primary-dim transition-all flex items-center gap-1 md:gap-2"
+                                  >
+                                    <span className="material-symbols-outlined text-[12px] md:text-[16px]">visibility</span>
+                                    View Handshake
+                                  </button>
+                                ) : (
+                                  <>
+                                    <button
+                                      onClick={() => setShowRejectConfirm(claim.id)}
+                                      disabled={processingId === claim.id}
+                                      className="px-2 py-1 md:px-3 md:py-2 rounded-lg text-[10px] md:text-xs font-bold border border-outline-variant/30 text-on-surface hover:bg-error/5 hover:text-error hover:border-error/20 transition-all flex items-center gap-1 md:gap-2"
+                                    >
+                                      <span className="material-symbols-outlined text-[12px] md:text-[16px]">close</span>
+                                      Decline
+                                    </button>
+                                    <button
+                                      onClick={() => handleAccept(claim.id)}
+                                      disabled={processingId === claim.id}
+                                      className="px-2 py-1 md:px-4 md:py-2 rounded-lg text-[10px] md:text-xs font-bold bg-primary text-white shadow-sm hover:bg-primary-dim transition-all flex items-center gap-1 md:gap-2"
+                                    >
+                                      <span className="material-symbols-outlined text-[12px] md:text-[16px]">verified_user</span>
+                                      Accept
+                                    </button>
+                                  </>
+                                )}
                               </div>
                             </div>
-                            <div className="flex gap-2">
-                              <button
-                                onClick={() => setShowRejectConfirm(claim.id)}
-                                disabled={processingId === claim.id}
-                                className="px-2 py-1 md:px-3 md:py-2 rounded-lg text-[10px] md:text-xs font-bold border border-outline-variant/30 text-on-surface hover:bg-error/5 hover:text-error hover:border-error/20 transition-all flex items-center gap-1 md:gap-2"
-                              >
-                                <span className="material-symbols-outlined text-[12px] md:text-[16px]">
-                                  close
-                                </span>
-                                Decline
-                              </button>
-                              <button
-                                onClick={() => handleAccept(claim.id)}
-                                disabled={processingId === claim.id}
-                                className="px-2 py-1 md:px-4 md:py-2 rounded-lg text-[10px] md:text-xs font-bold bg-primary text-white shadow-sm hover:bg-primary-dim transition-all flex items-center gap-1 md:gap-2"
-                              >
-                                <span className="material-symbols-outlined text-[12px] md:text-[16px]">
-                                  verified_user
-                                </span>
-                                Accept
-                              </button>
-                            </div>
-                          </div>
-
-                          <div className="bg-surface-container-low/50 rounded-xl p-3 md:p-4 border border-outline-variant/5">
-                            <div className="flex items-center gap-2 text-primary mb-1 md:mb-2">
-                              <span className="material-symbols-outlined text-[12px] md:text-[16px]">
-                                chat
-                              </span>
-                              <span className="text-[8px] md:text-[10px] uppercase font-black tracking-widest">
-                                Claimant’s Answer
-                              </span>
-                            </div>
-                            <div className="bg-white p-2 md:p-3 rounded-lg text-on-surface-variant leading-relaxed text-xs md:text-sm border border-outline-variant/10 shadow-sm break-words">
-                              {claim.answer}
+                            <div className="bg-surface-container-low/50 rounded-xl p-3 md:p-4 border border-outline-variant/5">
+                              <div className="flex items-center gap-2 text-primary mb-1 md:mb-2">
+                                <span className="material-symbols-outlined text-[12px] md:text-[16px]">chat</span>
+                                <span className="text-[8px] md:text-[10px] uppercase font-black tracking-widest">Claimant’s Answer</span>
+                              </div>
+                              <div className="bg-white p-2 md:p-3 rounded-lg text-on-surface-variant leading-relaxed text-xs md:text-sm border border-outline-variant/10">
+                                {claim.answer}
+                              </div>
                             </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))
+                    )
+                  })
                 )}
               </div>
             </div>
@@ -375,25 +346,24 @@ export default function SamaritanItemModal({
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[80]">
           <div className="bg-white rounded-xl p-5 md:p-6 max-w-[90%] sm:max-w-sm w-full">
             <h3 className="text-lg md:text-xl font-bold mb-2">Confirm Penalty</h3>
-            <p className="text-sm md:text-base mb-4">
-              This will deduct 10 reputation points from the claimant. Are you sure?
-            </p>
+            <p className="text-sm md:text-base mb-4">This will deduct 10 reputation points from the claimant. Are you sure?</p>
             <div className="flex gap-3 justify-end">
-              <button
-                onClick={() => setShowRejectConfirm(null)}
-                className="px-3 py-1.5 md:px-4 md:py-2 border rounded-lg text-sm"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => handleReject(showRejectConfirm)}
-                className="px-3 py-1.5 md:px-4 md:py-2 bg-error text-white rounded-lg text-sm"
-              >
-                Confirm
-              </button>
+              <button onClick={() => setShowRejectConfirm(null)} className="px-3 py-1.5 md:px-4 md:py-2 border rounded-lg text-sm">Cancel</button>
+              <button onClick={() => handleReject(showRejectConfirm)} className="px-3 py-1.5 md:px-4 md:py-2 bg-error text-white rounded-lg text-sm">Confirm</button>
             </div>
           </div>
         </div>
+      )}
+
+      {/* Handshake Modal */}
+      {handshakeClaimId && (
+        <HandshakeModal
+          isOpen={true}
+          onClose={handleHandshakeClose}
+          claimId={handshakeClaimId}
+          item={item}
+          onComplete={handleHandshakeClose}
+        />
       )}
     </div>,
     document.body
