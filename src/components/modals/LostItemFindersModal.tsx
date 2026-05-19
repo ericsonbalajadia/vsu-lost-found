@@ -1,7 +1,6 @@
 // src/components/modals/LostItemFindersModal.tsx
 import { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { supabase } from '../../lib/supabase';
 import { lostItemFindersApi } from '../../api/lostItemFindersApi';
 import { formatTime } from '../../utils/formatTime';
 import ImageCarousel from '../ui/ImageCarousel';
