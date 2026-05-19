@@ -1,7 +1,7 @@
 // src/App.tsx
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import AuthGuard from './guards/AuthGuard'
-import AdminGuard from './guards/AdminGuard'
+import AdminGuard from './guards/AdminGuard';
 import ProfileSettings from './pages/auth/settings/ProfileSettings'
 import SecuritySettings from './pages/auth/settings/SecuritySettings'
 import NotifSettings from './pages/auth/settings/NotifSettings'
@@ -20,7 +20,7 @@ import ClaimantHandshake from './pages/claimant/ClaimantHandshake'
 import ItemDetail from './pages/auth/ItemDetail'
 import HandshakeConfirmed from './pages/samaritan/HandshakeConfirmed'
 import SamaritanClaimsQueue from './pages/samaritan/SamaritanClaimsQueue'
-import SamaritanItemDetail from './pages/samaritan/SamaritanItemDetail'
+// import SamaritanItemDetail from './pages/samaritan/SamaritanItemDetail'
 import MyClaims from './pages/auth/MyClaims';
 import Claims from './pages/auth/Claims';
 
@@ -62,7 +62,7 @@ export default function App() {
           {/* Admin scaffold */}
           <Route element={<AdminGuard />}>
             <Route path="/admin" element={<div className="p-8">Admin — Phase 5+</div>} />
-          </Route>
+          </Route> 
         </Routes>
       </BrowserRouter>
     </>
