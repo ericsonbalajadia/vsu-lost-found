@@ -134,6 +134,29 @@ function ClaimCard({
   )
 }
 
+// Skeleton loader component for cards
+function ClaimCardSkeleton() {
+  return (
+    <div className="bg-surface-container-lowest rounded-xl overflow-hidden border border-outline-variant/20 flex flex-col animate-pulse">
+      <div className="h-48 bg-surface-container-high" />
+      <div className="p-5 space-y-3">
+        <div className="flex items-center justify-between">
+          <div className="h-4 bg-surface-container-high rounded w-1/4" />
+          <div className="h-3 bg-surface-container-high rounded w-1/6" />
+        </div>
+        <div className="h-6 bg-surface-container-high rounded w-3/4" />
+        <div className="h-4 bg-surface-container-high rounded w-full" />
+        <div className="h-4 bg-surface-container-high rounded w-2/3" />
+        <div className="flex items-center gap-2 mt-2">
+          <div className="w-5 h-5 rounded-full bg-surface-container-high" />
+          <div className="h-3 bg-surface-container-high rounded w-1/3" />
+        </div>
+        <div className="h-10 bg-surface-container-high rounded-xl mt-2" />
+      </div>
+    </div>
+  );
+}
+
 export default function Claims() {
   const { user } = useAuth()
   const [activeTab, setActiveTab] = useState<'claimant' | 'samaritan'>('claimant')
@@ -319,7 +342,20 @@ export default function Claims() {
     )
   }
 
-  if (loading) return <div className="p-8 text-center">Loading your claims...</div>
+  if (loading) {
+  return (
+    <AuthenticatedLayout>
+      <div className="max-w-7xl mx-auto p-6">
+        <h1 className="text-3xl font-bold mb-6">Claims</h1>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <ClaimCardSkeleton key={i} />
+          ))}
+        </div>
+      </div>
+    </AuthenticatedLayout>
+  );
+}
 
   return (
     <AuthenticatedLayout>
