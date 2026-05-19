@@ -18,7 +18,7 @@ import MyItems from './pages/auth/MyItems'
 
 import ClaimantHandshake from './pages/claimant/ClaimantHandshake'
 import ItemDetail from './pages/auth/ItemDetail'
-import HandshakeConfirmed from './pages/samaritan/HandshakeConfirmed'
+//import HandshakeConfirmed from './pages/samaritan/HandshakeConfirmed'
 import SamaritanClaimsQueue from './pages/samaritan/SamaritanClaimsQueue'
 // import SamaritanItemDetail from './pages/samaritan/SamaritanItemDetail'
 import MyClaims from './pages/auth/MyClaims';
@@ -34,7 +34,7 @@ import { Toaster } from 'react-hot-toast'
 export default function App() {
   return (
     <>
-      <Toaster position="top-center" />
+      <Toaster position="top-center" toastOptions={{ duration: 4000 }} />
       <BrowserRouter>
         <Routes>
           {/* Public */}
@@ -53,7 +53,7 @@ export default function App() {
             <Route path="/items/:id" element={<ItemDetail />} />
             {/* <Route path="/user/items/:id" element={<SamaritanItemDetail />} /> */}
             <Route path="/user/claims" element={<SamaritanClaimsQueue />} />
-            <Route path="/user/claims/:id/resolved" element={<HandshakeConfirmed />} />
+            {/* <Route path="/user/claims/:id/resolved" element={<HandshakeConfirmed />} /> */}
             <Route path="/claims/:id/handshake" element={<ClaimantHandshake />} />
             <Route path="/my-claims" element={<MyClaims />} />
             <Route path="/claims" element={<Claims />} />
