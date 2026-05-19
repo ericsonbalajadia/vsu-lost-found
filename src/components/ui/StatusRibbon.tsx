@@ -9,7 +9,7 @@ interface StatusRibbonProps {
 const config: Record<string, { label: string; bg: string; text: string; bar: string }> = {
   'found-active':       { label: 'FOUND',      bg: 'bg-primary/90',          text: 'text-white', bar: 'bg-primary' },
   'lost-active':        { label: 'LOST',       bg: 'bg-error/90',            text: 'text-white', bar: 'bg-error' },
-  'found-negotiation':  { label: 'CLAIMED',    bg: 'bg-secondary',           text: 'text-white', bar: 'bg-secondary' },
+  'found-negotiation': { label: 'IN NEGOTIATION', bg: 'bg-secondary', text: 'text-white', bar: 'bg-secondary' },
   'found-resolved':     { label: 'RESOLVED',   bg: 'bg-on-surface-variant/80', text: 'text-white', bar: 'bg-outline-variant' },
 }
 
