@@ -11,6 +11,7 @@ import ClaimItemModal from '../modals/ClaimItemModal'
 import ContactOwnerModal from '../modals/ContactOwnerModal'
 import ClaimantItemModal from '../modals/ClaimantItemModal'
 import SamaritanItemModal from '../modals/SamaritanItemModal'
+import LostItemFindersModal from '../modals/LostItemFindersModal'
 
 interface ItemCardProps {
   item: Item
@@ -41,6 +42,8 @@ export default function ItemCard({ item, onRefresh }: ItemCardProps) {
   const [existingClaim, setExistingClaim] = useState<any>(null)
   const [claimantModalOpen, setClaimantModalOpen] = useState(false)
   const [samaritanModalOpen, setSamaritanModalOpen] = useState(false)
+
+  const [lostFindersModalOpen, setLostFindersModalOpen] = useState(false)
 
   useEffect(() => {
     if (user && item.type === 'found' && item.status === 'active') {
@@ -165,7 +168,7 @@ export default function ItemCard({ item, onRefresh }: ItemCardProps) {
           <div className="mt-auto pt-2">
             {user ? (
               existingClaim ? (
-                // User has a claim on this item (but is not the owner)
+                // User has a claim on this item (not owner)
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span
@@ -206,12 +209,23 @@ export default function ItemCard({ item, onRefresh }: ItemCardProps) {
                   Contact Owner
                 </button>
               ) : isOwner ? (
-                <button
-                  onClick={() => setSamaritanModalOpen(true)}
-                  className="block w-full py-3 bg-primary hover:bg-primary-dim text-white font-bold rounded-xl text-center text-sm transition-all"
-                >
-                  View Details
-                </button>
+                // Lost item → open modal with potential finders
+                item.type === 'lost' ? (
+                  <button
+                    onClick={() => setLostFindersModalOpen(true)}
+                    className="block w-full py-3 bg-primary hover:bg-primary-dim text-white font-bold rounded-xl text-center text-sm transition-all"
+                  >
+                    View Details
+                  </button>
+                ) : (
+                  // Found item → open Samaritan modal (manage claims)
+                  <button
+                    onClick={() => setSamaritanModalOpen(true)}
+                    className="block w-full py-3 bg-primary hover:bg-primary-dim text-white font-bold rounded-xl text-center text-sm transition-all"
+                  >
+                    View Details
+                  </button>
+                )
               ) : (
                 <Link
                   to={`/items/${item.id}`}
@@ -259,6 +273,12 @@ export default function ItemCard({ item, onRefresh }: ItemCardProps) {
         onClose={() => setSamaritanModalOpen(false)}
         item={item}
         onRefresh={onRefresh}
+      />
+
+      <LostItemFindersModal
+        isOpen={lostFindersModalOpen}
+        onClose={() => setLostFindersModalOpen(false)}
+        item={item}
       />
     </>
   )
