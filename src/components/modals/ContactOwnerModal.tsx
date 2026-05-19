@@ -113,228 +113,258 @@ export default function ContactOwnerModal({
   return createPortal(
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 md:p-8 bg-slate-900/40 backdrop-blur-sm">
       <div className="relative w-full max-w-4xl max-h-[90vh] overflow-hidden bg-white rounded-2xl shadow-2xl flex flex-col md:flex-row">
-        {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-5 right-5 z-20 w-8 h-8 rounded-full bg-white/90 backdrop-blur flex items-center justify-center text-slate-500 hover:text-slate-900 hover:bg-white shadow-sm transition-all"
+          className="absolute top-3 right-3 md:top-5 md:right-5 z-20 w-7 h-7 md:w-8 md:h-8 rounded-full bg-white/90 backdrop-blur flex items-center justify-center text-slate-500 hover:text-slate-900 hover:bg-white shadow-sm transition-all"
         >
-          <span className="material-symbols-outlined text-xl">close</span>
+          <span className="material-symbols-outlined text-base md:text-xl">close</span>
         </button>
 
-        {/* Left column: item summary with map */}
-        <div className="w-full md:w-1/2 shrink-0 border-r border-outline-variant/10 overflow-y-auto bg-surface-container-low/30 p-6 md:p-8 space-y-6">
-          <div className="space-y-8">
-            {item.image_urls && item.image_urls.length > 0 ? (
-              <ImageCarousel images={item.image_urls} alt={item.title} />
-            ) : item.image_url ? (
-              <img
-                src={item.image_url}
-                alt={item.title}
-                className="w-full aspect-[4/3] object-cover rounded-2xl shadow-sm ring-1 ring-outline-variant/10"
-              />
-            ) : null}
+        <div className="flex-1 overflow-y-auto">
+          <div className="flex flex-col md:flex-row">
+            {/* Left column */}
+            <div className="w-full md:w-1/2 shrink-0 border-r border-outline-variant/10 overflow-y-auto bg-surface-container-low/30 p-5 md:p-8 space-y-5 md:space-y-6">
+              <div className="space-y-6 md:space-y-8">
+                {item.image_urls && item.image_urls.length > 0 ? (
+                  <ImageCarousel images={item.image_urls} alt={item.title} />
+                ) : item.image_url ? (
+                  <img
+                    src={item.image_url}
+                    alt={item.title}
+                    className="w-full aspect-[4/3] object-cover rounded-2xl shadow-sm ring-1 ring-outline-variant/10"
+                  />
+                ) : null}
 
-            <div className="space-y-6">
-              <div>
-                <h2 className="text-3xl font-extrabold tracking-tight text-on-surface font-headline">
-                  {item.title}
-                </h2>
-                <p className="text-on-surface-variant leading-relaxed text-[15px] mt-2">
-                  {item.description || 'No description provided.'}
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                {/* Date card */}
-                <div className="bg-white px-5 py-4 rounded-2xl flex items-center gap-5 ring-1 ring-outline-variant/10 shadow-sm">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                    <span className="material-symbols-outlined text-[22px]">calendar_today</span>
-                  </div>
-                  <div>
-                    <p className="text-[11px] uppercase font-bold text-outline tracking-wider mb-0.5">
-                      Date
-                    </p>
-                    <p className="font-bold text-[15px] text-on-surface">
-                      {item.incident_date
-                        ? new Date(item.incident_date).toLocaleDateString()
-                        : 'Not specified'}
-                    </p>
-                  </div>
+                <div>
+                  <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-on-surface font-headline">
+                    {item.title}
+                  </h2>
+                  <p className="text-on-surface-variant leading-relaxed text-sm md:text-[15px] mt-2">
+                    {item.description || 'No description provided.'}
+                  </p>
                 </div>
 
-                {/* Time card (if available) */}
-                {item.incident_time && (
-                  <div className="bg-white px-5 py-4 rounded-2xl flex items-center gap-5 ring-1 ring-outline-variant/10 shadow-sm">
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                      <span className="material-symbols-outlined text-[22px]">schedule</span>
+                <div className="space-y-3 md:space-y-4">
+                  <div className="bg-white px-4 py-3 md:px-5 md:py-4 rounded-2xl flex items-center gap-4 md:gap-5 ring-1 ring-outline-variant/10 shadow-sm">
+                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                      <span className="material-symbols-outlined text-[18px] md:text-[22px]">
+                        calendar_today
+                      </span>
                     </div>
                     <div>
-                      <p className="text-[11px] uppercase font-bold text-outline tracking-wider mb-0.5">
-                        Time
+                      <p className="text-[9px] md:text-[11px] uppercase font-bold text-outline tracking-wider">
+                        Date
                       </p>
-                      <p className="font-bold text-[15px] text-on-surface">
-                        {formatTime(item.incident_time)}
+                      <p className="font-bold text-sm md:text-[15px] text-on-surface">
+                        {item.incident_date
+                          ? new Date(item.incident_date).toLocaleDateString()
+                          : 'Not specified'}
                       </p>
                     </div>
                   </div>
-                )}
 
-                {/* Location card */}
-                <div className="bg-white px-5 py-4 rounded-2xl flex items-center gap-5 ring-1 ring-outline-variant/10 shadow-sm">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                    <span className="material-symbols-outlined text-[22px]">location_on</span>
-                  </div>
-                  <div>
-                    <p className="text-[11px] uppercase font-bold text-outline tracking-wider mb-0.5">
-                      Location
-                    </p>
-                    <p className="font-bold text-[15px] text-on-surface">
-                      {item.location_building || item.location_name || 'Not specified'}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Map card (if coordinates exist) */}
-                {hasLocation && (
-                  <div className="bg-white rounded-2xl overflow-hidden ring-1 ring-outline-variant/10 shadow-sm">
-                    <div className="px-5 pt-4 pb-2 flex items-center gap-2">
-                      <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                        <span className="material-symbols-outlined text-[18px]">map</span>
+                  {item.incident_time && (
+                    <div className="bg-white px-4 py-3 md:px-5 md:py-4 rounded-2xl flex items-center gap-4 md:gap-5 ring-1 ring-outline-variant/10 shadow-sm">
+                      <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                        <span className="material-symbols-outlined text-[18px] md:text-[22px]">
+                          schedule
+                        </span>
                       </div>
-                      <p className="text-[11px] uppercase font-bold text-outline tracking-wider">
-                        Location Map
+                      <div>
+                        <p className="text-[9px] md:text-[11px] uppercase font-bold text-outline tracking-wider">
+                          Time
+                        </p>
+                        <p className="font-bold text-sm md:text-[15px] text-on-surface">
+                          {formatTime(item.incident_time)}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="bg-white px-4 py-3 md:px-5 md:py-4 rounded-2xl flex items-center gap-4 md:gap-5 ring-1 ring-outline-variant/10 shadow-sm">
+                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                      <span className="material-symbols-outlined text-[18px] md:text-[22px]">
+                        location_on
+                      </span>
+                    </div>
+                    <div>
+                      <p className="text-[9px] md:text-[11px] uppercase font-bold text-outline tracking-wider">
+                        Location
+                      </p>
+                      <p className="font-bold text-sm md:text-[15px] text-on-surface">
+                        {item.location_building || item.location_name || 'Not specified'}
                       </p>
                     </div>
-                    <div className="h-48 w-full">
-                      <MapContainer
-                        center={[item.location_lat!, item.location_lng!]}
-                        zoom={15}
-                        style={{ height: '100%', width: '100%' }}
-                        zoomControl={false}
-                        attributionControl={false}
-                      >
-                        <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
-                        <Marker position={[item.location_lat!, item.location_lng!]} />
-                      </MapContainer>
-                    </div>
                   </div>
-                )}
 
-                {/* Reference number card */}
-                <div className="bg-white px-5 py-4 rounded-2xl flex items-center gap-5 ring-1 ring-outline-variant/10 shadow-sm">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                    <span className="material-symbols-outlined text-[22px]">badge</span>
-                  </div>
-                  <div>
-                    <p className="text-[11px] uppercase font-bold text-outline tracking-wider mb-0.5">
-                      Reference
-                    </p>
-                    <p className="font-bold text-[15px] text-on-surface font-mono">
-                      {item.reference_number}
-                    </p>
+                  {hasLocation && (
+                    <div className="bg-white rounded-2xl overflow-hidden ring-1 ring-outline-variant/10 shadow-sm">
+                      <div className="px-4 pt-3 pb-1 md:px-5 md:pt-4 md:pb-2 flex items-center gap-2">
+                        <div className="w-6 h-6 md:w-8 md:h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                          <span className="material-symbols-outlined text-[14px] md:text-[18px]">
+                            map
+                          </span>
+                        </div>
+                        <p className="text-[9px] md:text-[11px] uppercase font-bold text-outline tracking-wider">
+                          Location Map
+                        </p>
+                      </div>
+                      <div className="h-36 md:h-48 w-full">
+                        <MapContainer
+                          center={[item.location_lat!, item.location_lng!]}
+                          zoom={15}
+                          style={{ height: '100%', width: '100%' }}
+                          zoomControl={false}
+                          attributionControl={false}
+                        >
+                          <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                          <Marker position={[item.location_lat!, item.location_lng!]} />
+                        </MapContainer>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="bg-white px-4 py-3 md:px-5 md:py-4 rounded-2xl flex items-center gap-4 md:gap-5 ring-1 ring-outline-variant/10 shadow-sm">
+                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                      <span className="material-symbols-outlined text-[18px] md:text-[22px]">
+                        badge
+                      </span>
+                    </div>
+                    <div>
+                      <p className="text-[9px] md:text-[11px] uppercase font-bold text-outline tracking-wider">
+                        Reference
+                      </p>
+                      <p className="font-bold text-sm md:text-[15px] text-on-surface font-mono">
+                        {item.reference_number}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
 
-        {/* Right column: owner contact (unchanged) */}
-        <div className="flex-1 p-6 md:p-10 overflow-y-auto bg-white">
-          <div className="">
-            <h1 className="text-3xl font-extrabold text-on-surface tracking-tight mb-4">
-              Owner Verified
-            </h1>
-            <p className="text-on-surface-variant text-[15px] leading-relaxed">
-              Great news! If you have found this item, you can notify the owner below. You can now
-              contact the owner directly to coordinate the return of their item.
-            </p>
+            {/* Mobile divider */}
+            <div className="flex items-center gap-2 my-4 md:hidden">
+              <div className="flex-1 border-t-2 border-dashed border-outline-variant/40"></div>
+              <span className="material-symbols-outlined text-outline text-sm">drag_handle</span>
+              <div className="flex-1 border-t-2 border-dashed border-outline-variant/40"></div>
+            </div>
 
-            <div className="space-y-10 mt-8">
-              {loading ? (
-                <div className="text-center py-8 text-outline">Loading contact details...</div>
-              ) : reporter ? (
-                <div className="bg-surface-container-low/50 rounded-3xl p-6 border border-outline-variant/10 space-y-4">
-                  <div className="flex items-center gap-4 p-3 bg-white rounded-2xl ring-1 ring-outline-variant/10 shadow-sm">
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                      <span className="material-symbols-outlined text-[22px]">person</span>
+            {/* Right column */}
+            <div className="flex-1 p-5 md:p-10 overflow-y-auto bg-white">
+              <div>
+                <h1 className="text-2xl md:text-3xl font-extrabold text-on-surface tracking-tight mb-3 md:mb-4">
+                  Owner Verified
+                </h1>
+                <p className="text-on-surface-variant text-sm md:text-[15px] leading-relaxed mb-6 md:mb-8">
+                  Great news! If you have found this item, you can notify the owner below. You can
+                  now contact the owner directly to coordinate the return of their item.
+                </p>
+
+                <div className="space-y-6 md:space-y-10 mt-6 md:mt-8">
+                  {loading ? (
+                    <div className="text-center py-8 text-outline">Loading contact details...</div>
+                  ) : reporter ? (
+                    <div className="bg-surface-container-low/50 rounded-3xl p-4 md:p-6 border border-outline-variant/10 space-y-4">
+                      <div className="flex items-center gap-3 md:gap-4 p-2 md:p-3 bg-white rounded-2xl ring-1 ring-outline-variant/10 shadow-sm">
+                        <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                          <span className="material-symbols-outlined text-[18px] md:text-[22px]">
+                            person
+                          </span>
+                        </div>
+                        <div>
+                          <p className="text-[9px] md:text-[11px] uppercase font-bold text-outline tracking-wider">
+                            Full Name
+                          </p>
+                          <p className="font-bold text-sm md:text-[15px] text-on-surface">
+                            {reporter.full_name}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3 md:gap-4 p-2 md:p-3 bg-white rounded-2xl ring-1 ring-outline-variant/10 shadow-sm">
+                        <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                          <span className="material-symbols-outlined text-[18px] md:text-[22px]">
+                            mail
+                          </span>
+                        </div>
+                        <div>
+                          <p className="text-[9px] md:text-[11px] uppercase font-bold text-outline tracking-wider">
+                            Email Address
+                          </p>
+                          <p className="font-bold text-sm md:text-[15px] text-on-surface">
+                            {reporter.email}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-3 md:gap-4 p-2 md:p-3 bg-white rounded-2xl ring-1 ring-outline-variant/10 shadow-sm">
+                        <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
+                          <span className="material-symbols-outlined text-[18px] md:text-[22px]">
+                            call
+                          </span>
+                        </div>
+                        <div>
+                          <p className="text-[9px] md:text-[11px] uppercase font-bold text-outline tracking-wider">
+                            Contact Number
+                          </p>
+                          <p className="font-bold text-sm md:text-[15px] text-on-surface">
+                            {reporter.phone || 'Not provided'}
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-[11px] uppercase font-bold text-outline tracking-wider mb-0.5">
-                        Full Name
-                      </p>
-                      <p className="font-bold text-[15px] text-on-surface">{reporter.full_name}</p>
-                    </div>
+                  ) : (
+                    <div className="text-center py-8 text-error">Unable to load owner contact.</div>
+                  )}
+
+                  <div className="pt-2 space-y-4">
+                    <button
+                      onClick={handleFoundThis}
+                      disabled={hasReported || reporting}
+                      className="group relative w-full py-3 md:py-4 bg-primary hover:bg-primary-dim text-on-primary rounded-2xl font-bold text-sm md:text-base shadow-[0_20px_40px_-12px_rgba(44,91,182,0.3)] hover:shadow-[0_20px_40px_-8px_rgba(44,91,182,0.4)] active:scale-[0.99] transition-all duration-300 overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <span className="relative z-10 flex items-center justify-center gap-2">
+                        {hasReported
+                          ? 'Already reported'
+                          : reporting
+                            ? 'Reporting...'
+                            : 'Found this'}
+                        {!hasReported && !reporting && (
+                          <span className="material-symbols-outlined text-[16px] md:text-[18px]">
+                            check_circle
+                          </span>
+                        )}
+                      </span>
+                      <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    </button>
+
+                    <button
+                      onClick={handleEmail}
+                      disabled={!reporter}
+                      className="group relative w-full py-3 md:py-4 bg-primary hover:bg-primary-dim text-on-primary rounded-2xl font-bold text-sm md:text-base shadow-[0_20px_40px_-12px_rgba(44,91,182,0.3)] hover:shadow-[0_20px_40px_-8px_rgba(44,91,182,0.4)] active:scale-[0.99] transition-all duration-300 overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <span className="relative z-10 flex items-center justify-center gap-2">
+                        Create Email Thread
+                        <span className="material-symbols-outlined text-[16px] md:text-[18px]">
+                          mail
+                        </span>
+                      </span>
+                      <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    </button>
                   </div>
 
-                  <div className="flex items-center gap-4 p-3 bg-white rounded-2xl ring-1 ring-outline-variant/10 shadow-sm">
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                      <span className="material-symbols-outlined text-[22px]">mail</span>
-                    </div>
-                    <div>
-                      <p className="text-[11px] uppercase font-bold text-outline tracking-wider mb-0.5">
-                        Email Address
-                      </p>
-                      <p className="font-bold text-[15px] text-on-surface">{reporter.email}</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-4 p-3 bg-white rounded-2xl ring-1 ring-outline-variant/10 shadow-sm">
-                    <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                      <span className="material-symbols-outlined text-[22px]">call</span>
-                    </div>
-                    <div>
-                      <p className="text-[11px] uppercase font-bold text-outline tracking-wider mb-0.5">
-                        Contact Number
-                      </p>
-                      <p className="font-bold text-[15px] text-on-surface">
-                        {reporter.phone || 'Not provided'}
-                      </p>
-                    </div>
+                  <div className="flex items-start gap-3 px-3 py-3 md:px-4 md:py-4 bg-surface-container-low rounded-2xl border border-surface-container-high/50">
+                    <span className="material-symbols-outlined text-outline text-[14px] md:text-[18px] mt-0.5">
+                      info
+                    </span>
+                    <p className="text-[10px] md:text-[12px] text-on-surface-variant leading-relaxed">
+                      <span className="font-bold text-on-surface">What happens next?</span> After
+                      clicking “Found this”, the owner will be notified. You may initiate the first
+                      contact by clicking "Create Email Thread".
+                    </p>
                   </div>
                 </div>
-              ) : (
-                <div className="text-center py-8 text-error">Unable to load owner contact.</div>
-              )}
-
-              <div className="pt-2 space-y-4">
-                {/* Found this button */}
-                <button
-                  onClick={handleFoundThis}
-                  disabled={hasReported || reporting}
-                  className="group relative w-full py-4 bg-primary hover:bg-primary-dim text-on-primary rounded-2xl font-bold text-base shadow-[0_20px_40px_-12px_rgba(44,91,182,0.3)] hover:shadow-[0_20px_40px_-8px_rgba(44,91,182,0.4)] active:scale-[0.99] transition-all duration-300 overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <span className="relative z-10 flex items-center justify-center gap-2">
-                    {hasReported ? 'Already reported' : reporting ? 'Reporting...' : 'Found this'}
-                    {!hasReported && !reporting && (
-                      <span className="material-symbols-outlined text-[18px]">check_circle</span>
-                    )}
-                  </span>
-                  <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                </button>
-
-                {/* Email thread button (optional direct contact) */}
-                <button
-                  onClick={handleEmail}
-                  disabled={!reporter}
-                  className="group relative w-full py-4 bg-primary hover:bg-primary-dim text-on-primary rounded-2xl font-bold text-base shadow-[0_20px_40px_-12px_rgba(44,91,182,0.3)] hover:shadow-[0_20px_40px_-8px_rgba(44,91,182,0.4)] active:scale-[0.99] transition-all duration-300 overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <span className="relative z-10 flex items-center justify-center gap-2">
-                    Create Email Thread
-                    <span className="material-symbols-outlined text-[18px]">mail</span>
-                  </span>
-                  <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                </button>
-              </div>
-
-              <div className="flex items-start gap-3 px-4 py-4 bg-surface-container-low rounded-2xl border border-surface-container-high/50">
-                <span className="material-symbols-outlined text-outline text-[18px] mt-0.5">
-                  info
-                </span>
-                <p className="text-[12px] text-on-surface-variant leading-relaxed">
-                  <span className="font-bold text-on-surface">What happens next?</span> After
-                  clicking “Found this”, the owner will be notified. You may initiate the first contact with by clicking "Create Email Thread".
-                </p>
               </div>
             </div>
           </div>

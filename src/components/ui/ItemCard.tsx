@@ -205,8 +205,7 @@ export default function ItemCard({ item, onRefresh }: ItemCardProps) {
                   onClick={() => setShowContactModal(true)}
                   className="block w-full py-3 bg-secondary hover:bg-secondary-dim text-on-secondary font-bold rounded-xl text-center text-sm transition-all flex items-center justify-center gap-2"
                 >
-                  <span className="material-symbols-outlined text-sm">contact_mail</span>I Found
-                  This
+                  <span className="material-symbols-outlined text-sm">contact_mail</span>Contact Owner
                 </button>
               ) : isOwner ? (
                 // Owner of the item
