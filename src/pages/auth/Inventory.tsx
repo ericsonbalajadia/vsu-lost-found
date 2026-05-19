@@ -177,16 +177,15 @@ export default function Inventory() {
         <div className="bg-surface-container-low/50 rounded-[2.5rem] border border-outline-variant/10 shadow-soft">
           <div className="p-8 md:p-10">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div key="add-entry-card">
+                <AddEntryCard />
+              </div>
               {loading ? (
                 <>
-                  <AddEntryCard />
                   {getSkeletonCards(5)}
                 </>
-              ) : items.length === 0 ? (
-                <AddEntryCard />
-              ) : (
+              ) : items.length === 0 ? null : (
                 <>
-                  <AddEntryCard />
                   {items.map((item) => (
                     <ItemCard key={item.id} item={item} />
                   ))}
