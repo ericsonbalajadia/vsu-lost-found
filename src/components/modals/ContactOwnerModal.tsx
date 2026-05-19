@@ -1,73 +1,114 @@
 // src/components/modals/ContactOwnerModal.tsx
-import { useState, useEffect } from 'react';
-import { createPortal } from 'react-dom';
-import { MapContainer, TileLayer, Marker } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
-import { supabase } from '../../lib/supabase';
-import { openEmailThread } from '../../lib/mailto';
-import { formatTime } from '../../utils/formatTime';
-import type { Item } from '../../types/database';
-import ImageCarousel from '../ui/ImageCarousel';
+import { useState, useEffect } from 'react'
+import { createPortal } from 'react-dom'
+import { MapContainer, TileLayer, Marker } from 'react-leaflet'
+import L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
+import { supabase } from '../../lib/supabase'
+import { openEmailThread } from '../../lib/mailto'
+import { formatTime } from '../../utils/formatTime'
+import type { Item } from '../../types/database'
+import ImageCarousel from '../ui/ImageCarousel'
+import { lostItemFindersApi } from '../../api/lostItemFindersApi'
+import toast from 'react-hot-toast'
 
 // Fix Leaflet icon paths (Vite specific)
-delete (L.Icon.Default.prototype as any)._getIconUrl;
+delete (L.Icon.Default.prototype as any)._getIconUrl
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
   iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-});
+})
 
 interface ContactOwnerModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  item: Item;
+  isOpen: boolean
+  onClose: () => void
+  item: Item
+  onReportSuccess?: () => void
 }
 
 interface ReporterDetails {
-  full_name: string;
-  email: string;
-  phone: string | null;
+  full_name: string
+  email: string
+  phone: string | null
 }
 
-export default function ContactOwnerModal({ isOpen, onClose, item }: ContactOwnerModalProps) {
-  const [reporter, setReporter] = useState<ReporterDetails | null>(null);
-  const [loading, setLoading] = useState(false);
-  const hasLocation = item.location_lat && item.location_lng;
+export default function ContactOwnerModal({
+  isOpen,
+  onClose,
+  item,
+  onReportSuccess,
+}: ContactOwnerModalProps) {
+  const [reporter, setReporter] = useState<ReporterDetails | null>(null)
+  const [loading, setLoading] = useState(false)
+  const hasLocation = item.location_lat && item.location_lng
+
+  const [reporting, setReporting] = useState(false)
+  const [hasReported, setHasReported] = useState(false)
 
   useEffect(() => {
-    if (!isOpen || !item.reporter_id) return;
+    if (!isOpen || !item.reporter_id) return
 
     const fetchReporter = async () => {
-      setLoading(true);
+      setLoading(true)
       const { data, error } = await supabase
         .from('profiles')
         .select('full_name, email, phone')
         .eq('id', item.reporter_id)
-        .single();
+        .single()
 
       if (!error && data) {
-        setReporter(data);
+        setReporter(data)
       } else {
-        console.error('Failed to fetch reporter details:', error);
+        console.error('Failed to fetch reporter details:', error)
       }
-      setLoading(false);
-    };
+      setLoading(false)
+    }
 
-    fetchReporter();
-  }, [isOpen, item.reporter_id]);
+    fetchReporter()
+  }, [isOpen, item.reporter_id])
 
-const handleEmail = () => {
-  if (!reporter) return;
-  openEmailThread({
-    toEmail: reporter.email,
-    itemTitle: item.title,
-    itemRef: item.reference_number,
-    // claimTicket is omitted for lost items
-  });
-};
+  useEffect(() => {
+    if (!isOpen) return
+    const checkReported = async () => {
+      const { data: user } = await supabase.auth.getUser()
+      if (user.user) {
+        const reported = await lostItemFindersApi.hasReported(item.id, user.user.id)
+        setHasReported(reported)
+      }
+    }
+    checkReported()
+  }, [isOpen, item.id])
 
-  if (!isOpen) return null;
+  const handleFoundThis = async () => {
+    if (hasReported) {
+      toast.error('You have already reported this item.')
+      return
+    }
+    setReporting(true)
+    try {
+      await lostItemFindersApi.report(item.id)
+      toast.success('Owner has been notified! They may contact you.')
+      setHasReported(true)
+      if (onReportSuccess) onReportSuccess()
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to report. You may have already reported.')
+    } finally {
+      setReporting(false)
+    }
+  }
+
+  const handleEmail = () => {
+    if (!reporter) return
+    openEmailThread({
+      toEmail: reporter.email,
+      itemTitle: item.title,
+      itemRef: item.reference_number,
+      // claimTicket is omitted for lost items
+    })
+  }
+
+  if (!isOpen) return null
 
   return createPortal(
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 md:p-8 bg-slate-900/40 backdrop-blur-sm">
@@ -83,11 +124,15 @@ const handleEmail = () => {
         {/* Left column: item summary with map */}
         <div className="w-full md:w-1/2 shrink-0 border-r border-outline-variant/10 overflow-y-auto bg-surface-container-low/30 p-6 md:p-8 space-y-6">
           <div className="space-y-8">
-{item.image_urls && item.image_urls.length > 0 ? (
-  <ImageCarousel images={item.image_urls} alt={item.title} />
-) : item.image_url ? (
-  <img src={item.image_url} alt={item.title} className="w-full aspect-[4/3] object-cover rounded-2xl shadow-sm ring-1 ring-outline-variant/10" />
-) : null}
+            {item.image_urls && item.image_urls.length > 0 ? (
+              <ImageCarousel images={item.image_urls} alt={item.title} />
+            ) : item.image_url ? (
+              <img
+                src={item.image_url}
+                alt={item.title}
+                className="w-full aspect-[4/3] object-cover rounded-2xl shadow-sm ring-1 ring-outline-variant/10"
+              />
+            ) : null}
 
             <div className="space-y-6">
               <div>
@@ -106,9 +151,13 @@ const handleEmail = () => {
                     <span className="material-symbols-outlined text-[22px]">calendar_today</span>
                   </div>
                   <div>
-                    <p className="text-[11px] uppercase font-bold text-outline tracking-wider mb-0.5">Date</p>
+                    <p className="text-[11px] uppercase font-bold text-outline tracking-wider mb-0.5">
+                      Date
+                    </p>
                     <p className="font-bold text-[15px] text-on-surface">
-                      {item.incident_date ? new Date(item.incident_date).toLocaleDateString() : 'Not specified'}
+                      {item.incident_date
+                        ? new Date(item.incident_date).toLocaleDateString()
+                        : 'Not specified'}
                     </p>
                   </div>
                 </div>
@@ -120,7 +169,9 @@ const handleEmail = () => {
                       <span className="material-symbols-outlined text-[22px]">schedule</span>
                     </div>
                     <div>
-                      <p className="text-[11px] uppercase font-bold text-outline tracking-wider mb-0.5">Time</p>
+                      <p className="text-[11px] uppercase font-bold text-outline tracking-wider mb-0.5">
+                        Time
+                      </p>
                       <p className="font-bold text-[15px] text-on-surface">
                         {formatTime(item.incident_time)}
                       </p>
@@ -134,7 +185,9 @@ const handleEmail = () => {
                     <span className="material-symbols-outlined text-[22px]">location_on</span>
                   </div>
                   <div>
-                    <p className="text-[11px] uppercase font-bold text-outline tracking-wider mb-0.5">Location</p>
+                    <p className="text-[11px] uppercase font-bold text-outline tracking-wider mb-0.5">
+                      Location
+                    </p>
                     <p className="font-bold text-[15px] text-on-surface">
                       {item.location_building || item.location_name || 'Not specified'}
                     </p>
@@ -148,7 +201,9 @@ const handleEmail = () => {
                       <div className="w-8 h-8 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                         <span className="material-symbols-outlined text-[18px]">map</span>
                       </div>
-                      <p className="text-[11px] uppercase font-bold text-outline tracking-wider">Location Map</p>
+                      <p className="text-[11px] uppercase font-bold text-outline tracking-wider">
+                        Location Map
+                      </p>
                     </div>
                     <div className="h-48 w-full">
                       <MapContainer
@@ -171,7 +226,9 @@ const handleEmail = () => {
                     <span className="material-symbols-outlined text-[22px]">badge</span>
                   </div>
                   <div>
-                    <p className="text-[11px] uppercase font-bold text-outline tracking-wider mb-0.5">Reference</p>
+                    <p className="text-[11px] uppercase font-bold text-outline tracking-wider mb-0.5">
+                      Reference
+                    </p>
                     <p className="font-bold text-[15px] text-on-surface font-mono">
                       {item.reference_number}
                     </p>
@@ -189,7 +246,8 @@ const handleEmail = () => {
               Owner Verified
             </h1>
             <p className="text-on-surface-variant text-[15px] leading-relaxed">
-              Great news! You can now contact the owner directly to coordinate the return of their item.
+              Great news! If you have found this item, you can notify the owner below. You can now
+              contact the owner directly to coordinate the return of their item.
             </p>
 
             <div className="space-y-10 mt-8">
@@ -202,7 +260,9 @@ const handleEmail = () => {
                       <span className="material-symbols-outlined text-[22px]">person</span>
                     </div>
                     <div>
-                      <p className="text-[11px] uppercase font-bold text-outline tracking-wider mb-0.5">Full Name</p>
+                      <p className="text-[11px] uppercase font-bold text-outline tracking-wider mb-0.5">
+                        Full Name
+                      </p>
                       <p className="font-bold text-[15px] text-on-surface">{reporter.full_name}</p>
                     </div>
                   </div>
@@ -212,7 +272,9 @@ const handleEmail = () => {
                       <span className="material-symbols-outlined text-[22px]">mail</span>
                     </div>
                     <div>
-                      <p className="text-[11px] uppercase font-bold text-outline tracking-wider mb-0.5">Email Address</p>
+                      <p className="text-[11px] uppercase font-bold text-outline tracking-wider mb-0.5">
+                        Email Address
+                      </p>
                       <p className="font-bold text-[15px] text-on-surface">{reporter.email}</p>
                     </div>
                   </div>
@@ -222,7 +284,9 @@ const handleEmail = () => {
                       <span className="material-symbols-outlined text-[22px]">call</span>
                     </div>
                     <div>
-                      <p className="text-[11px] uppercase font-bold text-outline tracking-wider mb-0.5">Contact Number</p>
+                      <p className="text-[11px] uppercase font-bold text-outline tracking-wider mb-0.5">
+                        Contact Number
+                      </p>
                       <p className="font-bold text-[15px] text-on-surface">
                         {reporter.phone || 'Not provided'}
                       </p>
@@ -233,7 +297,23 @@ const handleEmail = () => {
                 <div className="text-center py-8 text-error">Unable to load owner contact.</div>
               )}
 
-              <div className="pt-2">
+              <div className="pt-2 space-y-4">
+                {/* Found this button */}
+                <button
+                  onClick={handleFoundThis}
+                  disabled={hasReported || reporting}
+                  className="group relative w-full py-4 bg-primary hover:bg-primary-dim text-on-primary rounded-2xl font-bold text-base shadow-[0_20px_40px_-12px_rgba(44,91,182,0.3)] hover:shadow-[0_20px_40px_-8px_rgba(44,91,182,0.4)] active:scale-[0.99] transition-all duration-300 overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  <span className="relative z-10 flex items-center justify-center gap-2">
+                    {hasReported ? 'Already reported' : reporting ? 'Reporting...' : 'Found this'}
+                    {!hasReported && !reporting && (
+                      <span className="material-symbols-outlined text-[18px]">check_circle</span>
+                    )}
+                  </span>
+                  <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                </button>
+
+                {/* Email thread button (optional direct contact) */}
                 <button
                   onClick={handleEmail}
                   disabled={!reporter}
@@ -246,11 +326,21 @@ const handleEmail = () => {
                   <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                 </button>
               </div>
+
+              <div className="flex items-start gap-3 px-4 py-4 bg-surface-container-low rounded-2xl border border-surface-container-high/50">
+                <span className="material-symbols-outlined text-outline text-[18px] mt-0.5">
+                  info
+                </span>
+                <p className="text-[12px] text-on-surface-variant leading-relaxed">
+                  <span className="font-bold text-on-surface">What happens next?</span> After
+                  clicking “Found this”, the owner will be notified. You may initiate the first contact with by clicking "Create Email Thread".
+                </p>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>,
     document.body
-  );
+  )
 }
