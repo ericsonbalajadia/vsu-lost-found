@@ -24,7 +24,7 @@ interface HandshakeModalProps {
   onClose: () => void;
   claimId: string;
   item: Item;
-  onComplete?: () => void; // called after Complete Handover
+  onComplete?: () => void;
 }
 
 export default function HandshakeModal({ isOpen, onClose, claimId, item, onComplete }: HandshakeModalProps) {
@@ -35,18 +35,44 @@ export default function HandshakeModal({ isOpen, onClose, claimId, item, onCompl
 
   useEffect(() => {
     if (!isOpen || !claimId) return;
+
     const fetchClaimant = async () => {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('claims')
-        .select('profiles!claimant_id (full_name, email, phone)')
-        .eq('id', claimId)
-        .single();
-      if (!error && data) {
-        setClaimant(data.profiles?.[0] || null);
+      try {
+        // 1. Get claimant_id from claim
+        const { data: claimData, error: claimError } = await supabase
+          .from('claims')
+          .select('claimant_id')
+          .eq('id', claimId)
+          .single();
+
+        if (claimError || !claimData) {
+          console.error('Failed to fetch claim:', claimError);
+          setLoading(false);
+          return;
+        }
+
+        // 2. Fetch profile using claimant_id
+        const { data: profileData, error: profileError } = await supabase
+          .from('profiles')
+          .select('full_name, email, phone')
+          .eq('id', claimData.claimant_id)
+          .single();
+
+        if (profileError || !profileData) {
+          console.error('Failed to fetch claimant profile:', profileError);
+          setLoading(false);
+          return;
+        }
+
+        setClaimant(profileData);
+      } catch (err) {
+        console.error('Unexpected error:', err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
+
     fetchClaimant();
   }, [isOpen, claimId]);
 
@@ -56,7 +82,7 @@ export default function HandshakeModal({ isOpen, onClose, claimId, item, onCompl
       toEmail: claimant.email,
       itemTitle: item.title,
       itemRef: item.reference_number,
-      claimTicket: '', // not needed here
+      claimTicket: '',
     });
   };
 
@@ -64,7 +90,6 @@ export default function HandshakeModal({ isOpen, onClose, claimId, item, onCompl
     if (resolving) return;
     setResolving(true);
     try {
-      // Call the existing finalize_resolution RPC (needs samaritan_id)
       const { data: user } = await supabase.auth.getUser();
       if (!user.user) throw new Error('Not authenticated');
       const { error } = await supabase.rpc('finalize_resolution', {
@@ -95,7 +120,7 @@ export default function HandshakeModal({ isOpen, onClose, claimId, item, onCompl
           <span className="material-symbols-outlined text-base md:text-xl">close</span>
         </button>
 
-        {/* LEFT COLUMN – Item Details */}
+        {/* LEFT COLUMN – Item Details (unchanged from your version) */}
         <div className="w-full md:w-1/2 shrink-0 border-r border-outline-variant/10 overflow-y-auto bg-surface-container-low/30 p-5 md:p-8 space-y-5 md:space-y-6">
           <div className="space-y-6 md:space-y-8">
             {item.image_urls && item.image_urls.length > 0 ? (
@@ -123,6 +148,7 @@ export default function HandshakeModal({ isOpen, onClose, claimId, item, onCompl
             </div>
 
             <div className="space-y-3 md:space-y-4">
+              {/* Date */}
               <div className="bg-white px-4 py-3 md:px-5 md:py-4 rounded-2xl flex items-center gap-4 md:gap-5 ring-1 ring-outline-variant/10 shadow-sm">
                 <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                   <span className="material-symbols-outlined text-[18px] md:text-[22px]">calendar_today</span>
@@ -135,6 +161,7 @@ export default function HandshakeModal({ isOpen, onClose, claimId, item, onCompl
                 </div>
               </div>
 
+              {/* Time */}
               {item.incident_time && (
                 <div className="bg-white px-4 py-3 md:px-5 md:py-4 rounded-2xl flex items-center gap-4 md:gap-5 ring-1 ring-outline-variant/10 shadow-sm">
                   <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
@@ -147,6 +174,7 @@ export default function HandshakeModal({ isOpen, onClose, claimId, item, onCompl
                 </div>
               )}
 
+              {/* Location */}
               <div className="bg-white px-4 py-3 md:px-5 md:py-4 rounded-2xl flex items-center gap-4 md:gap-5 ring-1 ring-outline-variant/10 shadow-sm">
                 <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                   <span className="material-symbols-outlined text-[18px] md:text-[22px]">location_on</span>
@@ -159,6 +187,7 @@ export default function HandshakeModal({ isOpen, onClose, claimId, item, onCompl
                 </div>
               </div>
 
+              {/* Map */}
               {hasLocation && (
                 <div className="bg-white rounded-2xl overflow-hidden ring-1 ring-outline-variant/10 shadow-sm">
                   <div className="px-4 pt-3 pb-1 md:px-5 md:pt-4 md:pb-2 flex items-center gap-2">
@@ -182,6 +211,7 @@ export default function HandshakeModal({ isOpen, onClose, claimId, item, onCompl
                 </div>
               )}
 
+              {/* Reference */}
               <div className="bg-white px-4 py-3 md:px-5 md:py-4 rounded-2xl flex items-center gap-4 md:gap-5 ring-1 ring-outline-variant/10 shadow-sm">
                 <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
                   <span className="material-symbols-outlined text-[18px] md:text-[22px]">badge</span>
