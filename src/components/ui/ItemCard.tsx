@@ -229,8 +229,14 @@ export default function ItemCard({ item, onRefresh }: ItemCardProps) {
                   </button>
                 )
               ) : (
-                <button onClick={() => setItemDetailModalOpen(true)} className="...">
-                  View Details
+                <button
+                  onClick={() => setItemDetailModalOpen(true)}
+                  className="group relative w-full py-2.5 px-4 rounded-full border-2 border-primary/30 text-primary font-semibold text-sm transition-all duration-200 hover:border-primary hover:bg-primary/5 hover:shadow-md flex items-center justify-center gap-2"
+                >
+                  <span>View Details</span>
+                  <span className="material-symbols-outlined text-base transition-transform duration-200 group-hover:translate-x-1">
+                    chevron_right
+                  </span>
                 </button>
               )
             ) : (
