@@ -22,6 +22,7 @@ import HandshakeConfirmed from './pages/samaritan/HandshakeConfirmed'
 import SamaritanClaimsQueue from './pages/samaritan/SamaritanClaimsQueue'
 import SamaritanItemDetail from './pages/samaritan/SamaritanItemDetail'
 import MyClaims from './pages/auth/MyClaims';
+import Claims from './pages/auth/Claims';
 
 import { Toaster } from 'react-hot-toast'
 
@@ -55,6 +56,7 @@ export default function App() {
             <Route path="/user/claims/:id/resolved" element={<HandshakeConfirmed />} />
             <Route path="/claims/:id/handshake" element={<ClaimantHandshake />} />
             <Route path="/my-claims" element={<MyClaims />} />
+            <Route path="/claims" element={<Claims />} />
           </Route>
 
           {/* Admin scaffold */}

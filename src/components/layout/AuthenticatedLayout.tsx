@@ -8,7 +8,8 @@ import NotificationBell from '../../components/ui/NotificationBell'
 const navItems = [
   { path: '/inventory', label: 'Dashboard', icon: 'dashboard' },
   { path: '/my-items', label: 'My Items', icon: 'inventory_2' },
-  { path: '/report', label: 'Report', icon: 'add_circle' },
+  { path: '/claims', label: 'Claims', icon: 'assignment' },
+  //{ path: '/report', label: 'Report', icon: 'add_circle' },
   { path: '/settings/profile', label: 'Settings', icon: 'settings' },
 ]
 
@@ -112,29 +113,31 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
 
         <nav className="flex-1 px-4">
           <ul className="space-y-1.5">
-            {navItems.slice(0, 2).map((item) => {
-              const active = isActive(item.path)
-              return (
-                <li key={item.path}>
-                  <Link
-                    to={item.path}
-                    className={`flex items-center gap-3 rounded-xl transition-all duration-200 font-headline font-semibold text-sm ${
-                      active
-                        ? 'bg-primary/10 text-primary'
-                        : 'text-on-surface-variant hover:text-primary hover:bg-primary/5'
-                    } ${collapsed ? 'justify-center py-3' : 'px-4 py-3'}`}
-                  >
-                    <span
-                      className="material-symbols-outlined"
-                      style={active ? { fontVariationSettings: "'FILL' 1" } : undefined}
+            {navItems
+              .filter((item) => item.path !== '/settings/profile') // exclude Settings (handled separately)
+              .map((item) => {
+                const active = isActive(item.path)
+                return (
+                  <li key={item.path}>
+                    <Link
+                      to={item.path}
+                      className={`flex items-center gap-3 rounded-xl transition-all duration-200 font-headline font-semibold text-sm ${
+                        active
+                          ? 'bg-primary/10 text-primary'
+                          : 'text-on-surface-variant hover:text-primary hover:bg-primary/5'
+                      } ${collapsed ? 'justify-center py-3' : 'px-4 py-3'}`}
                     >
-                      {item.icon}
-                    </span>
-                    {!collapsed && <span>{item.label}</span>}
-                  </Link>
-                </li>
-              )
-            })}
+                      <span
+                        className="material-symbols-outlined"
+                        style={active ? { fontVariationSettings: "'FILL' 1" } : undefined}
+                      >
+                        {item.icon}
+                      </span>
+                      {!collapsed && <span>{item.label}</span>}
+                    </Link>
+                  </li>
+                )
+              })}
           </ul>
         </nav>
 
