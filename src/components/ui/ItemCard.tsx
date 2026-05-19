@@ -12,6 +12,7 @@ import ContactOwnerModal from '../modals/ContactOwnerModal'
 import ClaimantItemModal from '../modals/ClaimantItemModal'
 import SamaritanItemModal from '../modals/SamaritanItemModal'
 import LostItemFindersModal from '../modals/LostItemFindersModal'
+import ItemDetailModal from '../modals/ItemDetailModal'
 
 interface ItemCardProps {
   item: Item
@@ -44,6 +45,8 @@ export default function ItemCard({ item, onRefresh }: ItemCardProps) {
   const [samaritanModalOpen, setSamaritanModalOpen] = useState(false)
 
   const [lostFindersModalOpen, setLostFindersModalOpen] = useState(false)
+
+  const [itemDetailModalOpen, setItemDetailModalOpen] = useState(false)
 
   useEffect(() => {
     if (user && item.type === 'found' && item.status === 'active') {
@@ -205,7 +208,8 @@ export default function ItemCard({ item, onRefresh }: ItemCardProps) {
                   onClick={() => setShowContactModal(true)}
                   className="block w-full py-3 bg-secondary hover:bg-secondary-dim text-on-secondary font-bold rounded-xl text-center text-sm transition-all flex items-center justify-center gap-2"
                 >
-                  <span className="material-symbols-outlined text-sm">contact_mail</span>Contact Owner
+                  <span className="material-symbols-outlined text-sm">contact_mail</span>Contact
+                  Owner
                 </button>
               ) : isOwner ? (
                 // Owner of the item
@@ -225,12 +229,9 @@ export default function ItemCard({ item, onRefresh }: ItemCardProps) {
                   </button>
                 )
               ) : (
-                <Link
-                  to={`/items/${item.id}`}
-                  className="block w-full py-3 bg-surface-container text-on-surface font-bold rounded-xl text-center text-sm transition-all hover:bg-surface-container-high"
-                >
+                <button onClick={() => setItemDetailModalOpen(true)} className="...">
                   View Details
-                </Link>
+                </button>
               )
             ) : (
               <Link
@@ -277,6 +278,13 @@ export default function ItemCard({ item, onRefresh }: ItemCardProps) {
         isOpen={lostFindersModalOpen}
         onClose={() => setLostFindersModalOpen(false)}
         item={item}
+      />
+
+      <ItemDetailModal
+        isOpen={itemDetailModalOpen}
+        onClose={() => setItemDetailModalOpen(false)}
+        item={item}
+        onRefresh={onRefresh}
       />
     </>
   )
