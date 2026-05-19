@@ -30,68 +30,77 @@ export default function Claims() {
 
   useEffect(() => {
     if (!user) return;
+
     const fetchData = async () => {
       setLoading(true);
+      try {
+        // 1. Items the user has claimed (claimant side)
+        const { data: claimed, error: err1 } = await supabase
+          .from('claims')
+          .select(`
+            id,
+            ticket_number,
+            answer,
+            status,
+            created_at,
+            items!inner (
+              id, reference_number, title, description, category, type, status,
+              location_lat, location_lng, location_name, location_building,
+              incident_date, incident_time, security_question, image_url, image_urls,
+              reporter_id, created_at, updated_at,
+              profiles!reporter_id ( full_name, reputation, avatar_url, campus_building )
+            )
+          `)
+          .eq('claimant_id', user.id)
+          .order('created_at', { ascending: false });
 
-      // 1. Items the user has claimed (claimant side)
-      const { data: claimed, error: err1 } = await supabase
-        .from('claims')
-        .select(`
-          id,
-          ticket_number,
-          answer,
-          status,
-          created_at,
-          items!inner (
-            id, reference_number, title, description, category, type, status,
-            location_lat, location_lng, location_name, location_building,
-            incident_date, incident_time, security_question, image_url, image_urls,
-            reporter_id, created_at, updated_at,
-            profiles!reporter_id ( full_name, reputation, avatar_url, campus_building )
-          )
-        `)
-        .eq('claimant_id', user.id)
-        .order('created_at', { ascending: false });
+        if (err1) throw err1;
 
-      if (!err1 && claimed) {
-        const transformed = (claimed as any[]).map((c) => ({
-          ...c.items[0],
-          claim_id: c.id,
-          claim_ticket: c.ticket_number,
-          claim_status: c.status,
-          claim_answer: c.answer,
-          claim_created_at: c.created_at,
-          profiles: c.items[0]?.profiles?.[0] || null,
-        }));
-        setClaimantItems(transformed);
-      }
-
-      // 2. Items the user reported that have pending claims (Samaritan side)
-      const { data: reported, error: err2 } = await supabase
-        .from('items')
-        .select(`
-          *,
-          profiles!reporter_id ( full_name, reputation, avatar_url, campus_building ),
-          claims!item_id ( id, status )
-        `)
-        .eq('reporter_id', user.id)
-        .eq('type', 'found')
-        .eq('status', 'active')
-        .order('created_at', { ascending: false });
-
-      if (!err2 && reported) {
-        const itemsWithPending = (reported as any[])
-          .filter((item) => (item.claims || []).some((c: any) => c.status === 'pending'))
-          .map((item) => ({
-            ...item,
-            pending_claims_count: (item.claims || []).filter((c: any) => c.status === 'pending').length,
-            profiles: item.profiles?.[0] || null,
+        if (claimed) {
+          const transformed = (claimed as any[]).map((c) => ({
+            ...c.items[0],
+            claim_id: c.id,
+            claim_ticket: c.ticket_number,
+            claim_status: c.status,
+            claim_answer: c.answer,
+            claim_created_at: c.created_at,
+            profiles: c.items[0]?.profiles?.[0] || null,
           }));
-        setSamaritanItems(itemsWithPending);
-      }
+          setClaimantItems(transformed);
+        }
 
-      setLoading(false);
+        // 2. Items the user reported that have pending claims (Samaritan side)
+        const { data: reported, error: err2 } = await supabase
+          .from('items')
+          .select(`
+            *,
+            profiles!reporter_id ( full_name, reputation, avatar_url, campus_building ),
+            claims!item_id ( id, status )
+          `)
+          .eq('reporter_id', user.id)
+          .eq('type', 'found')
+          .eq('status', 'active')
+          .order('created_at', { ascending: false });
+
+        if (err2) throw err2;
+
+        if (reported) {
+          const itemsWithPending = (reported as any[])
+            .filter((item) => (item.claims || []).some((c: any) => c.status === 'pending'))
+            .map((item) => ({
+              ...item,
+              pending_claims_count: (item.claims || []).filter((c: any) => c.status === 'pending').length,
+              profiles: item.profiles?.[0] || null,
+            }));
+          setSamaritanItems(itemsWithPending);
+        }
+      } catch (error) {
+        console.error('Error fetching claims data:', error);
+      } finally {
+        setLoading(false);
+      }
     };
+
     fetchData();
   }, [user]);
 
@@ -161,9 +170,16 @@ export default function Claims() {
               <p className="col-span-full text-on-surface-variant">You haven't claimed any items yet.</p>
             ) : (
               claimantItems.map((item) => (
-                <div key={item.id} className="bg-surface-container-lowest p-4 rounded-xl shadow-sm border flex gap-4">
+                <div
+                  key={item.id}
+                  className="bg-surface-container-lowest p-4 rounded-xl shadow-sm border flex gap-4"
+                >
                   {item.image_url && (
-                    <img src={item.image_url} alt={item.title} className="w-20 h-20 object-cover rounded-lg" />
+                    <img
+                      src={item.image_url}
+                      alt={item.title}
+                      className="w-20 h-20 object-cover rounded-lg"
+                    />
                   )}
                   <div className="flex-1">
                     <h3 className="font-bold text-lg">{item.title}</h3>
@@ -191,13 +207,22 @@ export default function Claims() {
               <p className="col-span-full text-on-surface-variant">No pending claims on your items.</p>
             ) : (
               samaritanItems.map((item) => (
-                <div key={item.id} className="bg-surface-container-lowest p-4 rounded-xl shadow-sm border flex gap-4">
+                <div
+                  key={item.id}
+                  className="bg-surface-container-lowest p-4 rounded-xl shadow-sm border flex gap-4"
+                >
                   {item.image_url && (
-                    <img src={item.image_url} alt={item.title} className="w-20 h-20 object-cover rounded-lg" />
+                    <img
+                      src={item.image_url}
+                      alt={item.title}
+                      className="w-20 h-20 object-cover rounded-lg"
+                    />
                   )}
                   <div className="flex-1">
                     <h3 className="font-bold text-lg">{item.title}</h3>
-                    <p className="text-sm text-outline">{item.pending_claims_count} pending claim(s)</p>
+                    <p className="text-sm text-outline">
+                      {item.pending_claims_count} pending claim(s)
+                    </p>
                     <button
                       onClick={() => setSelectedItem(item)}
                       className="mt-2 bg-primary text-white px-3 py-1.5 rounded-lg text-sm font-bold hover:bg-primary-dim"
