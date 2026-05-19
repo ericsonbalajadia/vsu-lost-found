@@ -124,9 +124,12 @@ function ClaimCard({
 
         <button
           onClick={buttonAction}
-          className="mt-3 w-full bg-primary hover:bg-primary-dim text-white font-bold py-2.5 rounded-xl text-sm transition-all flex items-center justify-center gap-2"
+          className="mt-3 w-full bg-gradient-to-r from-primary to-primary-dim hover:from-primary-dim hover:to-primary 
+             text-white font-bold py-2.5 rounded-full shadow-md hover:shadow-lg 
+             transition-all duration-200 active:scale-[0.98] 
+             flex items-center justify-center gap-2 text-sm"
         >
-          <span className="material-symbols-outlined text-sm">visibility</span>
+          <span className="material-symbols-outlined text-base">visibility</span>
           {buttonText}
         </button>
       </div>
@@ -154,7 +157,7 @@ function ClaimCardSkeleton() {
         <div className="h-10 bg-surface-container-high rounded-xl mt-2" />
       </div>
     </div>
-  );
+  )
 }
 
 export default function Claims() {
@@ -343,47 +346,73 @@ export default function Claims() {
   }
 
   if (loading) {
-  return (
-    <AuthenticatedLayout>
-      <div className="max-w-7xl mx-auto p-6">
-        <h1 className="text-3xl font-bold mb-6">Claims</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <ClaimCardSkeleton key={i} />
-          ))}
+    return (
+      <AuthenticatedLayout>
+        <div className="max-w-7xl mx-auto p-6">
+          <h1 className="text-3xl font-bold mb-6">Claims</h1>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <ClaimCardSkeleton key={i} />
+            ))}
+          </div>
         </div>
-      </div>
-    </AuthenticatedLayout>
-  );
-}
+      </AuthenticatedLayout>
+    )
+  }
 
   return (
     <AuthenticatedLayout>
       <div className="max-w-7xl mx-auto p-6">
-        <h1 className="text-3xl font-bold mb-6">Claims</h1>
+        <div className="mb-8">
+          <h1 className="text-4xl lg:text-5xl font-black text-on-surface tracking-tight mb-4 font-headline">
+            Claims Center
+          </h1>
+          <p className="text-on-surface-variant text-lg font-medium opacity-80 max-w-3xl">
+            Track and manage all your claim activity. Here you can review items you've claimed,
+            respond to claims on your found items, and coordinate returns.
+          </p>
+        </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-outline-variant/20 mb-6">
+        {/* Modern pill‑style tabs */}
+        <div className="flex gap-2 mb-6 bg-surface-container-high/50 p-1 rounded-full w-fit">
           <button
             onClick={() => setActiveTab('claimant')}
-            className={`px-4 py-2 text-sm font-semibold transition-colors ${
+            className={`px-6 py-2 rounded-full text-sm font-semibold transition-all flex items-center gap-2 ${
               activeTab === 'claimant'
-                ? 'text-primary border-b-2 border-primary'
-                : 'text-on-surface-variant hover:text-primary'
+                ? 'bg-primary text-on-primary shadow-md'
+                : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
             }`}
           >
+            <span className="material-symbols-outlined text-[18px]">assignment_ind</span>
             Items I Claimed ({claimantItems.length})
           </button>
           <button
             onClick={() => setActiveTab('samaritan')}
-            className={`px-4 py-2 text-sm font-semibold transition-colors ${
+            className={`px-6 py-2 rounded-full text-sm font-semibold transition-all flex items-center gap-2 ${
               activeTab === 'samaritan'
-                ? 'text-primary border-b-2 border-primary'
-                : 'text-on-surface-variant hover:text-primary'
+                ? 'bg-primary text-on-primary shadow-md'
+                : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
             }`}
           >
+            <span className="material-symbols-outlined text-[18px]">verified_user</span>
             Items with Pending Claims ({samaritanItems.length})
           </button>
+        </div>
+
+        {/* Helpful note – fills empty space and provides guidance */}
+        <div className="mb-6 p-4 bg-primary-container/10 rounded-xl border border-primary/20 flex items-start gap-3">
+          <span className="material-symbols-outlined text-primary text-xl">info</span>
+          <div className="text-sm text-on-surface-variant">
+            <p className="font-semibold text-on-surface">Need help?</p>
+            <p>
+              • For items you've claimed: you can edit your answer while the claim is pending.
+              <br />
+              • For claims on your items: review claimant answers and decide to accept or reject.
+              <br />• Once accepted, exchange contact details via email and mark the item as
+              resolved.
+            </p>
+          </div>
         </div>
 
         {/* Claimant Tab – full cards */}
