@@ -4,6 +4,8 @@ import { useParams, Link } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { itemsApi } from '../../api/itemsApi'
 import { claimsApi } from '../../api/claimsApi'
+import { lostItemFindersApi } from '../../api/lostItemFindersApi'
+import SecurityChallengeModal from '../../components/modals/SecurityChallengeModal'
 import ImageCarousel from '../../components/ui/ImageCarousel'
 import { formatTime } from '../../utils/formatTime'
 import { MapContainer, TileLayer, Marker } from 'react-leaflet'
@@ -28,6 +30,9 @@ export default function ItemDetail() {
   const [claimLoading, setClaimLoading] = useState(true)
   const [editingAnswer, setEditingAnswer] = useState('')
   const [saving, setSaving] = useState(false)
+  const [showClaimModal, setShowClaimModal] = useState(false)
+  const [finders, setFinders] = useState<any[]>([])
+  const [loadingFinders, setLoadingFinders] = useState(false)
 
   // Fetch item
   useEffect(() => {
@@ -54,13 +59,25 @@ export default function ItemDetail() {
     fetchClaim()
   }, [user, id])
 
+  // Fetch potential finders (only for lost items and owner)
+  useEffect(() => {
+    if (item && item.type === 'lost' && user?.id === item.reporter_id) {
+      const fetchFinders = async () => {
+        setLoadingFinders(true)
+        const { data } = await lostItemFindersApi.getByLostItem(item.id)
+        setFinders(data || [])
+        setLoadingFinders(false)
+      }
+      fetchFinders()
+    }
+  }, [item, user])
+
   const handleSaveAnswer = async () => {
     if (!existingClaim) return
     setSaving(true)
     try {
       await claimsApi.update(existingClaim.id, editingAnswer)
       toast.success('Answer updated successfully')
-      // Refresh claim data
       const { data } = await claimsApi.getExistingClaim(id!, user!.id)
       setExistingClaim(data)
       setEditingAnswer(data?.answer || '')
@@ -291,6 +308,40 @@ export default function ItemDetail() {
         </div>
       </div>
 
+      {/* Potential Finders section (only for lost item owners) */}
+      {item.type === 'lost' && user?.id === item.reporter_id && (
+        <div className="mt-8">
+          <h3 className="text-xl font-bold mb-4">Potential Finders ({finders.length})</h3>
+          {loadingFinders ? (
+            <div className="text-center py-4">Loading...</div>
+          ) : finders.length === 0 ? (
+            <p className="text-on-surface-variant">No one has reported finding this item yet.</p>
+          ) : (
+            <div className="space-y-4">
+              {finders.map((finder) => (
+                <div key={finder.id} className="bg-surface-container-low p-4 rounded-xl border">
+                  <div className="flex justify-between items-start flex-wrap gap-4">
+                    <div>
+                      <p className="font-semibold">{finder.profiles?.full_name || 'Anonymous'}</p>
+                      <p className="text-sm text-outline">
+                        Reported: {new Date(finder.created_at).toLocaleString()}
+                      </p>
+                      {finder.message && <p className="text-sm mt-1 italic">"{finder.message}"</p>}
+                    </div>
+                    <a
+                      href={`mailto:${finder.profiles?.email}?subject=Regarding your report for ${item.title}&body=Hi, you reported finding my lost item "${item.title}". Let's coordinate.`}
+                      className="bg-primary text-on-primary px-4 py-2 rounded-lg text-sm font-bold hover:bg-primary-dim transition"
+                    >
+                      Contact Finder
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       <div className="mt-8">
         {isSamaritan ? (
           <Link
@@ -301,15 +352,25 @@ export default function ItemDetail() {
           </Link>
         ) : canClaim ? (
           <button
-            onClick={() => {
-              /* open claim modal */
-            }}
+            onClick={() => setShowClaimModal(true)}
             className="bg-primary text-on-primary px-6 py-3 rounded-xl font-bold hover:bg-primary-dim"
           >
             Claim This Item
           </button>
         ) : null}
       </div>
+
+      {/* Claim Modal */}
+      <SecurityChallengeModal
+        isOpen={showClaimModal}
+        onClose={() => setShowClaimModal(false)}
+        item={item}
+        userId={user?.id || ''}
+        onSuccess={() => {
+          setShowClaimModal(false)
+          window.location.reload() // refresh to show updated claim status
+        }}
+      />
     </div>
   )
 }
