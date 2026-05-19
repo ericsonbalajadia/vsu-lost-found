@@ -15,6 +15,7 @@ function timeAgo(dateStr: string): string {
 const TYPE_ICON: Record<string, string> = {
   match_found: 'search', claim_accepted: 'verified', claim_declined: 'cancel',
   claim_submitted: 'assignment', item_resolved: 'handshake', message: 'mail', system: 'info',
+  finder_found: 'search',
 };
 
 export default function NotificationBell() {
