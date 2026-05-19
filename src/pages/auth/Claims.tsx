@@ -41,7 +41,6 @@ function ClaimCard({
   buttonText: string
   buttonAction: () => void
 }) {
-  console.log('🔍 ClaimCard received item:', item)
   const hasLocation = !!(item.location_lat && item.location_lng)
   return (
     <div className="bg-surface-container-lowest rounded-xl overflow-hidden border border-outline-variant/20 flex flex-col transition-all hover:-translate-y-1 hover:shadow-md">
@@ -86,7 +85,9 @@ function ClaimCard({
         <div className="space-y-1 text-xs text-outline">
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-sm">location_on</span>
-            <span>{item.location_building ?? item.location_name ?? 'VSU Campus'}</span>
+            <span className="truncate">
+              {item.location_building ?? item.location_name ?? 'VSU Campus'}
+            </span>
           </div>
           <div className="flex items-center gap-2 flex-wrap">
             <span className="material-symbols-outlined text-sm">calendar_today</span>
@@ -117,8 +118,8 @@ function ClaimCard({
                 </span>
               )}
             </div>
-            <span>{item.profiles.full_name}</span>
-            <span className="text-primary font-bold">★ {item.profiles.reputation}</span>
+            <span className="truncate">{item.profiles.full_name}</span>
+            <span className="text-primary font-bold shrink-0">★ {item.profiles.reputation}</span>
           </div>
         )}
 
@@ -154,7 +155,8 @@ function ClaimCardSkeleton() {
           <div className="w-5 h-5 rounded-full bg-surface-container-high" />
           <div className="h-3 bg-surface-container-high rounded w-1/3" />
         </div>
-        <div className="h-10 bg-surface-container-high rounded-xl mt-2" />
+        {/* Skeleton button – matches real button style */}
+        <div className="h-10 bg-gradient-to-r from-primary/50 to-primary-dim/50 rounded-full mt-2" />
       </div>
     </div>
   )
@@ -201,16 +203,13 @@ export default function Claims() {
 
         if (claimed) {
           const transformed = (claimed as any[]).map((c) => {
-            // c.items is the item object, not an array
             const item = c.items || {}
-            // Handle profiles (could be array or object)
             let reporterProfile = null
             const profilesData = item.profiles
             if (profilesData) {
               reporterProfile = Array.isArray(profilesData) ? profilesData[0] : profilesData
             }
             return {
-              // Item fields
               id: item.id || '',
               reference_number: item.reference_number || '',
               title: item.title || 'Untitled Item',
@@ -233,7 +232,6 @@ export default function Claims() {
               created_at: item.created_at || new Date().toISOString(),
               updated_at: item.updated_at || new Date().toISOString(),
               profiles: reporterProfile,
-              // Claim-specific fields
               claim_id: c.id,
               claim_ticket: c.ticket_number,
               claim_status: c.status,
@@ -271,7 +269,6 @@ export default function Claims() {
                 reporterProfile = Array.isArray(profilesData) ? profilesData[0] : profilesData
               }
               return {
-                // All Item fields (same as above)
                 id: item.id,
                 reference_number: item.reference_number || '',
                 title: item.title || 'Untitled Item',
@@ -345,124 +342,136 @@ export default function Claims() {
     )
   }
 
-  if (loading) {
-    return (
-      <AuthenticatedLayout>
-        <div className="max-w-7xl mx-auto p-6">
-          <h1 className="text-3xl font-bold mb-6">Claims</h1>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <ClaimCardSkeleton key={i} />
-            ))}
-          </div>
-        </div>
-      </AuthenticatedLayout>
-    )
-  }
-
   return (
     <AuthenticatedLayout>
-      <div className="max-w-7xl mx-auto p-6">
-        <div className="mb-8">
-          <h1 className="text-4xl lg:text-5xl font-black text-on-surface tracking-tight mb-4 font-headline">
+      <div className="flex-1 flex flex-col min-h-0">
+        {/* Header (always visible) */}
+        <div className="px-4 sm:px-6 md:px-12 py-6 md:py-10 bg-surface shrink-0">
+        <div className="max-w-7xl mx-auto">
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-on-surface tracking-tight mb-2 md:mb-4 font-headline">
             Claims Center
           </h1>
-          <p className="text-on-surface-variant text-lg font-medium opacity-80 max-w-3xl">
+          <p className="text-base sm:text-lg text-on-surface-variant font-medium opacity-80 max-w-3xl">
             Track and manage all your claim activity. Here you can review items you've claimed,
             respond to claims on your found items, and coordinate returns.
           </p>
         </div>
-
-        {/* Tabs */}
-        {/* Modern pill‑style tabs */}
-        <div className="flex gap-2 mb-6 bg-surface-container-high/50 p-1 rounded-full w-fit">
-          <button
-            onClick={() => setActiveTab('claimant')}
-            className={`px-6 py-2 rounded-full text-sm font-semibold transition-all flex items-center gap-2 ${
-              activeTab === 'claimant'
-                ? 'bg-primary text-on-primary shadow-md'
-                : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
-            }`}
-          >
-            <span className="material-symbols-outlined text-[18px]">assignment_ind</span>
-            Items I Claimed ({claimantItems.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('samaritan')}
-            className={`px-6 py-2 rounded-full text-sm font-semibold transition-all flex items-center gap-2 ${
-              activeTab === 'samaritan'
-                ? 'bg-primary text-on-primary shadow-md'
-                : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
-            }`}
-          >
-            <span className="material-symbols-outlined text-[18px]">verified_user</span>
-            Items with Pending Claims ({samaritanItems.length})
-          </button>
-        </div>
-
-        {/* Helpful note – fills empty space and provides guidance */}
-        <div className="mb-6 p-4 bg-primary-container/10 rounded-xl border border-primary/20 flex items-start gap-3">
-          <span className="material-symbols-outlined text-primary text-xl">info</span>
-          <div className="text-sm text-on-surface-variant">
-            <p className="font-semibold text-on-surface">Need help?</p>
-            <p>
-              • For items you've claimed: you can edit your answer while the claim is pending.
-              <br />
-              • For claims on your items: review claimant answers and decide to accept or reject.
-              <br />• Once accepted, exchange contact details via email and mark the item as
-              resolved.
-            </p>
-          </div>
-        </div>
-
-        {/* Claimant Tab – full cards */}
-        {activeTab === 'claimant' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {claimantItems.length === 0 ? (
-              <p className="col-span-full text-on-surface-variant">
-                You haven't claimed any items yet.
-              </p>
-            ) : (
-              claimantItems.map((item, idx) => (
-                <ClaimCard
-                  key={item.id || `claimant-${idx}`}
-                  item={item}
-                  badge={getStatusBadge(item.claim_status)}
-                  buttonText="View Claim"
-                  buttonAction={() => openClaimantModal(item)}
-                />
-              ))
-            )}
-          </div>
-        )}
-
-        {/* Samaritan Tab – full cards */}
-        {activeTab === 'samaritan' && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {samaritanItems.length === 0 ? (
-              <p className="col-span-full text-on-surface-variant">
-                No pending claims on your items.
-              </p>
-            ) : (
-              samaritanItems.map((item, idx) => (
-                <ClaimCard
-                  key={item.id || `samaritan-${idx}`}
-                  item={item}
-                  badge={
-                    <span className="bg-primary text-white px-2 py-1 rounded-full text-xs font-bold">
-                      {item.pending_claims_count} pending
-                    </span>
-                  }
-                  buttonText="Review Claims"
-                  buttonAction={() => setSelectedItem(item)}
-                />
-              ))
-            )}
-          </div>
-        )}
       </div>
 
-      {/* Claimant Modal */}
+        {/* Sticky tabs (solid background) – always visible */}
+        <div className="sticky top-0 z-10 bg-surface-container-lowest border-b border-outline-variant/10">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
+            <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => setActiveTab('claimant')}
+                className={`flex-1 sm:flex-initial px-4 sm:px-6 py-2 text-sm font-semibold transition-all flex items-center justify-center gap-2 
+                  ${
+                    activeTab === 'claimant'
+                      ? 'bg-primary text-on-primary shadow-md'
+                      : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
+                  }
+                  rounded-lg md:rounded-full`}
+              >
+                <span className="material-symbols-outlined text-[18px]">assignment_ind</span>
+                <span className="whitespace-nowrap">Items I Claimed ({claimantItems.length})</span>
+              </button>
+              <button
+                onClick={() => setActiveTab('samaritan')}
+                className={`flex-1 sm:flex-initial px-4 sm:px-6 py-2 text-sm font-semibold transition-all flex items-center justify-center gap-2 
+                  ${
+                    activeTab === 'samaritan'
+                      ? 'bg-primary text-on-primary shadow-md'
+                      : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
+                  }
+                  rounded-lg md:rounded-full`}
+              >
+                <span className="material-symbols-outlined text-[18px]">verified_user</span>
+                <span className="whitespace-nowrap">
+                  Items with Pending Claims ({samaritanItems.length})
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Scrollable content – skeletons only inside the card grid */}
+        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="bg-surface-container-low/50 rounded-[2.5rem] border border-outline-variant/10 shadow-soft p-6 md:p-10">
+              {/* Helpful note (always visible) */}
+              <div className="mb-6 p-4 bg-primary-container/10 rounded-xl border border-primary/20 flex flex-col sm:flex-row items-start gap-3">
+                <span className="material-symbols-outlined text-primary text-xl shrink-0">
+                  info
+                </span>
+                <div className="text-sm text-on-surface-variant space-y-1">
+                  <p className="font-semibold text-on-surface">Need help?</p>
+                  <p className="text-xs sm:text-sm">
+                    • For items you've claimed: you can edit your answer while the claim is pending.
+                    <br />
+                    • For claims on your items: review claimant answers and decide to accept or
+                    reject.
+                    <br />• Once accepted, exchange contact details via email and mark the item as
+                    resolved.
+                  </p>
+                </div>
+              </div>
+
+              {/* Claimant Tab */}
+              {activeTab === 'claimant' && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                  {loading ? (
+                    // Show skeletons while loading
+                    Array.from({ length: 6 }).map((_, i) => <ClaimCardSkeleton key={i} />)
+                  ) : claimantItems.length === 0 ? (
+                    <p className="col-span-full text-on-surface-variant text-center py-8">
+                      You haven't claimed any items yet.
+                    </p>
+                  ) : (
+                    claimantItems.map((item, idx) => (
+                      <ClaimCard
+                        key={item.id || `claimant-${idx}`}
+                        item={item}
+                        badge={getStatusBadge(item.claim_status)}
+                        buttonText="View Claim"
+                        buttonAction={() => openClaimantModal(item)}
+                      />
+                    ))
+                  )}
+                </div>
+              )}
+
+              {/* Samaritan Tab */}
+              {activeTab === 'samaritan' && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                  {loading ? (
+                    Array.from({ length: 6 }).map((_, i) => <ClaimCardSkeleton key={i} />)
+                  ) : samaritanItems.length === 0 ? (
+                    <p className="col-span-full text-on-surface-variant text-center py-8">
+                      No pending claims on your items.
+                    </p>
+                  ) : (
+                    samaritanItems.map((item, idx) => (
+                      <ClaimCard
+                        key={item.id || `samaritan-${idx}`}
+                        item={item}
+                        badge={
+                          <span className="bg-primary text-white px-2 py-1 rounded-full text-xs font-bold">
+                            {item.pending_claims_count} pending
+                          </span>
+                        }
+                        buttonText="Review Claims"
+                        buttonAction={() => setSelectedItem(item)}
+                      />
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Modals (unchanged) */}
       {selectedItem && selectedClaim && (
         <ClaimantItemModal
           isOpen={true}
@@ -472,8 +481,6 @@ export default function Claims() {
           onRefresh={() => window.location.reload()}
         />
       )}
-
-      {/* Samaritan Modal */}
       {selectedItem && !selectedClaim && (
         <SamaritanItemModal
           isOpen={true}
