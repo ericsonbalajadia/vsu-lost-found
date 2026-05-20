@@ -97,7 +97,7 @@ export default function HandshakeModal({ isOpen, onClose, claimId, item, onCompl
         p_samaritan_id: user.user.id,
       });
       if (error) throw error;
-      toast.success('Item marked as resolved. Other claimants have been notified.');
+      toast.success('Item marked as resolved. Other claimants have been notified. You earned +10 reputation!');
       if (onComplete) onComplete();
       onClose();
     } catch (err: any) {
