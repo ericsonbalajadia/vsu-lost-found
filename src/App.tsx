@@ -17,9 +17,7 @@ import Report from './pages/auth/Report'
 import MyItems from './pages/auth/MyItems'
 
 import ClaimantHandshake from './pages/claimant/ClaimantHandshake'
-import ItemDetail from './pages/auth/ItemDetail'
 //import HandshakeConfirmed from './pages/samaritan/HandshakeConfirmed'
-import SamaritanClaimsQueue from './pages/samaritan/SamaritanClaimsQueue'
 // import SamaritanItemDetail from './pages/samaritan/SamaritanItemDetail'
 import MyClaims from './pages/auth/MyClaims';
 import Claims from './pages/auth/Claims';
@@ -50,9 +48,7 @@ export default function App() {
             <Route path="/settings/profile" element={<ProfileSettings />} />
             <Route path="/settings/security" element={<SecuritySettings />} />
             <Route path="/settings/notifications" element={<NotifSettings />} />
-            <Route path="/items/:id" element={<ItemDetail />} />
             {/* <Route path="/user/items/:id" element={<SamaritanItemDetail />} /> */}
-            <Route path="/user/claims" element={<SamaritanClaimsQueue />} />
             {/* <Route path="/user/claims/:id/resolved" element={<HandshakeConfirmed />} /> */}
             <Route path="/claims/:id/handshake" element={<ClaimantHandshake />} />
             <Route path="/my-claims" element={<MyClaims />} />
