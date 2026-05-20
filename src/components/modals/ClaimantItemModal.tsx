@@ -1,7 +1,7 @@
 // src/components/modals/ClaimantItemModal.tsx
 import { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
-import { Link } from 'react-router-dom'
+// import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { claimsApi } from '../../api/claimsApi'
 import { formatTime } from '../../utils/formatTime'
@@ -305,14 +305,14 @@ export default function ClaimantItemModal({
                       review your answer manually. Be as specific as possible.
                     </p>
                   </div>
-                  <div className="flex items-start gap-2">
+                  {/* <div className="flex items-start gap-2">
                     <span className="material-symbols-outlined text-[14px] md:text-[16px] text-primary">
                       schedule
                     </span>
                     <p>
                       If your claim is accepted, you will see the Samaritan's contact details here.
                     </p>
-                  </div>
+                  </div> */}
                   {isPending && (
                     <div className="flex items-start gap-2">
                       <span className="material-symbols-outlined text-[14px] md:text-[16px] text-amber-500">
@@ -323,7 +323,7 @@ export default function ClaimantItemModal({
                   )}
                 </div>
 
-                {isAccepted && (
+                {/* {isAccepted && (
                   <Link
                     to={`/claims/${claim.id}/handshake`}
                     onClick={onClose}
@@ -331,7 +331,7 @@ export default function ClaimantItemModal({
                   >
                     View Samaritan Contact →
                   </Link>
-                )}
+                )} */}
 
                 {isDeclined && (
                   <a
