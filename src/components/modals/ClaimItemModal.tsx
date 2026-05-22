@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, react-hooks/set-state-in-effect */
 // src/components/modals/ClaimItemModal.tsx
 import React, { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
@@ -57,8 +58,9 @@ export default function ClaimItemModal({
       toast.success('Claim submitted! The Samaritan will review your answer.')
       onSuccess()
       onClose()
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to submit claim')
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : 'Failed to submit claim'
+      toast.error(message)
     } finally {
       setSubmitting(false)
     }

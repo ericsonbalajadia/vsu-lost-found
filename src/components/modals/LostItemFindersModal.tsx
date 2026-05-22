@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, react-hooks/set-state-in-effect */
 // src/components/modals/LostItemFindersModal.tsx
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'

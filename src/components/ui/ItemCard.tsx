@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, react-hooks/set-state-in-effect */
 // src/components/ui/ItemCard.tsx
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'

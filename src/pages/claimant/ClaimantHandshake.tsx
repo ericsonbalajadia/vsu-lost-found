@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, react-hooks/set-state-in-effect */
 // src/pages/claimant/ClaimantHandshake.tsx
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';

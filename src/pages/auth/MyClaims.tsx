@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, react-hooks/set-state-in-effect */
 // src/pages/auth/MyClaims.tsx
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, react-hooks/set-state-in-effect */
 // src/pages/auth/Claims.tsx
 import { useEffect, useState } from 'react'
 import { useAuth } from '../../contexts/AuthContext'

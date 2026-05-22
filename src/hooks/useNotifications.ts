@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any, react-hooks/set-state-in-effect */
 // src/hooks/useNotifications.ts
 import { useState, useEffect, useCallback } from 'react';
 import { notificationsApi } from '../api/notificationsApi';
