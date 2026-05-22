@@ -21,6 +21,7 @@ import ClaimantHandshake from './pages/claimant/ClaimantHandshake'
 // import SamaritanItemDetail from './pages/samaritan/SamaritanItemDetail'
 import MyClaims from './pages/auth/MyClaims';
 import Claims from './pages/auth/Claims';
+import NotFound from './pages/NotFound';
 
 import { Toaster } from 'react-hot-toast'
 
@@ -29,10 +30,22 @@ import { Toaster } from 'react-hot-toast'
 //   <div className="p-8 text-center font-headline text-2xl">Browse — Phase 3</div>
 // )
 
+const AdminStub = () => (
+  <div className="min-h-screen flex items-center justify-center p-8 text-center">
+    <div>
+      <h1 className="text-2xl font-bold font-headline mb-3">Admin Access</h1>
+      <p className="text-[--color-on-surface-variant] max-w-sm">
+        FoundPath admins manage the platform via{' '}
+        <a href="https://supabase.com/dashboard" target="_blank" rel="noreferrer noopener" className="text-[--color-primary] underline underline-offset-4">Supabase Dashboard</a>.
+      </p>
+    </div>
+  </div>
+);
+
 export default function App() {
   return (
     <>
-      <Toaster position="top-center" toastOptions={{ duration: 4000 }} />
+      <Toaster position="top-center" toastOptions={{ duration: 4000, style: { fontFamily: 'Manrope, sans-serif', fontSize: '14px' } }} />
       <BrowserRouter>
         <Routes>
           {/* Public */}
@@ -57,8 +70,12 @@ export default function App() {
 
           {/* Admin scaffold */}
           <Route element={<AdminGuard />}>
-            <Route path="/admin" element={<div className="p-8">Admin — Phase 5+</div>} />
+            <Route path="/admin" element={<AdminStub />} />
           </Route> 
+
+          <Route path="*" element={<NotFound />} />
+
+
         </Routes>
       </BrowserRouter>
     </>
