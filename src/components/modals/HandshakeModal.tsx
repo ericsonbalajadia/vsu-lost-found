@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, react-hooks/set-state-in-effect */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/components/modals/HandshakeModal.tsx
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';

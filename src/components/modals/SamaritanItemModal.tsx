@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, react-hooks/set-state-in-effect */
 // src/components/modals/SamaritanItemModal.tsx
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { supabase } from '../../lib/supabase'
 import { claimsApi } from '../../api/claimsApi'
@@ -55,36 +55,34 @@ export default function SamaritanItemModal({
   const [privateNotes, setPrivateNotes] = useState<string | null>(null)
   const hasLocation = !!(item.location_lat && item.location_lng)
 
-  const fetchClaims = async () => {
-    setLoading(true)
-    const { data, error } = await supabase
-      .from('claims')
-      .select(
-        `
-        id,
-        ticket_number,
-        answer,
-        status,
-        created_at,
-        profiles!claimant_id (
-          full_name,
-          email,
-          avatar_url,
-          reputation
-        )
-      `
+const fetchClaims = useCallback(async () => {
+  setLoading(true);
+  const { data, error } = await supabase
+    .from('claims')
+    .select(`
+      id,
+      ticket_number,
+      answer,
+      status,
+      created_at,
+      profiles!claimant_id (
+        full_name,
+        email,
+        avatar_url,
+        reputation
       )
-      .eq('item_id', item.id)
-      .in('status', ['pending', 'accepted'])
-      .order('created_at', { ascending: false })
-    if (!error && data) setClaims(data as Claim[])
-    setLoading(false)
-  }
+    `)
+    .eq('item_id', item.id)
+    .in('status', ['pending', 'accepted'])
+    .order('created_at', { ascending: false });
+  if (!error && data) setClaims(data as Claim[]);
+  setLoading(false);
+}, [item.id]);
 
   useEffect(() => {
     if (!isOpen || !item.id) return
     fetchClaims()
-  }, [isOpen, item.id])
+  }, [isOpen, item.id, fetchClaims])
 
   // Fetch samaritan_notes separately (not included in public item data)
   useEffect(() => {

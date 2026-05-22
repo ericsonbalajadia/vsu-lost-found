@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, react-hooks/set-state-in-effect */
 // src/components/ui/ItemCard.tsx
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
@@ -18,6 +17,13 @@ import ItemDetailModal from '../modals/ItemDetailModal'
 interface ItemCardProps {
   item: Item
   onRefresh?: () => void // optional: refetch items after claim submission
+}
+
+interface ExistingClaim {
+  id: string;
+  status: string;
+  ticket_number: string;
+  answer: string;
 }
 
 function formatDate(dateStr: string | null): string {
@@ -41,7 +47,7 @@ export default function ItemCard({ item, onRefresh }: ItemCardProps) {
   const canClaim = item.type === 'found' && item.status === 'active' && !isOwner && !hasPendingClaim
   const canContact = item.type === 'lost' && item.status === 'active' && !isOwner
 
-  const [existingClaim, setExistingClaim] = useState<any>(null)
+  const [existingClaim, setExistingClaim] = useState<ExistingClaim | null>(null)
   const [claimantModalOpen, setClaimantModalOpen] = useState(false)
   const [samaritanModalOpen, setSamaritanModalOpen] = useState(false)
 
@@ -56,7 +62,7 @@ export default function ItemCard({ item, onRefresh }: ItemCardProps) {
         if (data) setHasPendingClaim(true)
       })
     }
-  }, [user, item.id])
+  }, [user, item.id, item.type, item.status])
 
   const handleClaimClick = async () => {
     if (!user) return
@@ -71,7 +77,7 @@ export default function ItemCard({ item, onRefresh }: ItemCardProps) {
         return
       }
       setShowClaimModal(true)
-    } catch (err) {
+    } catch {
       toast.error('Unable to verify claim status.')
     } finally {
       setCheckingClaim(false)

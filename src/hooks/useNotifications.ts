@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, react-hooks/set-state-in-effect */
 // src/hooks/useNotifications.ts
 import { useState, useEffect, useCallback } from 'react';
 import { notificationsApi } from '../api/notificationsApi';
@@ -25,6 +24,7 @@ export function useNotifications() {
 
   useEffect(() => {
     if (!user) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchAll();
     const interval = setInterval(fetchAll, 30000);
     return () => clearInterval(interval);

@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, react-hooks/set-state-in-effect */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/components/modals/EditClaimModal.tsx
 import { useState } from 'react';
 import { createPortal } from 'react-dom';

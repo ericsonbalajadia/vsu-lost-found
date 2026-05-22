@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, react-hooks/set-state-in-effect */
 // src/pages/auth/MyClaims.tsx
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../contexts/AuthContext';
 import { supabase } from '../../lib/supabase';
@@ -29,46 +29,33 @@ export default function MyClaims() {
   const [loading, setLoading] = useState(true);
   const [editingClaim, setEditingClaim] = useState<{ id: string; answer: string } | null>(null);
 
-  const fetchClaims = async () => {
-    if (!user) return;
-    const { data, error } = await supabase
-      .from('claims')
-      .select(`
-        id,
-        ticket_number,
-        answer,
-        status,
-        created_at,
-        items!inner (
-          id,
-          title,
-          reference_number,
-          image_url,
-          type
-        )
-      `)
-      .eq('claimant_id', user.id)
-      .order('created_at', { ascending: false });
-
-    if (!error && data) {
-      const transformed = (data as any[]).map((claim) => ({
-        ...claim,
-        items: claim.items?.[0] ?? {
-          id: '',
-          title: '',
-          reference_number: '',
-          image_url: null,
-          type: '',
-        },
-      }));
-      setClaims(transformed as ClaimWithItem[]);
-    }
-    setLoading(false);
-  };
+const fetchClaims = useCallback(async () => {
+  if (!user) return;
+  const { data, error } = await supabase
+    .from('claims')
+    .select(`
+      id,
+      ticket_number,
+      answer,
+      status,
+      created_at,
+      items!inner (id, title, reference_number, image_url, type)
+    `)
+    .eq('claimant_id', user.id)
+    .order('created_at', { ascending: false });
+  if (!error && data) {
+    const transformed = (data as any[]).map((c) => ({
+      ...c,
+      items: c.items?.[0] ?? {},
+    }));
+    setClaims(transformed);
+  }
+  setLoading(false);
+}, [user]);
 
   useEffect(() => {
     fetchClaims();
-  }, [user]);
+  }, [fetchClaims]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
