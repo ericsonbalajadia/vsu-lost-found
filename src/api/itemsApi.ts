@@ -68,4 +68,34 @@ export const itemsApi = {
   async getInsights(building: string) {
     return supabase.rpc('get_location_insights', { p_building: building })
   },
+
+  async delete(itemId: string) {
+    return supabase.from('items').delete().eq('id', itemId)
+  },
+
+  // Reporter can update their own active item's details (unused in Phase 5, kept for future)
+  async update(
+    itemId: string,
+    payload: Partial<
+      Pick<
+        CreateItemPayload,
+        | 'title'
+        | 'description'
+        | 'category'
+        | 'location_lat'
+        | 'location_lng'
+        | 'location_name'
+        | 'location_building'
+        | 'incident_date'
+        | 'incident_time'
+      >
+    >
+  ) {
+    return supabase
+      .from('items')
+      .update({ ...payload, updated_at: new Date().toISOString() })
+      .eq('id', itemId)
+      .select('id, title, status, updated_at')
+      .single()
+  },
 }
