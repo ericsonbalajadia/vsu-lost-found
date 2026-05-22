@@ -49,6 +49,16 @@
   --radius: 0.25rem;
   --radius-xl: 0.75rem;
   --radius-full: 9999px;
+
+  --color-success:            #15803d;   /* green-700 */
+  --color-success-container:  #dcfce7;   /* green-100 */
+  --color-on-success:         #ffffff;
+  --color-on-success-container: #14532d;
+
+  --color-warning:            #c2410c;   /* orange-700 */
+  --color-warning-container:  #ffedd5;   /* orange-100 */
+  --color-on-warning:         #ffffff;
+  --color-on-warning-container: #7c2d12;
 }
 
 /* Your custom light/dark variables (keep these) */
