@@ -7,10 +7,11 @@ import { storageApi } from '../../api/storageApi'
 import { supabase } from '../../lib/supabase'
 import LocationPicker from '../../components/forms/LocationPicker'
 import type { LocationData } from '../../components/forms/LocationPicker'
-import type { ItemCategory, ItemType, CreateItemPayload } from '../../types/database'
+import type { ItemCategory, ItemType, CreateItemPayload, Item } from '../../types/database'
 import AuthenticatedLayout from '../../components/layout/AuthenticatedLayout'
 import CustomSelect from '../../components/ui/CustomSelect'
 import Breadcrumbs from '../../components/ui/Breadcrumbs'
+import ItemDetailModal from '../../components/modals/ItemDetailModal'
 
 const CATEGORIES: ItemCategory[] = [
   'Electronics',
@@ -58,6 +59,10 @@ export default function Report() {
   const [error, setError] = useState<string | null>(null)
   const [insight, setInsight] = useState<string | null>(null)
   const [validationError, setValidationError] = useState<string | null>(null)
+
+  // Modal for newly created item
+  const [showItemDetailModal, setShowItemDetailModal] = useState(false)
+  const [createdItem, setCreatedItem] = useState<Item | null>(null)
 
   // Revoke all object URLs on unmount
   useEffect(() => {
@@ -172,12 +177,24 @@ export default function Report() {
           .eq('id', newItem.id)
       }
 
-      navigate(`/items/${newItem.id}`)
+      // Fetch the complete item (including joined profile) to pass to modal
+      const { data: fullItem, error: fetchError } = await itemsApi.getById(newItem.id)
+      if (fetchError || !fullItem) throw new Error('Failed to fetch created item details')
+
+      // Transform profiles array to object
+      const typedItem = { ...fullItem, profiles: (fullItem as any).profiles?.[0] } as Item
+      setCreatedItem(typedItem)
+      setShowItemDetailModal(true)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Something went wrong. Please try again.')
     } finally {
       setSubmitting(false)
     }
+  }
+
+  const handleModalClose = () => {
+    setShowItemDetailModal(false)
+    navigate('/inventory')
   }
 
   const today = new Date().toISOString().split('T')[0]
@@ -531,31 +548,31 @@ export default function Report() {
                 aria-label="Upload item images"
               />
 
-{/* Thumbnail gallery */}
-{imagePreviews.length > 0 && (
-  <div className="flex flex-wrap gap-2 mt-2">
-    {imagePreviews.map((preview, idx) => (
-      <div
-        key={idx}
-        className="relative w-16 h-16 rounded-md bg-surface-variant/30 border border-outline-variant/20 overflow-hidden group"
-      >
-        <img
-          src={preview}
-          alt={`Preview ${idx + 1}`}
-          className="w-full h-full object-cover"
-        />
-        <button
-          type="button"
-          onClick={() => removeImage(idx)}
-          className="absolute top-0 right-0 w-5 h-5 bg-error/80 text-white rounded-full flex items-center justify-center hover:bg-error transition-colors md:opacity-0 md:group-hover:opacity-100 opacity-100"
-          aria-label="Remove image"
-        >
-          <span className="material-symbols-outlined text-xs">close</span>
-        </button>
-      </div>
-    ))}
-  </div>
-)}
+              {/* Thumbnail gallery */}
+              {imagePreviews.length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {imagePreviews.map((preview, idx) => (
+                    <div
+                      key={idx}
+                      className="relative w-16 h-16 rounded-md bg-surface-variant/30 border border-outline-variant/20 overflow-hidden group"
+                    >
+                      <img
+                        src={preview}
+                        alt={`Preview ${idx + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(idx)}
+                        className="absolute top-0 right-0 w-5 h-5 bg-error/80 text-white rounded-full flex items-center justify-center hover:bg-error transition-colors md:opacity-0 md:group-hover:opacity-100 opacity-100"
+                        aria-label="Remove image"
+                      >
+                        <span className="material-symbols-outlined text-xs">close</span>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
             </section>
 
             {/* Submit Button */}
@@ -585,6 +602,16 @@ export default function Report() {
           </div>
         </form>
       </div>
+
+      {/* Item Detail Modal for the newly created item */}
+      {createdItem && (
+        <ItemDetailModal
+          isOpen={showItemDetailModal}
+          onClose={handleModalClose}
+          item={createdItem}
+          onRefresh={handleModalClose}
+        />
+      )}
     </AuthenticatedLayout>
   )
 }
