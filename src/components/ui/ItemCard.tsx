@@ -1,5 +1,5 @@
 // src/components/ui/ItemCard.tsx
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { formatTime } from '../../utils/formatTime'
@@ -16,7 +16,8 @@ import ItemDetailModal from '../modals/ItemDetailModal'
 
 interface ItemCardProps {
   item: Item
-  onRefresh?: () => void // optional: refetch items after claim submission
+  onRefresh?: () => void
+  onDelete?: (itemId: string) => Promise<void>
 }
 
 interface ExistingClaim {
@@ -35,7 +36,7 @@ function formatDate(dateStr: string | null): string {
   })
 }
 
-export default function ItemCard({ item, onRefresh }: ItemCardProps) {
+export default function ItemCard({ item, onRefresh, onDelete }: ItemCardProps) {
   const { user } = useAuth()
   const navigate = useNavigate()
   const [showClaimModal, setShowClaimModal] = useState(false)
@@ -50,10 +51,14 @@ export default function ItemCard({ item, onRefresh }: ItemCardProps) {
   const [existingClaim, setExistingClaim] = useState<ExistingClaim | null>(null)
   const [claimantModalOpen, setClaimantModalOpen] = useState(false)
   const [samaritanModalOpen, setSamaritanModalOpen] = useState(false)
-
   const [lostFindersModalOpen, setLostFindersModalOpen] = useState(false)
-
   const [itemDetailModalOpen, setItemDetailModalOpen] = useState(false)
+
+  // Kebab menu state
+  const [menuOpen, setMenuOpen] = useState(false)
+  const menuRef = useRef<HTMLDivElement>(null)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   useEffect(() => {
     if (user && item.type === 'found' && item.status === 'active') {
@@ -64,16 +69,25 @@ export default function ItemCard({ item, onRefresh }: ItemCardProps) {
     }
   }, [user, item.id, item.type, item.status])
 
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setMenuOpen(false)
+        setShowDeleteConfirm(false) // also reset delete confirm
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
   const handleClaimClick = async () => {
     if (!user) return
     setCheckingClaim(true)
     try {
       const { data: existingClaim } = await claimsApi.getExistingClaim(item.id, user.id)
       if (existingClaim) {
-        // Optionally, differentiate by status
-        toast.error(
-          'You already have a claim for this item. Please wait for the Samaritan to review it.'
-        )
+        toast.error('You already have a claim for this item. Please wait for the Samaritan to review it.')
         return
       }
       setShowClaimModal(true)
@@ -86,7 +100,7 @@ export default function ItemCard({ item, onRefresh }: ItemCardProps) {
 
   const handleClaimSuccess = () => {
     if (onRefresh) onRefresh()
-    else window.location.reload() // fallback
+    else window.location.reload()
   }
 
   const handleViewDetails = () => {
@@ -97,9 +111,82 @@ export default function ItemCard({ item, onRefresh }: ItemCardProps) {
     }
   }
 
+  const handleDeleteClick = () => {
+    setShowDeleteConfirm(true)
+  }
+
+  const confirmDelete = async () => {
+    if (!onDelete) return
+    setDeleting(true)
+    try {
+      await onDelete(item.id)
+      setMenuOpen(false)
+      setShowDeleteConfirm(false)
+    } finally {
+      setDeleting(false)
+    }
+  }
+
+  const cancelDelete = () => {
+    setShowDeleteConfirm(false)
+  }
+
   return (
     <>
-      <article className="group bg-surface-container-lowest rounded-xl overflow-hidden transition-all duration-300 hover:-translate-y-1 flex flex-col border border-outline-variant/20">
+      <article className="group bg-surface-container-lowest rounded-xl overflow-hidden transition-all duration-300 hover:-translate-y-1 flex flex-col border border-outline-variant/20 relative">
+        {/* Kebab menu (top‑right corner) – only for owner and active items */}
+        {isOwner && item.status === 'active' && onDelete && (
+          <div ref={menuRef} className="absolute top-3 right-3 z-20">
+            <button
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="w-8 h-8 rounded-full bg-white/80 hover:bg-white flex items-center justify-center shadow-sm transition-colors"
+              aria-label="Item actions"
+            >
+              <span className="material-symbols-outlined text-on-surface text-xl">more_vert</span>
+            </button>
+            {menuOpen && (
+              <div className="absolute right-0 mt-1 w-36 bg-white rounded-lg shadow-lg border border-outline-variant/20 overflow-hidden z-30">
+                <div className="py-1">
+                  <button
+                    onClick={handleDeleteClick}
+                    className="w-full px-4 py-2 text-left text-sm text-error hover:bg-error/5 transition-colors flex items-center gap-2"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">delete</span>
+                    Delete
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Delete confirmation overlay (inside card, replacing the menu options) – optional, can be a dialog */}
+        {showDeleteConfirm && (
+          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm z-40 flex items-center justify-center rounded-xl">
+            <div className="bg-white rounded-xl p-4 max-w-[90%] w-64 text-center shadow-xl">
+              <p className="text-sm font-medium mb-3">Delete "{item.title}"?</p>
+              <p className="text-xs text-outline mb-4">This action cannot be undone.</p>
+              <div className="flex gap-2 justify-center">
+                <button
+                  onClick={cancelDelete}
+                  className="px-3 py-1.5 text-xs font-bold rounded-lg bg-surface-container-highest text-on-surface hover:bg-surface-container-high"
+                  disabled={deleting}
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={confirmDelete}
+                  disabled={deleting}
+                  className="px-3 py-1.5 text-xs font-bold rounded-lg text-on-error hover:opacity-90"
+                  style={{ background: 'var(--color-error)' }}
+                >
+                  {deleting ? 'Deleting...' : 'Delete'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Image */}
         <div className="relative h-48 bg-surface-variant overflow-hidden">
           <img
@@ -113,7 +200,7 @@ export default function ItemCard({ item, onRefresh }: ItemCardProps) {
           <StatusRibbon type={item.type} status={item.status} />
         </div>
 
-        {/* Content */}
+        {/* Content (unchanged) */}
         <div className="p-6 space-y-4 flex flex-col flex-grow">
           <div className="space-y-1">
             <div className="flex items-center justify-between">
@@ -159,11 +246,7 @@ export default function ItemCard({ item, onRefresh }: ItemCardProps) {
             <div className="flex items-center gap-2 text-xs text-on-surface-variant">
               <div className="w-5 h-5 rounded-full bg-primary-container overflow-hidden flex-shrink-0">
                 {item.profiles.avatar_url ? (
-                  <img
-                    src={item.profiles.avatar_url}
-                    alt=""
-                    className="w-full h-full object-cover"
-                  />
+                  <img src={item.profiles.avatar_url} alt="" className="w-full h-full object-cover" />
                 ) : (
                   <span className="material-symbols-outlined text-[10px] text-primary flex items-center justify-center h-full">
                     person
@@ -175,10 +258,10 @@ export default function ItemCard({ item, onRefresh }: ItemCardProps) {
             </div>
           )}
 
+          {/* Action buttons area */}
           <div className="mt-auto pt-2">
             {user ? (
               existingClaim ? (
-                // User has a claim on this item (not owner)
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span
@@ -186,8 +269,8 @@ export default function ItemCard({ item, onRefresh }: ItemCardProps) {
                         existingClaim.status === 'pending'
                           ? 'bg-yellow-100 text-yellow-800'
                           : existingClaim.status === 'accepted'
-                            ? 'bg-green-100 text-green-800'
-                            : 'bg-red-100 text-red-800'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-red-100 text-red-800'
                       }`}
                     >
                       {existingClaim.status === 'pending' && 'Claim Pending'}
@@ -215,26 +298,18 @@ export default function ItemCard({ item, onRefresh }: ItemCardProps) {
                   onClick={() => setShowContactModal(true)}
                   className="block w-full py-3 bg-secondary hover:bg-secondary-dim text-on-secondary font-bold rounded-xl text-center text-sm transition-all flex items-center justify-center gap-2"
                 >
-                  <span className="material-symbols-outlined text-sm">contact_mail</span>Contact
-                  Owner
+                  <span className="material-symbols-outlined text-sm">contact_mail</span>
+                  Contact Owner
                 </button>
               ) : isOwner ? (
-                // Owner of the item
-                item.type === 'lost' ? (
+                <div className="space-y-2">
                   <button
-                    onClick={() => setLostFindersModalOpen(true)}
+                    onClick={() => (item.type === 'lost' ? setLostFindersModalOpen(true) : setSamaritanModalOpen(true))}
                     className="block w-full py-3 bg-primary hover:bg-primary-dim text-white font-bold rounded-xl text-center text-sm transition-all"
                   >
-                    Potential Finders
+                    {item.type === 'lost' ? 'Potential Finders' : 'Manage Claims'}
                   </button>
-                ) : (
-                  <button
-                    onClick={() => setSamaritanModalOpen(true)}
-                    className="block w-full py-3 bg-primary hover:bg-primary-dim text-white font-bold rounded-xl text-center text-sm transition-all"
-                  >
-                    Manage Claims
-                  </button>
-                )
+                </div>
               ) : (
                 <button
                   onClick={() => setItemDetailModalOpen(true)}
@@ -286,13 +361,11 @@ export default function ItemCard({ item, onRefresh }: ItemCardProps) {
         item={item}
         onRefresh={onRefresh}
       />
-
       <LostItemFindersModal
         isOpen={lostFindersModalOpen}
         onClose={() => setLostFindersModalOpen(false)}
         item={item}
       />
-
       <ItemDetailModal
         isOpen={itemDetailModalOpen}
         onClose={() => setItemDetailModalOpen(false)}

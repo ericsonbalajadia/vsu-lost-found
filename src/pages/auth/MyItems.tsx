@@ -8,6 +8,7 @@ import type { Item } from '../../types/database'
 import ItemCard from '../../components/ui/ItemCard'
 import { getSkeletonCards } from '../../components/ui/SkeletonLoader'
 import AuthenticatedLayout from '../../components/layout/AuthenticatedLayout'
+import { toast } from 'react-hot-toast'
 
 type TabKey = 'all' | 'found' | 'lost' | 'resolved'
 
@@ -50,6 +51,20 @@ export default function MyItems() {
       return true
     })
     .filter((item) => item.title.toLowerCase().includes(searchTerm.toLowerCase()))
+
+// Inside the component, add the delete handler:
+const handleDeleteItem = async (itemId: string) => {
+  const { error } = await itemsApi.delete(itemId);
+  if (error) {
+    toast.error('Cannot delete: this item may have active claims.', { duration: 5000 });
+    throw error; // let ItemCard know it failed
+  } else {
+    toast.success('Item deleted.');
+    // Remove from local state
+    setItems(prev => prev.filter(i => i.id !== itemId));
+  }
+};
+
 
   return (
     <AuthenticatedLayout>
@@ -131,7 +146,9 @@ export default function MyItems() {
                     <p className="text-on-surface-variant">No items match your current filter.</p>
                   </div>
                 ) : (
-                  filteredItems.map((item) => <ItemCard key={item.id} item={item} />)
+                  filteredItems.map((item) => (
+  <ItemCard key={item.id} item={item} onDelete={handleDeleteItem} />
+))
                 )}
               </div>
             </div>
