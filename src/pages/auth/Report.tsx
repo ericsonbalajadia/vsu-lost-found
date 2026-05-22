@@ -76,12 +76,12 @@ export default function Report() {
     }
   }, [])
 
-  useEffect(() => {
-    if (location?.building && location.building !== building) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      handleBuildingChange(location.building)
-    }
-  }, [location, building, handleBuildingChange])
+  // useEffect(() => {
+  //   if (location?.building && location.building !== building) {
+  //     // eslint-disable-next-line react-hooks/set-state-in-effect
+  //     handleBuildingChange(location.building)
+  //   }
+  // }, [location, building, handleBuildingChange])
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || [])

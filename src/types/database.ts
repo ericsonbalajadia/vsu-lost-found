@@ -25,29 +25,29 @@ export interface Profile {
 }
 
 export interface Item {
-  id: string
-  reporter_id: string
-  reference_number: string
-  title: string
-  description: string | null
-  category: ItemCategory
-  type: ItemType
-  status: ItemStatus
-  location_lat: number | null
-  location_lng: number | null
-  location_name: string | null
-  location_building: string | null
-  incident_date: string | null
-  incident_time: string | null
-  security_question: string | null
-  // samaritan_notes intentionally omitted – never selected in public queries
-  image_url: string | null
-  image_urls: string[] | null
-  matched_item_id: string | null
-  created_at: string
-  updated_at: string
+  id: string;
+  reporter_id: string;
+  reference_number: string;
+  title: string;
+  description: string | null;
+  category: ItemCategory;
+  type: ItemType;
+  status: ItemStatus;
+  location_lat: number | null;
+  location_lng: number | null;
+  location_name: string | null;
+  location_building: string | null;
+  incident_date: string | null;
+  incident_time: string | null;
+  security_question: string | null;
+  samaritan_notes: string | null;     
+  image_url: string | null;
+  image_urls: string[] | null;
+  matched_item_id: string | null;
+  created_at: string;
+  updated_at: string;
   // Joined fields
-  profiles?: Pick<Profile, 'full_name' | 'reputation' | 'avatar_url' | 'campus_building'>
+  profiles?: Pick<Profile, 'full_name' | 'reputation' | 'avatar_url' | 'campus_building'>;
 }
 
 export interface CreateItemPayload {
@@ -90,4 +90,40 @@ export type NotifType =
 
 export interface RawItemWithProfileArray extends Omit<Item, 'profiles'> {
   profiles: Profile[] | null;
+}
+
+export interface Claim {
+  id: string;
+  item_id: string;
+  claimant_id: string;
+  ticket_number: string;
+  answer: string;
+  status: ClaimStatus;
+  reviewed_by: string | null;
+  reviewed_at: string | null;
+  created_at: string;
+  // joined fields
+  profiles?: Pick<Profile, 'id' | 'full_name' | 'email' | 'phone' | 'avatar_url' | 'reputation'>;
+  items?: Pick<Item, 'id' | 'title' | 'reference_number' | 'type' | 'status' | 'security_question' | 'samaritan_notes' | 'image_url' | 'reporter_id'>;
+}
+
+export interface Notification {
+  id: string;
+  user_id: string;
+  type: NotifType;
+  title: string;
+  body: string | null;
+  related_item_id: string | null;
+  is_read: boolean;
+  created_at: string;
+}
+
+export interface LostItemFinder {
+  id: string;
+  lost_item_id: string;
+  finder_id: string;
+  message: string | null;
+  created_at: string;
+  // joined fields
+  finder?: Profile;
 }

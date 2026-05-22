@@ -5,6 +5,7 @@ import type { CreateItemPayload, ItemCategory, ItemType } from '../types/databas
 // SAFE FIELDS — never select samaritan_notes in public queries
 const PUBLIC_ITEM_FIELDS = `
   id, reference_number, title, description, category, type, status,
+  reporter_id, 
   location_lat, location_lng, location_name, location_building,
   incident_date, incident_time, security_question, image_url, image_urls,
   created_at, updated_at,
@@ -24,36 +25,34 @@ export const itemsApi = {
     let query = supabase
       .from('items')
       .select(PUBLIC_ITEM_FIELDS)
-      .eq('status', 'active')
+      .in('status', ['active', 'negotiation']) //include both active and negotiation
       .order('created_at', { ascending: false })
 
-    if (filters?.type)     query = query.eq('type', filters.type)
+    if (filters?.type) query = query.eq('type', filters.type)
     if (filters?.category) query = query.eq('category', filters.category)
     if (filters?.search) {
       query = query.ilike('title', `%${filters.search}%`)
     }
-    if (filters?.limit)    query = query.limit(filters.limit)
+    if (filters?.limit) query = query.limit(filters.limit)
 
     return query
   },
 
   // Single item detail — uses maybeSingle() to avoid hanging
   async getById(id: string) {
-    return supabase
-      .from('items')
-      .select(PUBLIC_ITEM_FIELDS)
-      .eq('id', id)
-      .maybeSingle()
+    return supabase.from('items').select(PUBLIC_ITEM_FIELDS).eq('id', id).maybeSingle()
   },
 
   // Reporter's own items — includes samaritan_notes for Samaritan view
   async getMyItems(userId: string) {
     return supabase
       .from('items')
-      .select(`
+      .select(
+        `
         ${PUBLIC_ITEM_FIELDS},
         samaritan_notes
-      `)
+      `
+      )
       .eq('reporter_id', userId)
       .order('created_at', { ascending: false })
   },
