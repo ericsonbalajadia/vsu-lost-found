@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any, react-hooks/set-state-in-effect */
 // src/components/modals/ClaimItemModal.tsx
+/* eslint-disable @typescript-eslint/no-explicit-any, react-hooks/set-state-in-effect */
 import React, { useState, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { MapContainer, TileLayer, Marker } from 'react-leaflet'
