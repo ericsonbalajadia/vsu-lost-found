@@ -55,9 +55,9 @@ export default function ProfileSettings() {
   // Populate form when profile loads
   useEffect(() => {
     if (profile) {
-      setFullName(profile.full_name)
+      setFullName(profile.full_name ?? '')
       setPhone(profile.phone ?? '')
-      setBuilding(profile.campus_building)
+      setBuilding(profile.campus_building ?? 'General Campus')
       setBio(profile.bio ?? '')
     }
   }, [profile])
@@ -188,7 +188,7 @@ export default function ProfileSettings() {
                   >
                     remove_circle
                   </span>
-                  −10 if a Samaritan rejects your claim as false
+                  -10 if a Samaritan rejects your claim as false
                 </div>
               </div>
             </div>
