@@ -97,53 +97,53 @@ export default function MyItems() {
           </div>
         </div>
 
-        {/* Sticky search & filter bar matching Inventory layout */}
-        <div className="sticky top-0 z-10 w-full bg-surface-container-lowest border-b border-outline-variant/20 shadow-md transition-all">
-          <div className="flex flex-col md:flex-row gap-4 items-center px-6 md:px-12 py-4 max-w-[1600px] mx-auto">
-            <div className="relative flex-1 w-full group">
-              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">
-                search
-              </span>
-              <input
-                type="text"
-                placeholder="Search your reported items..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 bg-surface-container-highest border-none rounded-2xl focus:ring-2 focus:ring-primary-container focus:bg-surface-container-lowest transition-all text-on-surface placeholder:text-outline"
-              />
-            </div>
-            <div
-              role="tablist"
-              aria-label="Item status filter"
-              className="inline-flex p-1 bg-surface-container-high rounded-full w-full md:w-auto self-stretch md:self-auto"
-            >
-              {tabs.map((tab) => (
-                <button
-                  role="tab"
-                  key={tab.key}
-                  onClick={() => setActiveTab(tab.key)}
-                  className={`flex-1 px-6 py-2 rounded-full text-sm font-headline transition-all ${
-                    activeTab === tab.key
-                      ? 'bg-surface-container-lowest text-primary font-bold shadow-sm'
-                      : 'text-on-surface-variant font-semibold hover:bg-surface-variant/40 hover:text-on-surface'
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
+          {/* Sticky search & filter bar matching Inventory layout */}
+          <div className="sticky top-0 z-10 w-full bg-surface-container-lowest border-b border-outline-variant/20 shadow-md transition-all">
+            <div className="flex flex-col md:flex-row gap-4 items-center px-6 md:px-12 py-4 max-w-[1600px] mx-auto">
+              <div className="relative flex-1 w-full group">
+                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">
+                  search
+                </span>
+                <input
+                  type="text"
+                  placeholder="Search your reported items..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-12 pr-4 py-4 bg-surface-container-highest border-none rounded-2xl focus:ring-2 focus:ring-primary-container focus:bg-surface-container-lowest transition-all text-on-surface placeholder:text-outline"
+                />
+              </div>
+              <div
+                role="tablist"
+                aria-label="Item status filter"
+                className="inline-flex p-1 bg-surface-container-high rounded-full w-full md:w-auto self-stretch md:self-auto"
+              >
+                {tabs.map((tab) => (
+                  <button
+                    role="tab"
+                    key={tab.key}
+                    onClick={() => setActiveTab(tab.key)}
+                    className={`flex-1 px-6 py-2 rounded-full text-sm font-headline transition-all ${
+                      activeTab === tab.key
+                        ? 'bg-surface-container-lowest text-primary font-bold shadow-sm'
+                        : 'text-on-surface-variant font-semibold hover:bg-surface-variant/40 hover:text-on-surface'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
 
         <div className="px-8 md:px-10 pt-8 pb-10">
           <div className="bg-surface-container-low/50 rounded-[2.5rem] border border-outline-variant/10 shadow-soft">
             <div className="p-8 md:p-10">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {/* "Add New Entry" card */}
+                {/* "Add New Entry" card - Hidden on mobile, visible on medium screens and up */}
                 <Link
                   key="add-report-card"
                   to="/report"
-                  className="bg-surface-container-low/30 group rounded-3xl overflow-hidden border-2 border-dashed border-outline-variant/40 hover:border-primary/50 hover:bg-primary/[0.02] transition-all duration-500 flex flex-col items-center justify-center p-8 text-center cursor-pointer min-h-[460px]"
+                  className="bg-surface-container-low/30 group rounded-3xl overflow-hidden border-2 border-dashed border-outline-variant/40 hover:border-primary/50 hover:bg-primary/[0.02] transition-all duration-500 hidden md:flex flex-col items-center justify-center p-8 text-center cursor-pointer min-h-[460px]"
                 >
                   <div className="w-20 h-20 rounded-3xl bg-surface-container flex items-center justify-center text-primary/60 group-hover:scale-110 group-hover:bg-primary group-hover:text-white transition-all duration-500 mb-8 shadow-sm">
                     <span className="material-symbols-outlined text-4xl font-light">

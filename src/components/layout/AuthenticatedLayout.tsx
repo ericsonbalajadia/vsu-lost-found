@@ -49,8 +49,8 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
     <div className="flex h-screen overflow-hidden bg-background">
       {/* Desktop Sidebar */}
       <aside
-        className={`hidden md:flex flex-col h-full bg-surface-container-lowest border-r border-outline-variant/10 shrink-0 transition-all duration-300 ${
-          collapsed ? 'w-20' : 'w-72'
+        className={`hidden md:flex flex-col h-full bg-surface-container-lowest border-r border-outline-variant/30 shrink-0 transition-all duration-300 ${
+          collapsed ? 'w-20' : 'w-60'
         }`}
       >
         <div className={`p-6 mb-2 flex items-center gap-3 ${collapsed ? 'justify-center' : ''}`}>
@@ -61,6 +61,8 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
             </span>
           )}
         </div>
+
+        <div className="px-4 pb-6 border-t border-outline-variant/60 pt-6"></div>
 
         <nav className="flex-1 px-4">
           <ul className="space-y-1.5">
@@ -140,7 +142,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
 
         <div className="p-6">
           <nav
-            className={`px-4 pb-6 border-t border-outline-variant/10 pt-6 ${collapsed ? 'px-0' : ''}`}
+            className={`px-4 pb-6 border-t border-outline-variant/60 pt-6 ${collapsed ? 'px-0' : ''}`}
           >
             <ul className="space-y-1.5">
               <li>
