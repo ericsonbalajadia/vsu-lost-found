@@ -6,6 +6,7 @@ import { useAuth } from '../../../contexts/AuthContext'
 import { profilesApi } from '../../../api/profilesApi'
 import type { UpdateProfilePayload } from '../../../types/api'
 import ReputationBadge from '../../../components/ui/ReputationBadge'
+import AvatarModal from '../../../components/modals/AvatarModal'
 
 // Skeleton component defined at top level (no render-time creation)
 const ProfileSkeleton = () => (
@@ -52,6 +53,8 @@ export default function ProfileSettings() {
   const [saved, setSaved] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const [avatarModalOpen, setAvatarModalOpen] = useState(false)
+
   // Populate form when profile loads
   useEffect(() => {
     if (profile) {
@@ -94,6 +97,13 @@ export default function ProfileSettings() {
 
   return (
     <SidebarSettings>
+      <AvatarModal
+        isOpen={avatarModalOpen}
+        onClose={() => setAvatarModalOpen(false)}
+        onSuccess={() => {
+          // refresh profile (already handled by refreshProfile in modal)
+        }}
+      />
       <div id="main-content" className="w-full space-y-10">
         {/* Page Header */}
         <div className="space-y-2">
@@ -130,7 +140,10 @@ export default function ProfileSettings() {
                 {profile.full_name}
               </h3>
               <p className="text-sm text-on-surface-variant font-medium mb-6">{profile.email}</p>
-              <button className="w-full py-3 px-6 bg-surface-container-highest text-on-surface font-semibold rounded-xl hover:bg-surface-container-high transition-colors text-sm">
+              <button
+                onClick={() => setAvatarModalOpen(true)}
+                className="w-full py-3 px-6 bg-surface-container-highest text-on-surface font-semibold rounded-xl hover:bg-surface-container-high transition-colors text-sm"
+              >
                 Change Avatar
               </button>
             </div>
