@@ -18,6 +18,7 @@ interface ItemCardProps {
   item: Item
   onRefresh?: () => void
   onDelete?: (itemId: string) => Promise<void>
+  onEdit?: (item: Item) => void       
 }
 
 interface ExistingClaim {
@@ -36,7 +37,7 @@ function formatDate(dateStr: string | null): string {
   })
 }
 
-export default function ItemCard({ item, onRefresh, onDelete }: ItemCardProps) {
+export default function ItemCard({ item, onRefresh, onDelete, onEdit }: ItemCardProps) {
   const { user } = useAuth()
   const navigate = useNavigate()
   const [showClaimModal, setShowClaimModal] = useState(false)
@@ -74,7 +75,7 @@ export default function ItemCard({ item, onRefresh, onDelete }: ItemCardProps) {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setMenuOpen(false)
-        setShowDeleteConfirm(false) // also reset delete confirm
+        setShowDeleteConfirm(false)
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
@@ -109,6 +110,11 @@ export default function ItemCard({ item, onRefresh, onDelete }: ItemCardProps) {
     } else {
       navigate(`/items/${item.id}`)
     }
+  }
+
+  const handleEdit = () => {
+    if (onEdit) onEdit(item)
+    setMenuOpen(false)
   }
 
   const handleDeleteClick = () => {
@@ -147,6 +153,17 @@ export default function ItemCard({ item, onRefresh, onDelete }: ItemCardProps) {
             {menuOpen && (
               <div className="absolute right-0 mt-1 w-36 bg-white rounded-lg shadow-lg border border-outline-variant/20 overflow-hidden z-30">
                 <div className="py-1">
+                  {/* Edit button */}
+                  {onEdit && (
+                    <button
+                      onClick={handleEdit}
+                      className="w-full px-4 py-2 text-left text-sm text-on-surface hover:bg-surface-container/50 transition-colors flex items-center gap-2"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">edit</span>
+                      Edit
+                    </button>
+                  )}
+                  {/* Delete button */}
                   <button
                     onClick={handleDeleteClick}
                     className="w-full px-4 py-2 text-left text-sm text-error hover:bg-error/5 transition-colors flex items-center gap-2"
@@ -160,7 +177,7 @@ export default function ItemCard({ item, onRefresh, onDelete }: ItemCardProps) {
           </div>
         )}
 
-        {/* Delete confirmation overlay (inside card, replacing the menu options) – optional, can be a dialog */}
+        {/* Delete confirmation overlay (inside card, replacing the menu options) */}
         {showDeleteConfirm && (
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm z-40 flex items-center justify-center rounded-xl">
             <div className="bg-white rounded-xl p-4 max-w-[90%] w-64 text-center shadow-xl">
@@ -200,7 +217,7 @@ export default function ItemCard({ item, onRefresh, onDelete }: ItemCardProps) {
           <StatusRibbon type={item.type} status={item.status} />
         </div>
 
-        {/* Content (unchanged) */}
+        {/* Content */}
         <div className="p-6 space-y-4 flex flex-col flex-grow">
           <div className="space-y-1">
             <div className="flex items-center justify-between">
@@ -258,7 +275,7 @@ export default function ItemCard({ item, onRefresh, onDelete }: ItemCardProps) {
             </div>
           )}
 
-          {/* Action buttons area */}
+          {/* Action buttons area (unchanged) */}
           <div className="mt-auto pt-2">
             {user ? (
               existingClaim ? (
@@ -333,7 +350,7 @@ export default function ItemCard({ item, onRefresh, onDelete }: ItemCardProps) {
         </div>
       </article>
 
-      {/* Modals */}
+      {/* Modals (unchanged) */}
       <ClaimItemModal
         isOpen={showClaimModal}
         onClose={() => setShowClaimModal(false)}
