@@ -52,23 +52,25 @@ export default function MyItems() {
     })
     .filter((item) => item.title.toLowerCase().includes(searchTerm.toLowerCase()))
 
-// Inside the component, add the delete handler:
-const handleDeleteItem = async (itemId: string) => {
-  const { error } = await itemsApi.delete(itemId);
-  if (error) {
-    toast.error('Cannot delete: this item may have active claims.', { duration: 5000 });
-    throw error; // let ItemCard know it failed
-  } else {
-    toast.success('Item deleted.');
-    // Remove from local state
-    setItems(prev => prev.filter(i => i.id !== itemId));
+  // Inside the component, add the delete handler:
+  const handleDeleteItem = async (itemId: string) => {
+    const { error } = await itemsApi.delete(itemId)
+    if (error) {
+      toast.error('Cannot delete: this item may have active claims.', { duration: 5000 })
+      throw error // let ItemCard know it failed
+    } else {
+      toast.success('Item deleted.')
+      // Remove from local state
+      setItems((prev) => prev.filter((i) => i.id !== itemId))
+    }
   }
-};
-
 
   return (
     <AuthenticatedLayout>
-      <div className="flex flex-col h-full w-full max-w-[1400px] mx-auto overflow-hidden">
+      <div
+        id="main-content"
+        className="flex flex-col h-full w-full max-w-[1400px] mx-auto overflow-hidden"
+      >
         <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-12 py-10 md:py-14 px-6 md:px-12 bg-surface shrink-0 z-10">
           <div className="flex-1">
             <h1 className="text-4xl lg:text-5xl font-black tracking-tight text-on-surface mb-6 font-headline">
@@ -91,9 +93,14 @@ const handleDeleteItem = async (itemId: string) => {
                   className="w-full pl-12 pr-4 py-4 bg-surface-container-highest border-none rounded-xl focus:ring-2 focus:ring-primary-container focus:bg-surface-container-lowest transition-all text-on-surface placeholder:text-outline"
                 />
               </div>
-              <div className="inline-flex p-1 bg-surface-container-high rounded-full w-full md:w-auto">
+              <div
+                role="tablist"
+                aria-label="Item status filter"
+                className="inline-flex p-1 bg-surface-container-high rounded-full w-full md:w-auto"
+              >
                 {tabs.map((tab) => (
                   <button
+                    role="tab"
                     key={tab.key}
                     onClick={() => setActiveTab(tab.key)}
                     className={`flex-1 px-6 py-2 rounded-full text-sm font-headline transition-all ${
@@ -147,8 +154,8 @@ const handleDeleteItem = async (itemId: string) => {
                   </div>
                 ) : (
                   filteredItems.map((item) => (
-  <ItemCard key={item.id} item={item} onDelete={handleDeleteItem} />
-))
+                    <ItemCard key={item.id} item={item} onDelete={handleDeleteItem} />
+                  ))
                 )}
               </div>
             </div>

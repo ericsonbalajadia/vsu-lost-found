@@ -47,7 +47,7 @@ export default function Login() {
   };
 
   return (
-    <main className="flex-grow flex flex-col md:flex-row h-screen bg-background">
+    <main id="main-content" className="flex-grow flex flex-col md:flex-row h-screen bg-background">
       {/* Left Hero Section (Desktop Only) */}
       <section className="hidden md:flex md:w-1/2 lg:w-3/5 relative overflow-hidden group">
         <div className="absolute inset-0 bg-primary/40 z-10 transition-colors group-hover:bg-primary/30"></div>

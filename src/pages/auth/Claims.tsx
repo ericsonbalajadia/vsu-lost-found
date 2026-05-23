@@ -44,7 +44,7 @@ function ClaimCard({
 }) {
   const hasLocation = !!(item.location_lat && item.location_lng)
   return (
-    <div className="bg-surface-container-lowest rounded-xl overflow-hidden border border-outline-variant/20 flex flex-col transition-all hover:-translate-y-1 hover:shadow-md">
+    <div id="main-content" className="bg-surface-container-lowest rounded-xl overflow-hidden border border-outline-variant/20 flex flex-col transition-all hover:-translate-y-1 hover:shadow-md">
       {/* Image */}
       <div className="relative h-48 bg-surface-variant overflow-hidden">
         <img
@@ -142,7 +142,7 @@ function ClaimCard({
 // Skeleton loader component for cards
 function ClaimCardSkeleton() {
   return (
-    <div className="bg-surface-container-lowest rounded-xl overflow-hidden border border-outline-variant/20 flex flex-col animate-pulse">
+    <div role="status" aria-live="polite" className="bg-surface-container-lowest rounded-xl overflow-hidden border border-outline-variant/20 flex flex-col animate-pulse">
       <div className="h-48 bg-surface-container-high" />
       <div className="p-5 space-y-3">
         <div className="flex items-center justify-between">

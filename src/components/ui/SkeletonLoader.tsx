@@ -2,7 +2,7 @@
 /* eslint-disable react-refresh/only-export-components */
 export function ItemCardSkeleton() {
   return (
-    <div className="bg-surface-container-lowest rounded-xl overflow-hidden animate-pulse w-full">
+    <div role="status" aria-live="polite" className="bg-surface-container-lowest rounded-xl overflow-hidden animate-pulse w-full">
       <div className="h-48 bg-surface-container-high" />
       <div className="p-6 space-y-4">
         <div className="h-4 bg-surface-container-high rounded w-1/4" />

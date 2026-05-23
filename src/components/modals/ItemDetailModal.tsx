@@ -1,73 +1,92 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, react-hooks/set-state-in-effect */
 // src/components/modals/ItemDetailModal.tsx
-import { useState, useEffect } from 'react';
-import { createPortal } from 'react-dom';
-import { useAuth } from '../../contexts/AuthContext';
-import { claimsApi } from '../../api/claimsApi';
-import { formatTime } from '../../utils/formatTime';
-import ImageCarousel from '../ui/ImageCarousel';
-import { MapContainer, TileLayer, Marker } from 'react-leaflet';
-import L from 'leaflet';
-import 'leaflet/dist/leaflet.css';
-import ClaimItemModal from './ClaimItemModal';
-import ContactOwnerModal from './ContactOwnerModal';
-import ClaimantItemModal from './ClaimantItemModal';
-import SamaritanItemModal from './SamaritanItemModal';
-import LostItemFindersModal from './LostItemFindersModal';
-import type { Item } from '../../types/database';
+import { useState, useEffect, useRef } from 'react'
+import { createPortal } from 'react-dom'
+import { useAuth } from '../../contexts/AuthContext'
+import { claimsApi } from '../../api/claimsApi'
+import { formatTime } from '../../utils/formatTime'
+import ImageCarousel from '../ui/ImageCarousel'
+import { MapContainer, TileLayer, Marker } from 'react-leaflet'
+import L from 'leaflet'
+import 'leaflet/dist/leaflet.css'
+import ClaimItemModal from './ClaimItemModal'
+import ContactOwnerModal from './ContactOwnerModal'
+import ClaimantItemModal from './ClaimantItemModal'
+import SamaritanItemModal from './SamaritanItemModal'
+import LostItemFindersModal from './LostItemFindersModal'
+import type { Item } from '../../types/database'
 
 // Fix Leaflet icon
-delete (L.Icon.Default.prototype as any)._getIconUrl;
+delete (L.Icon.Default.prototype as any)._getIconUrl
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
   iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
   shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-});
+})
 
 interface ItemDetailModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  item: Item;
-  onRefresh?: () => void;
+  isOpen: boolean
+  onClose: () => void
+  item: Item
+  onRefresh?: () => void
 }
 
-export default function ItemDetailModal({ isOpen, onClose, item, onRefresh }: ItemDetailModalProps) {
-  const { user } = useAuth();
-  const [existingClaim, setExistingClaim] = useState<any>(null);
-  const [loadingClaim, setLoadingClaim] = useState(true);
-  const [showClaimModal, setShowClaimModal] = useState(false);
-  const [showContactModal, setShowContactModal] = useState(false);
-  const [showClaimantModal, setShowClaimantModal] = useState(false);
-  const [showSamaritanModal, setShowSamaritanModal] = useState(false);
-  const [showLostFindersModal, setShowLostFindersModal] = useState(false);
+export default function ItemDetailModal({
+  isOpen,
+  onClose,
+  item,
+  onRefresh,
+}: ItemDetailModalProps) {
+  const { user } = useAuth()
+  const [existingClaim, setExistingClaim] = useState<any>(null)
+  const [loadingClaim, setLoadingClaim] = useState(true)
+  const [showClaimModal, setShowClaimModal] = useState(false)
+  const [showContactModal, setShowContactModal] = useState(false)
+  const [showClaimantModal, setShowClaimantModal] = useState(false)
+  const [showSamaritanModal, setShowSamaritanModal] = useState(false)
+  const [showLostFindersModal, setShowLostFindersModal] = useState(false)
 
-  const hasLocation = !!(item.location_lat && item.location_lng);
-  const isOwner = user?.id === item.reporter_id;
+  const hasLocation = !!(item.location_lat && item.location_lng)
+  const isOwner = user?.id === item.reporter_id
+
+  const modalRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (isOpen) {
+      // Small delay ensures the modal is rendered in the DOM before focusing
+      const timer = setTimeout(() => {
+        modalRef.current?.focus()
+      }, 50)
+      return () => clearTimeout(timer)
+    }
+  }, [isOpen])
 
   useEffect(() => {
     if (!isOpen || !user) {
-      setLoadingClaim(false);
-      return;
+      setLoadingClaim(false)
+      return
     }
     const fetchClaim = async () => {
-      setLoadingClaim(true);
-      const { data } = await claimsApi.getExistingClaim(item.id, user.id);
-      setExistingClaim(data);
-      setLoadingClaim(false);
-    };
-    fetchClaim();
-  }, [isOpen, user, item.id]);
+      setLoadingClaim(true)
+      const { data } = await claimsApi.getExistingClaim(item.id, user.id)
+      setExistingClaim(data)
+      setLoadingClaim(false)
+    }
+    fetchClaim()
+  }, [isOpen, user, item.id])
 
   const handleClaimSuccess = () => {
-    if (onRefresh) onRefresh();
-    onClose();
-  };
+    if (onRefresh) onRefresh()
+    onClose()
+  }
 
   const renderActionArea = () => {
     if (!user) {
       return (
         <div className="space-y-4">
-          <p className="text-sm text-on-surface-variant">Sign in to claim this item or contact the owner.</p>
+          <p className="text-sm text-on-surface-variant">
+            Sign in to claim this item or contact the owner.
+          </p>
           <a
             href="/login"
             className="block w-full text-center bg-primary text-white py-3 rounded-xl font-bold"
@@ -75,35 +94,44 @@ export default function ItemDetailModal({ isOpen, onClose, item, onRefresh }: It
             Sign In
           </a>
         </div>
-      );
+      )
     }
 
     if (loadingClaim) {
-      return <div className="text-center py-8 text-outline">Loading...</div>;
+      return <div className="text-center py-8 text-outline">Loading...</div>
     }
 
     if (existingClaim) {
       return (
-        <div className="space-y-4">
+        <div ref={modalRef} tabIndex={-1} className="space-y-4">
           <div className="bg-surface-container-low p-4 rounded-xl">
             <p className="text-sm text-outline">Your claim status</p>
-            <p className={`font-bold mt-1 ${
-              existingClaim.status === 'pending' ? 'text-yellow-600' :
-              existingClaim.status === 'accepted' ? 'text-green-600' : 'text-red-600'
-            }`}>
-              {existingClaim.status === 'pending' ? 'Pending Review' :
-               existingClaim.status === 'accepted' ? 'Accepted' : 'Declined'}
+            <p
+              className={`font-bold mt-1 ${
+                existingClaim.status === 'pending'
+                  ? 'text-yellow-600'
+                  : existingClaim.status === 'accepted'
+                    ? 'text-green-600'
+                    : 'text-red-600'
+              }`}
+            >
+              {existingClaim.status === 'pending'
+                ? 'Pending Review'
+                : existingClaim.status === 'accepted'
+                  ? 'Accepted'
+                  : 'Declined'}
             </p>
             <p className="text-xs text-outline mt-1">Ticket: {existingClaim.ticket_number}</p>
           </div>
           <button
+            aria-label="View details of your claim"
             onClick={() => setShowClaimantModal(true)}
             className="w-full bg-primary text-white py-3 rounded-xl font-bold hover:bg-primary-dim"
           >
             View Your Claim
           </button>
         </div>
-      );
+      )
     }
 
     if (isOwner) {
@@ -112,53 +140,58 @@ export default function ItemDetailModal({ isOpen, onClose, item, onRefresh }: It
           <button
             onClick={() => setShowSamaritanModal(true)}
             className="w-full bg-primary text-white py-3 rounded-xl font-bold hover:bg-primary-dim"
+            aria-label="Manage claims"
           >
             Manage Claims
           </button>
-        );
+        )
       } else {
         return (
           <button
             onClick={() => setShowLostFindersModal(true)}
             className="w-full bg-primary text-white py-3 rounded-xl font-bold hover:bg-primary-dim"
+            aria-label="View potential finders"
           >
             Potential Finders
           </button>
-        );
+        )
       }
     }
 
     if (item.type === 'found' && item.status === 'active') {
       return (
         <button
+          aria-label="Claim this found item"
           onClick={() => setShowClaimModal(true)}
           className="w-full bg-primary text-white py-3 rounded-xl font-bold hover:bg-primary-dim"
         >
           Claim This Item
         </button>
-      );
+      )
     }
 
     if (item.type === 'lost' && item.status === 'active') {
       return (
         <button
+          aria-label="Report found item"
           onClick={() => setShowContactModal(true)}
           className="w-full bg-secondary text-white py-3 rounded-xl font-bold hover:bg-secondary-dim"
         >
           I Found This
         </button>
-      );
+      )
     }
 
-    return <p className="text-sm text-on-surface-variant">This item is no longer available.</p>;
-  };
+    return <p className="text-sm text-on-surface-variant">This item is no longer available.</p>
+  }
 
-  if (!isOpen) return null;
+  if (!isOpen) return null
 
   return createPortal(
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 md:p-8 bg-slate-900/40 backdrop-blur-sm">
       <div className="relative w-full max-w-5xl max-h-[90vh] overflow-hidden bg-white rounded-2xl shadow-2xl flex flex-col md:flex-row">
         <button
+          aria-label="Close item details modal"
           onClick={onClose}
           className="absolute top-3 right-3 md:top-5 md:right-5 z-20 w-7 h-7 md:w-8 md:h-8 rounded-full bg-white/90 backdrop-blur flex items-center justify-center text-slate-500 hover:text-slate-900 hover:bg-white shadow-sm transition-all"
         >
@@ -175,7 +208,11 @@ export default function ItemDetailModal({ isOpen, onClose, item, onRefresh }: It
                 <div className="absolute top-3 left-3 z-10 bg-primary text-white text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded-lg shadow-sm">
                   {item.type === 'found' ? 'Found' : 'Lost'}
                 </div>
-                <img src={item.image_url} alt={item.title} className="w-full aspect-[4/3] object-cover rounded-2xl shadow-sm" />
+                <img
+                  src={item.image_url}
+                  alt={item.title}
+                  className="w-full aspect-[4/3] object-cover rounded-2xl shadow-sm"
+                />
               </div>
             ) : null}
 
@@ -205,15 +242,21 @@ export default function ItemDetailModal({ isOpen, onClose, item, onRefresh }: It
               </div>
               <div>
                 <p className="text-[10px] uppercase text-outline font-bold">Date</p>
-                <p className="font-medium">{item.incident_date ? new Date(item.incident_date).toLocaleDateString() : '—'}</p>
+                <p className="font-medium">
+                  {item.incident_date ? new Date(item.incident_date).toLocaleDateString() : '—'}
+                </p>
               </div>
               <div>
                 <p className="text-[10px] uppercase text-outline font-bold">Time</p>
-                <p className="font-medium">{item.incident_time ? formatTime(item.incident_time) : '—'}</p>
+                <p className="font-medium">
+                  {item.incident_time ? formatTime(item.incident_time) : '—'}
+                </p>
               </div>
               <div className="col-span-2">
                 <p className="text-[10px] uppercase text-outline font-bold">Location</p>
-                <p className="font-medium">{item.location_building || item.location_name || 'Not specified'}</p>
+                <p className="font-medium">
+                  {item.location_building || item.location_name || 'Not specified'}
+                </p>
               </div>
               <div className="col-span-2">
                 <p className="text-[10px] uppercase text-outline font-bold">Reference</p>
@@ -224,7 +267,9 @@ export default function ItemDetailModal({ isOpen, onClose, item, onRefresh }: It
                   <p className="text-[10px] uppercase text-outline font-bold">Reported by</p>
                   <div className="flex items-center gap-2 mt-0.5">
                     <span className="font-medium">{item.profiles.full_name}</span>
-                    <span className="text-primary text-xs font-bold">★ {item.profiles.reputation}</span>
+                    <span className="text-primary text-xs font-bold">
+                      ★ {item.profiles.reputation}
+                    </span>
                   </div>
                 </div>
               )}
@@ -235,7 +280,9 @@ export default function ItemDetailModal({ isOpen, onClose, item, onRefresh }: It
               <div className="rounded-xl overflow-hidden ring-1 ring-outline-variant/10">
                 <div className="px-3 pt-2 pb-1 flex items-center gap-2">
                   <span className="material-symbols-outlined text-primary text-sm">map</span>
-                  <p className="text-[9px] uppercase font-bold text-outline tracking-wider">Location Map</p>
+                  <p className="text-[9px] uppercase font-bold text-outline tracking-wider">
+                    Location Map
+                  </p>
                 </div>
                 <div className="h-32 w-full">
                   <MapContainer
@@ -304,5 +351,5 @@ export default function ItemDetailModal({ isOpen, onClose, item, onRefresh }: It
       )}
     </div>,
     document.body
-  );
+  )
 }

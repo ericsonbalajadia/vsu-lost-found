@@ -1,6 +1,6 @@
 // src/components/modals/ClaimItemModal.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any, react-hooks/set-state-in-effect */
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { MapContainer, TileLayer, Marker } from 'react-leaflet'
 import L from 'leaflet'
@@ -38,6 +38,18 @@ export default function ClaimItemModal({
   const [submitting, setSubmitting] = useState(false)
   const hasLocation = !!(item.location_lat && item.location_lng)
 
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      // Small delay ensures the modal is rendered in the DOM before focusing
+      const timer = setTimeout(() => {
+        modalRef.current?.focus();
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
+
   useEffect(() => {
     if (!isOpen) setAnswer('')
   }, [isOpen])
@@ -69,9 +81,10 @@ export default function ClaimItemModal({
   if (!isOpen) return null
 
   return createPortal(
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 md:p-8 bg-slate-900/40 backdrop-blur-sm">
+    <div ref={modalRef} tabIndex={-1} className="fixed inset-0 z-[60] flex items-center justify-center p-4 md:p-8 bg-slate-900/40 backdrop-blur-sm">
       <div className="relative w-full max-w-4xl max-h-[90vh] overflow-hidden bg-white rounded-2xl shadow-2xl flex flex-col md:flex-row">
         <button
+        aria-label="Close modal"
           onClick={onClose}
           className="absolute top-3 right-3 md:top-5 md:right-5 z-20 w-7 h-7 md:w-8 md:h-8 rounded-full bg-white/90 backdrop-blur flex items-center justify-center text-slate-500 hover:text-slate-900 hover:bg-white shadow-sm transition-all"
         >
@@ -254,6 +267,7 @@ export default function ClaimItemModal({
 
                   <div className="pt-2 space-y-4 md:space-y-6">
                     <button
+                    aria-label="Submit claim answer"
                       type="submit"
                       disabled={submitting}
                       className="group relative w-full py-3 md:py-4 bg-primary hover:bg-primary-dim text-on-primary rounded-2xl font-bold text-sm md:text-base shadow-[0_20px_40px_-12px_rgba(44,91,182,0.3)] hover:shadow-[0_20px_40px_-8px_rgba(44,91,182,0.4)] active:scale-[0.99] transition-all duration-300 overflow-hidden disabled:opacity-60"

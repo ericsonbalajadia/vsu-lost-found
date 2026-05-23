@@ -9,7 +9,7 @@ import ReputationBadge from '../../../components/ui/ReputationBadge'
 
 // Skeleton component defined at top level (no render-time creation)
 const ProfileSkeleton = () => (
-  <div className="animate-pulse space-y-8">
+  <div role="status" aria-live="polite" className="animate-pulse space-y-8">
     <div className="h-8 bg-surface-container-high rounded w-1/3" />
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
       <div className="lg:col-span-4 space-y-6">
@@ -94,7 +94,7 @@ export default function ProfileSettings() {
 
   return (
     <SidebarSettings>
-      <div className="w-full space-y-10">
+      <div id="main-content" className="w-full space-y-10">
         {/* Page Header */}
         <div className="space-y-2">
           <h1 className="text-4xl font-extrabold tracking-tight font-headline text-on-surface">

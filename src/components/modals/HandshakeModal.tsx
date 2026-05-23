@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/components/modals/HandshakeModal.tsx
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { supabase } from '../../lib/supabase';
 import { openEmailThread } from '../../lib/mailto';
@@ -33,6 +33,18 @@ export default function HandshakeModal({ isOpen, onClose, claimId, item, onCompl
   const [loading, setLoading] = useState(true);
   const [resolving, setResolving] = useState(false);
   const hasLocation = !!(item.location_lat && item.location_lng);
+
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      // Small delay ensures the modal is rendered in the DOM before focusing
+      const timer = setTimeout(() => {
+        modalRef.current?.focus();
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen || !claimId) return;
@@ -111,11 +123,12 @@ export default function HandshakeModal({ isOpen, onClose, claimId, item, onCompl
   if (!isOpen) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 md:p-8 bg-slate-900/40 backdrop-blur-sm">
+    <div ref={modalRef} tabIndex={-1} className="fixed inset-0 z-[70] flex items-center justify-center p-4 md:p-8 bg-slate-900/40 backdrop-blur-sm">
       <div className="relative w-full max-w-4xl max-h-[90vh] overflow-hidden bg-white rounded-2xl shadow-2xl flex flex-col md:flex-row">
         {/* Close button */}
         <button
           onClick={onClose}
+          aria-label="Close modal"
           className="absolute top-3 right-3 md:top-5 md:right-5 z-20 w-7 h-7 md:w-8 md:h-8 rounded-full bg-white/90 backdrop-blur flex items-center justify-center text-slate-500 hover:text-slate-900 hover:bg-white shadow-sm transition-all"
         >
           <span className="material-symbols-outlined text-base md:text-xl">close</span>
@@ -274,6 +287,7 @@ export default function HandshakeModal({ isOpen, onClose, claimId, item, onCompl
 
             <div className="space-y-3">
               <button
+              aria-label="Create email thread with claimant"
                 onClick={handleEmail}
                 disabled={!claimant}
                 className="w-full bg-primary hover:bg-primary-dim text-white py-3 md:py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg disabled:opacity-50"
@@ -282,6 +296,7 @@ export default function HandshakeModal({ isOpen, onClose, claimId, item, onCompl
                 Create Email Thread
               </button>
               <button
+                aria-label="Complete handover"
                 onClick={handleCompleteHandover}
                 disabled={resolving || !claimant}
                 className="w-full bg-[#1A73E8] hover:bg-[#1557b0] text-white py-3 md:py-4 rounded-xl font-bold flex items-center justify-center gap-2 transition-all shadow-lg disabled:opacity-50"

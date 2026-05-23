@@ -42,7 +42,7 @@ export default function ClaimantHandshake() {
   });
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <div id="main-content" className="max-w-4xl mx-auto p-6">
       <div className="flex justify-between items-start mb-6">
         <h1 className="text-3xl font-bold">Claim Verified ✅</h1>
         <div className="flex gap-2">
