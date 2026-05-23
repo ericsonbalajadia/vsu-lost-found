@@ -44,7 +44,7 @@ function ClaimCard({
 }) {
   const hasLocation = !!(item.location_lat && item.location_lng)
   return (
-    <div id="main-content" className="bg-surface-container-lowest rounded-xl overflow-hidden border border-outline-variant/20 flex flex-col transition-all hover:-translate-y-1 hover:shadow-md">
+    <div className="bg-surface-container-lowest rounded-xl overflow-hidden border border-outline-variant/20 flex flex-col transition-all hover:-translate-y-1 hover:shadow-md z-0">
       {/* Image */}
       <div className="relative h-48 bg-surface-variant overflow-hidden">
         <img
@@ -345,46 +345,46 @@ export default function Claims() {
 
   return (
     <AuthenticatedLayout>
-      <div className="flex-1 flex flex-col min-h-0">
-        {/* Header (always visible) */}
-        <div className="px-4 sm:px-6 md:px-12 py-6 md:py-10 bg-surface shrink-0">
-        <div className="max-w-7xl mx-auto">
-          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-black text-on-surface tracking-tight mb-2 md:mb-4 font-headline">
-            Claims Center
-          </h1>
-          <p className="text-base sm:text-lg text-on-surface-variant font-medium opacity-80 max-w-3xl">
-            Track and manage all your claim activity. Here you can review items you've claimed,
-            respond to claims on your found items, and coordinate returns.
-          </p>
+      {/* NO CLASSNAME: Frees the layout footprint into full edge-to-edge widescreen */}
+      <div id="main-content" className="flex flex-col w-full">
+        
+        {/* Header Block with full responsive layout spacing */}
+        <div className="px-8 md:px-12 py-10 md:py-14 bg-surface shrink-0">
+          <div className="max-w-[1600px] mx-auto">
+            <h1 className="text-4xl lg:text-5xl font-black text-on-surface tracking-tight mb-6 font-headline">
+              Claims Center
+            </h1>
+            <p className="text-on-surface-variant text-base md:text-lg leading-relaxed opacity-80 max-w-3xl">
+              Track and manage all your claim activity. Here you can review items you've claimed,
+              respond to claims on your found items, and coordinate returns.
+            </p>
+          </div>
         </div>
-      </div>
 
-        {/* Sticky tabs (solid background) – always visible */}
-        <div className="sticky top-0 z-10 bg-surface-container-lowest border-b border-outline-variant/10">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3">
-            <div className="flex flex-wrap gap-2">
+        {/* STICKY SUB-HEADER TAB BAR: Locks clean and solid on window scroll */}
+        <div className="sticky top-0 z-10 w-full bg-surface-container-lowest border-b border-outline-variant/20 shadow-md transition-all">
+          <div className="max-w-[1600px] mx-auto px-8 md:px-12 py-4">
+            <div className="flex flex-wrap gap-3">
               <button
                 onClick={() => setActiveTab('claimant')}
-                className={`flex-1 sm:flex-initial px-4 sm:px-6 py-2 text-sm font-semibold transition-all flex items-center justify-center gap-2 
+                className={`flex-1 sm:flex-initial px-6 py-2.5 text-sm font-bold transition-all flex items-center justify-center gap-2 rounded-full shadow-sm
                   ${
                     activeTab === 'claimant'
-                      ? 'bg-primary text-on-primary shadow-md'
-                      : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
-                  }
-                  rounded-lg md:rounded-full`}
+                      ? 'bg-primary text-on-primary font-bold shadow-md'
+                      : 'text-on-surface-variant bg-surface-container-high/60 hover:bg-surface-container-high hover:text-on-surface'
+                  }`}
               >
                 <span className="material-symbols-outlined text-[18px]">assignment_ind</span>
                 <span className="whitespace-nowrap">Items I Claimed ({claimantItems.length})</span>
               </button>
               <button
                 onClick={() => setActiveTab('samaritan')}
-                className={`flex-1 sm:flex-initial px-4 sm:px-6 py-2 text-sm font-semibold transition-all flex items-center justify-center gap-2 
+                className={`flex-1 sm:flex-initial px-6 py-2.5 text-sm font-bold transition-all flex items-center justify-center gap-2 rounded-full shadow-sm
                   ${
                     activeTab === 'samaritan'
-                      ? 'bg-primary text-on-primary shadow-md'
-                      : 'text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface'
-                  }
-                  rounded-lg md:rounded-full`}
+                      ? 'bg-primary text-on-primary font-bold shadow-md'
+                      : 'text-on-surface-variant bg-surface-container-high/60 hover:bg-surface-container-high hover:text-on-surface'
+                  }`}
               >
                 <span className="material-symbols-outlined text-[18px]">verified_user</span>
                 <span className="whitespace-nowrap">
@@ -395,84 +395,82 @@ export default function Claims() {
           </div>
         </div>
 
-        {/* Scrollable content – skeletons only inside the card grid */}
-        <div className="flex-1 overflow-y-auto px-4 sm:px-6 py-6">
-          <div className="max-w-7xl mx-auto">
-            <div className="bg-surface-container-low/50 rounded-[2.5rem] border border-outline-variant/10 shadow-soft p-6 md:p-10">
-              {/* Helpful note (always visible) */}
-              <div className="mb-6 p-4 bg-primary-container/10 rounded-xl border border-primary/20 flex flex-col sm:flex-row items-start gap-3">
-                <span className="material-symbols-outlined text-primary text-xl shrink-0">
-                  info
-                </span>
-                <div className="text-sm text-on-surface-variant space-y-1">
-                  <p className="font-semibold text-on-surface">Need help?</p>
-                  <p className="text-xs sm:text-sm">
-                    • For items you've claimed: you can edit your answer while the claim is pending.
-                    <br />
-                    • For claims on your items: review claimant answers and decide to accept or
-                    reject.
-                    <br />• Once accepted, exchange contact details via email and mark the item as
-                    resolved.
-                  </p>
-                </div>
+        {/* Outer Grid content area with matching spacious padding configuration */}
+        <div className="px-8 md:px-10 pt-8 pb-10 max-w-[1600px] mx-auto w-full">
+          <div className="bg-surface-container-low/50 rounded-[2.5rem] border border-outline-variant/10 shadow-soft p-8 md:p-10">
+            
+            {/* Helpful instructions banner */}
+            <div className="mb-8 p-5 bg-primary-container/10 rounded-2xl border border-primary/15 flex flex-col sm:flex-row items-start gap-3">
+              <span className="material-symbols-outlined text-primary text-xl shrink-0 mt-0.5">
+                info
+              </span>
+              <div className="text-sm text-on-surface-variant space-y-1">
+                <p className="font-extrabold text-on-surface tracking-wide">Need assistance with your updates?</p>
+                <p className="text-xs sm:text-sm leading-relaxed opacity-90">
+                  • <strong>For items you've claimed:</strong> you can edit your answer while the claim is pending.
+                  <br />
+                  • <strong>For claims on your items:</strong> review claimant answers and decide to accept or reject.
+                  <br />
+                  • Once accepted, exchange contact details via email and mark the item as resolved.
+                </p>
               </div>
-
-              {/* Claimant Tab */}
-              {activeTab === 'claimant' && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                  {loading ? (
-                    // Show skeletons while loading
-                    Array.from({ length: 6 }).map((_, i) => <ClaimCardSkeleton key={i} />)
-                  ) : claimantItems.length === 0 ? (
-                    <p className="col-span-full text-on-surface-variant text-center py-8">
-                      You haven't claimed any items yet.
-                    </p>
-                  ) : (
-                    claimantItems.map((item, idx) => (
-                      <ClaimCard
-                        key={item.id || `claimant-${idx}`}
-                        item={item}
-                        badge={getStatusBadge(item.claim_status)}
-                        buttonText="View Claim"
-                        buttonAction={() => openClaimantModal(item)}
-                      />
-                    ))
-                  )}
-                </div>
-              )}
-
-              {/* Samaritan Tab */}
-              {activeTab === 'samaritan' && (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                  {loading ? (
-                    Array.from({ length: 6 }).map((_, i) => <ClaimCardSkeleton key={i} />)
-                  ) : samaritanItems.length === 0 ? (
-                    <p className="col-span-full text-on-surface-variant text-center py-8">
-                      No pending claims on your items.
-                    </p>
-                  ) : (
-                    samaritanItems.map((item, idx) => (
-                      <ClaimCard
-                        key={item.id || `samaritan-${idx}`}
-                        item={item}
-                        badge={
-                          <span className="bg-primary text-white px-2 py-1 rounded-full text-xs font-bold">
-                            {item.pending_claims_count} pending
-                          </span>
-                        }
-                        buttonText="Review Claims"
-                        buttonAction={() => setSelectedItem(item)}
-                      />
-                    ))
-                  )}
-                </div>
-              )}
             </div>
+
+            {/* Claimant Grid Tab Context */}
+            {activeTab === 'claimant' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {loading ? (
+                  Array.from({ length: 6 }).map((_, i) => <ClaimCardSkeleton key={i} />)
+                ) : claimantItems.length === 0 ? (
+                  <p className="col-span-full text-on-surface-variant text-center py-12 font-medium">
+                    You haven't claimed any items yet.
+                  </p>
+                ) : (
+                  claimantItems.map((item, idx) => (
+                    <ClaimCard
+                      key={item.id || `claimant-${idx}`}
+                      item={item}
+                      badge={getStatusBadge(item.claim_status)}
+                      buttonText="View Claim"
+                      buttonAction={() => openClaimantModal(item)}
+                    />
+                  ))
+                )}
+              </div>
+            )}
+
+            {/* Samaritan Grid Tab Context */}
+            {activeTab === 'samaritan' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {loading ? (
+                  Array.from({ length: 6 }).map((_, i) => <ClaimCardSkeleton key={i} />)
+                ) : samaritanItems.length === 0 ? (
+                  <p className="col-span-full text-on-surface-variant text-center py-12 font-medium">
+                    No pending claims on your items.
+                    </p>
+                ) : (
+                  samaritanItems.map((item, idx) => (
+                    <ClaimCard
+                      key={item.id || `samaritan-${idx}`}
+                      item={item}
+                      badge={
+                        <span className="bg-primary text-white px-2 py-1 rounded-full text-xs font-bold shadow-sm">
+                          {item.pending_claims_count} pending
+                        </span>
+                      }
+                      buttonText="Review Claims"
+                      buttonAction={() => setSelectedItem(item)}
+                    />
+                  ))
+                )}
+              </div>
+            )}
+
           </div>
         </div>
       </div>
 
-      {/* Modals (unchanged) */}
+      {/* Modals contexts */}
       {selectedItem && selectedClaim && (
         <ClaimantItemModal
           isOpen={true}

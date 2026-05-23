@@ -77,7 +77,7 @@ export default function Inventory() {
         <h1 className="text-4xl lg:text-5xl font-black text-on-surface tracking-tight mb-4 font-headline">
           Dashboard Overview
         </h1>
-        <p className="text-on-surface-variant text-lg font-medium opacity-80 max-w-2xl">
+        <p className="text-on-surface-variant text-base md:text-lg leading-relaxed opacity-80 max-w-3xl">
           Get a bird's‑eye view of all campus recovery activities. Track active reports, monitor
           claims, and manage resolutions from a single interface.
         </p>
