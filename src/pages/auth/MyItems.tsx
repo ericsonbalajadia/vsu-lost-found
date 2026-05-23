@@ -8,6 +8,7 @@ import type { Item } from '../../types/database'
 import ItemCard from '../../components/ui/ItemCard'
 import { getSkeletonCards } from '../../components/ui/SkeletonLoader'
 import AuthenticatedLayout from '../../components/layout/AuthenticatedLayout'
+import EditItemModal from '../../components/modals/EditItemModal'
 import { toast } from 'react-hot-toast'
 
 type TabKey = 'all' | 'found' | 'lost' | 'resolved'
@@ -25,22 +26,23 @@ export default function MyItems() {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<TabKey>('all')
   const [searchTerm, setSearchTerm] = useState('')
+  const [editingItem, setEditingItem] = useState<any>(null);
 
-  useEffect(() => {
-    if (!user) return
-    const fetch = async () => {
-      setLoading(true)
-      const { data } = await itemsApi.getMyItems(user.id)
-      const typedItems =
-        (data as any[])?.map((item) => ({
-          ...item,
-          profiles: item.profiles?.[0],
-        })) ?? []
-      setItems(typedItems as Item[])
-      setLoading(false)
-    }
-    fetch()
-  }, [user])
+  const fetchItems = async () => {
+  if (!user) return
+  setLoading(true)
+  const { data } = await itemsApi.getMyItems(user.id)
+  const typedItems = (data as any[])?.map((item) => ({
+    ...item,
+    profiles: item.profiles?.[0],
+  })) ?? []
+  setItems(typedItems as Item[])
+  setLoading(false)
+}
+
+useEffect(() => {
+  fetchItems()
+}, [user])
 
   const filteredItems = items
     .filter((item) => {
@@ -64,6 +66,29 @@ export default function MyItems() {
       setItems((prev) => prev.filter((i) => i.id !== itemId))
     }
   }
+
+  // In MyItems.tsx, inside the component, define a refresh function
+const refreshItems = async () => {
+  setLoading(true);
+  const { data } = await itemsApi.getMyItems(user!.id);
+  const typedItems = (data as any[])?.map((item) => ({
+    ...item,
+    profiles: item.profiles?.[0],
+  })) ?? [];
+  setItems(typedItems as Item[]);
+  setLoading(false);
+};
+
+// Then in the EditItemModal, use it:
+<EditItemModal
+  isOpen={!!editingItem}
+  onClose={() => setEditingItem(null)}
+  item={editingItem}
+  onSuccess={() => {
+    setEditingItem(null);
+    refreshItems(); // ✅ refresh the list
+  }}
+/>
 
   return (
     <AuthenticatedLayout>
@@ -154,7 +179,7 @@ export default function MyItems() {
                   </div>
                 ) : (
                   filteredItems.map((item) => (
-                    <ItemCard key={item.id} item={item} onDelete={handleDeleteItem} />
+                    <ItemCard key={item.id} item={item} onDelete={handleDeleteItem} onEdit={setEditingItem} />
                   ))
                 )}
               </div>
@@ -162,6 +187,16 @@ export default function MyItems() {
           </div>
         </div>
       </div>
+
+      <EditItemModal
+  isOpen={!!editingItem}
+  onClose={() => setEditingItem(null)}
+  item={editingItem}
+  onSuccess={() => {
+    setEditingItem(null);
+    refreshItems(); // refresh list
+  }}
+/>
     </AuthenticatedLayout>
   )
 }
