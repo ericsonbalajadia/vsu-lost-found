@@ -28,7 +28,6 @@ export default function MyItems() {
   const [searchTerm, setSearchTerm] = useState('')
   const [editingItem, setEditingItem] = useState<any>(null)
 
-  // Define fetchItems with useCallback
   const fetchItems = useCallback(async () => {
     if (!user) return
     setLoading(true)
@@ -43,7 +42,6 @@ export default function MyItems() {
   }, [user])
 
   useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchItems()
   }, [fetchItems])
 
@@ -57,20 +55,17 @@ export default function MyItems() {
     })
     .filter((item) => item.title.toLowerCase().includes(searchTerm.toLowerCase()))
 
-  // Inside the component, add the delete handler:
   const handleDeleteItem = async (itemId: string) => {
     const { error } = await itemsApi.delete(itemId)
     if (error) {
       toast.error('Cannot delete: this item may have active claims.', { duration: 5000 })
-      throw error // let ItemCard know it failed
+      throw error
     } else {
       toast.success('Item deleted.')
-      // Remove from local state
       setItems((prev) => prev.filter((i) => i.id !== itemId))
     }
   }
 
-  // In MyItems.tsx, inside the component, define a refresh function
   const refreshItems = async () => {
     setLoading(true)
     const { data } = await itemsApi.getMyItems(user!.id)
@@ -83,24 +78,13 @@ export default function MyItems() {
     setLoading(false)
   }
 
-  // Then in the EditItemModal, use it:
-  ;<EditItemModal
-    isOpen={!!editingItem}
-    onClose={() => setEditingItem(null)}
-    item={editingItem}
-    onSuccess={() => {
-      setEditingItem(null)
-      refreshItems() // ✅ refresh the list
-    }}
-  />
-
   return (
     <AuthenticatedLayout>
       <div
         id="main-content"
-        className="flex flex-col h-full w-full max-w-[1400px] mx-auto overflow-hidden"
       >
-        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-12 py-10 md:py-14 px-6 md:px-12 bg-surface shrink-0 z-10">
+        {/* Page header title details */}
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-12 py-10 md:py-14 px-8 md:px-12 bg-surface shrink-0">
           <div className="flex-1">
             <h1 className="text-4xl lg:text-5xl font-black tracking-tight text-on-surface mb-6 font-headline">
               My Reported Items
@@ -109,48 +93,52 @@ export default function MyItems() {
               Monitor the status of your campus reports. Track claims, update details, or finalize
               resolutions in one centralized dashboard.
             </p>
-            <div className="mt-10 flex flex-col md:flex-row gap-4 items-center">
-              <div className="relative flex-1 w-full group">
-                <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">
-                  search
-                </span>
-                <input
-                  type="text"
-                  placeholder="Search your reported items..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-12 pr-4 py-4 bg-surface-container-highest border-none rounded-xl focus:ring-2 focus:ring-primary-container focus:bg-surface-container-lowest transition-all text-on-surface placeholder:text-outline"
-                />
-              </div>
-              <div
-                role="tablist"
-                aria-label="Item status filter"
-                className="inline-flex p-1 bg-surface-container-high rounded-full w-full md:w-auto"
-              >
-                {tabs.map((tab) => (
-                  <button
-                    role="tab"
-                    key={tab.key}
-                    onClick={() => setActiveTab(tab.key)}
-                    className={`flex-1 px-6 py-2 rounded-full text-sm font-headline transition-all ${
-                      activeTab === tab.key
-                        ? 'bg-surface-container-lowest text-primary font-bold shadow-sm'
-                        : 'text-on-surface-variant font-semibold hover:bg-surface-variant/40 hover:text-on-surface'
-                    }`}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
+          </div>
+        </div>
+
+        {/* Sticky search & filter bar matching Inventory layout */}
+        <div className="sticky top-0 z-10 w-full bg-surface-container-lowest border-b border-outline-variant/20 shadow-md transition-all">
+          <div className="flex flex-col md:flex-row gap-4 items-center px-6 md:px-12 py-4 max-w-[1600px] mx-auto">
+            <div className="relative flex-1 w-full group">
+              <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">
+                search
+              </span>
+              <input
+                type="text"
+                placeholder="Search your reported items..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-12 pr-4 py-4 bg-surface-container-highest border-none rounded-2xl focus:ring-2 focus:ring-primary-container focus:bg-surface-container-lowest transition-all text-on-surface placeholder:text-outline"
+              />
+            </div>
+            <div
+              role="tablist"
+              aria-label="Item status filter"
+              className="inline-flex p-1 bg-surface-container-high rounded-full w-full md:w-auto self-stretch md:self-auto"
+            >
+              {tabs.map((tab) => (
+                <button
+                  role="tab"
+                  key={tab.key}
+                  onClick={() => setActiveTab(tab.key)}
+                  className={`flex-1 px-6 py-2 rounded-full text-sm font-headline transition-all ${
+                    activeTab === tab.key
+                      ? 'bg-surface-container-lowest text-primary font-bold shadow-sm'
+                      : 'text-on-surface-variant font-semibold hover:bg-surface-variant/40 hover:text-on-surface'
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
             </div>
           </div>
         </div>
 
-        <div className="flex-1 px-6 md:px-10 pb-10 overflow-hidden">
-          <div className="h-full bg-surface-container-low/50 rounded-[2.5rem] border border-outline-variant/10 shadow-soft overflow-y-auto">
-            <div className="p-8 md:p-12">
+        <div className="px-8 md:px-10 pt-8 pb-10">
+          <div className="bg-surface-container-low/50 rounded-[2.5rem] border border-outline-variant/10 shadow-soft">
+            <div className="p-8 md:p-10">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                {/* "Add New Entry" card – always visible */}
+                {/* "Add New Entry" card */}
                 <Link
                   key="add-report-card"
                   to="/report"
@@ -203,7 +191,7 @@ export default function MyItems() {
         item={editingItem}
         onSuccess={() => {
           setEditingItem(null)
-          refreshItems() // refresh list
+          refreshItems()
         }}
       />
     </AuthenticatedLayout>
