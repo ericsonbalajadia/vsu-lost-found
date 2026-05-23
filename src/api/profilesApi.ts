@@ -54,11 +54,14 @@ async updateProfile(userId: string, payload: UpdateProfilePayload) {
     const ext = file.name.split('.').pop()
     const path = `${userId}/avatar.${ext}`
 
+    // Delete old avatar if exists (optional but keeps storage clean)
+    await supabase.storage.from('avatars').remove([path]);
+
     const { error } = await supabase.storage
       .from('avatars')
       .upload(path, file, { upsert: true })
 
-    if (error) throw error
+    if (error) throw new Error(`Avatar upload failed: ${error.message}`);
 
     const { data } = supabase.storage
       .from('avatars')
@@ -66,4 +69,30 @@ async updateProfile(userId: string, payload: UpdateProfilePayload) {
 
     return data.publicUrl
   },
+
+  async removeAvatar(userId: string) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('avatar_url')
+      .eq('id', userId)
+      .single();
+
+    if (profile?.avatar_url) {
+      // Extract path from URL (e.g., .../avatars/user-id/avatar.jpg)
+      const url = new URL(profile.avatar_url);
+      const path = url.pathname.split('/avatars/')[1];
+      if (path) {
+        await supabase.storage.from('avatars').remove([path]);
+      }
+    }
+
+    return supabase
+      .from('profiles')
+      .update({ avatar_url: null })
+      .eq('id', userId);
+  },
+
+
+
+  
 }
