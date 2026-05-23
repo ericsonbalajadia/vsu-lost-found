@@ -75,33 +75,60 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
           )}
         </div>
 
-        <nav className="flex-1 px-4">
-          <ul className="space-y-1.5">
-            {navItems.slice(0, 2).map(item => {
-              const active = isActive(item.path);
-              return (
-                <li key={item.path}>
-                  <Link
-                    to={item.path}
-                    className={`flex items-center px-4 py-3 gap-3 rounded-xl transition-all duration-200 font-headline font-semibold text-sm ${
-                      active
-                        ? 'bg-primary/10 text-primary'
-                        : 'text-on-surface-variant hover:text-primary hover:bg-primary/5'
-                    } ${collapsed ? 'justify-center' : ''}`}
-                  >
-                    <span
-                      className="material-symbols-outlined"
-                      style={active ? { fontVariationSettings: "'FILL' 1" } : undefined}
-                    >
-                      {item.icon}
-                    </span>
-                    {!collapsed && <span>{item.label}</span>}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
+<nav className="flex-1 px-4">
+  <ul className="space-y-1.5">
+    {/* Dashboard */}
+    <li>
+      <Link
+        to="/inventory"
+        className={`flex items-center px-4 py-3 gap-3 rounded-xl transition-all duration-200 font-headline font-semibold text-sm ${
+          location.pathname === '/inventory'
+            ? 'bg-primary/10 text-primary'
+            : 'text-on-surface-variant hover:text-primary hover:bg-primary/5'
+        } ${collapsed ? 'justify-center' : ''}`}
+      >
+        <span className="material-symbols-outlined" style={location.pathname === '/inventory' ? { fontVariationSettings: "'FILL' 1" } : undefined}>
+          dashboard
+        </span>
+        {!collapsed && <span>Dashboard</span>}
+      </Link>
+    </li>
+
+    {/* Claims */}
+    <li>
+      <Link
+        to="/claims"
+        className={`flex items-center px-4 py-3 gap-3 rounded-xl transition-all duration-200 font-headline font-semibold text-sm ${
+          location.pathname === '/claims'
+            ? 'bg-primary/10 text-primary'
+            : 'text-on-surface-variant hover:text-primary hover:bg-primary/5'
+        } ${collapsed ? 'justify-center' : ''}`}
+      >
+        <span className="material-symbols-outlined" style={location.pathname === '/claims' ? { fontVariationSettings: "'FILL' 1" } : undefined}>
+          assignment
+        </span>
+        {!collapsed && <span>Claims</span>}
+      </Link>
+    </li>
+
+    {/* My Items */}
+    <li>
+      <Link
+        to="/my-items"
+        className={`flex items-center px-4 py-3 gap-3 rounded-xl transition-all duration-200 font-headline font-semibold text-sm ${
+          location.pathname === '/my-items'
+            ? 'bg-primary/10 text-primary'
+            : 'text-on-surface-variant hover:text-primary hover:bg-primary/5'
+        } ${collapsed ? 'justify-center' : ''}`}
+      >
+        <span className="material-symbols-outlined" style={location.pathname === '/my-items' ? { fontVariationSettings: "'FILL' 1" } : undefined}>
+          inventory_2
+        </span>
+        {!collapsed && <span>My Items</span>}
+      </Link>
+    </li>
+  </ul>
+</nav>
 
         <div className="p-6">
           <nav className={`px-4 pb-6 border-t border-outline-variant/10 pt-6 ${collapsed ? 'px-0' : ''}`}>
