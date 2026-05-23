@@ -221,11 +221,11 @@ export default function LocationPicker({
   }, []);
 
   return (
-    <div className={`relative rounded-xl overflow-hidden border border-[#acb3b6]/30 ${className}`}>
+    <div className={`relative rounded-xl overflow-hidden border border-[#acb3b6]/30 ${className}`} style={{ position: "relative", width: "100%", zIndex: 0 }}>
       {/* Map container */}
       <div
         ref={mapContainerRef}
-        style={{ height, width: "100%" }}
+        style={{ height, width: "100%", zIndex: 0 }}
       />
 
       {/* Location label overlay */}
