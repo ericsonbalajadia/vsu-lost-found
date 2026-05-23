@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, react-hooks/set-state-in-effect */
 // src/components/modals/ClaimantItemModal.tsx
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 // import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
@@ -51,6 +51,8 @@ export default function ClaimantItemModal({
   const isAccepted = claim.status === 'accepted'
   const isDeclined = claim.status === 'declined'
 
+  const modalRef = useRef<HTMLDivElement>(null);
+
   useEffect(() => {
     if (isOpen) {
       setAnswer(claim.answer)
@@ -58,6 +60,16 @@ export default function ClaimantItemModal({
       setIsDirty(false)
     }
   }, [isOpen, claim.answer])
+
+  useEffect(() => {
+    if (isOpen) {
+      // Small delay ensures the modal is rendered in the DOM before focusing
+      const timer = setTimeout(() => {
+        modalRef.current?.focus();
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (isDeclined && item.reporter_id) {
@@ -111,10 +123,11 @@ export default function ClaimantItemModal({
   if (!isOpen) return null
 
   return createPortal(
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 md:p-8 bg-slate-900/40 backdrop-blur-sm">
+    <div ref={modalRef} tabIndex={-1} className="fixed inset-0 z-[60] flex items-center justify-center p-4 md:p-8 bg-slate-900/40 backdrop-blur-sm">
       <div className="relative w-full max-w-5xl max-h-[90vh] overflow-hidden bg-white rounded-2xl shadow-2xl flex flex-col md:flex-row">
         {/* Close button */}
         <button
+        aria-label="Close modal"
           onClick={onClose}
           className="absolute top-3 right-3 md:top-5 md:right-5 z-20 w-7 h-7 md:w-8 md:h-8 rounded-full bg-white/90 backdrop-blur flex items-center justify-center text-slate-500 hover:text-slate-900 hover:bg-white shadow-sm transition-all"
         >
@@ -274,6 +287,7 @@ export default function ClaimantItemModal({
                       />
                       <div className="flex gap-2 md:gap-3 mt-3">
                         <button
+                        aria-label="Save answer"
                           onClick={handleSave}
                           disabled={saving || !isDirty || !answer.trim()}
                           className="flex-1 bg-primary hover:bg-primary-dim text-white py-2 rounded-xl font-bold text-xs md:text-sm transition disabled:opacity-50"
@@ -281,6 +295,7 @@ export default function ClaimantItemModal({
                           {saving ? 'Saving...' : 'Save Changes'}
                         </button>
                         <button
+                        aria-label="Cancel changes"
                           onClick={handleCancel}
                           disabled={!isDirty}
                           className="flex-1 bg-surface-container-high hover:bg-surface-container-highest text-on-surface py-2 rounded-xl font-bold text-xs md:text-sm transition disabled:opacity-50"

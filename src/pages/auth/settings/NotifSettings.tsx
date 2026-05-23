@@ -57,7 +57,7 @@ export default function NotifSettings() {
 
   return (
     <SidebarSettings>
-      <div className="max-w-2xl mx-auto space-y-6">
+      <div id="main-content" className="max-w-2xl mx-auto space-y-6">
         <header>
           <h1 className="text-4xl font-extrabold font-headline text-on-surface tracking-tight mb-2">
             Notification Preferences

@@ -26,7 +26,7 @@ export default function Landing() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-surface">
+    <div id="main-content" className="min-h-screen bg-surface">
       {/* TopAppBar – simplified (no sidebar) */}
       <nav className="bg-surface/85 backdrop-blur-xl sticky top-0 z-50">
         <div className="flex justify-between items-center w-full px-6 py-4 max-w-7xl mx-auto">

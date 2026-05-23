@@ -5,10 +5,11 @@ import SidebarSettings from '../../../components/layout/SidebarSettings'
 import { useAuth } from '../../../contexts/AuthContext'
 import { profilesApi } from '../../../api/profilesApi'
 import type { UpdateProfilePayload } from '../../../types/api'
+import ReputationBadge from '../../../components/ui/ReputationBadge'
 
 // Skeleton component defined at top level (no render-time creation)
 const ProfileSkeleton = () => (
-  <div className="animate-pulse space-y-8">
+  <div role="status" aria-live="polite" className="animate-pulse space-y-8">
     <div className="h-8 bg-surface-container-high rounded w-1/3" />
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
       <div className="lg:col-span-4 space-y-6">
@@ -54,12 +55,12 @@ export default function ProfileSettings() {
   // Populate form when profile loads
   useEffect(() => {
     if (profile) {
-      setFullName(profile.full_name);
-      setPhone(profile.phone ?? '');
-      setBuilding(profile.campus_building);
-      setBio(profile.bio ?? '');
+      setFullName(profile.full_name ?? '')
+      setPhone(profile.phone ?? '')
+      setBuilding(profile.campus_building ?? 'General Campus')
+      setBio(profile.bio ?? '')
     }
-  }, [profile]);
+  }, [profile])
 
   const handleSave = async () => {
     if (!user || !profile) return
@@ -93,7 +94,7 @@ export default function ProfileSettings() {
 
   return (
     <SidebarSettings>
-      <div className="w-full space-y-10">
+      <div id="main-content" className="w-full space-y-10">
         {/* Page Header */}
         <div className="space-y-2">
           <h1 className="text-4xl font-extrabold tracking-tight font-headline text-on-surface">
@@ -135,19 +136,60 @@ export default function ProfileSettings() {
             </div>
 
             {/* Reputation Card */}
-            <div className="bg-primary bg-gradient-to-br from-primary to-primary-dim p-6 rounded-xl text-on-primary shadow-xl">
-              <div className="flex items-center justify-between mb-4">
-                <span className="material-symbols-outlined text-4xl">star</span>
-                <span className="text-4xl font-extrabold font-headline">{profile.reputation}</span>
+            <div className="bg-[--color-surface-container-lowest] p-6 rounded-xl shadow-sm border border-[--color-outline-variant]/10 space-y-5">
+              <div className="flex items-center justify-between">
+                <h4 className="text-sm font-bold text-[--color-on-surface] font-headline">
+                  Trust Score
+                </h4>
+                <ReputationBadge score={profile.reputation} size="md" showLabel />
               </div>
-              <h4 className="text-lg font-bold font-headline mb-2">Trust Score</h4>
-              <p className="text-sm opacity-90 leading-snug">
-                Your reputation grows when you successfully return items (+10) and decreases if you
-                submit false claims (-10). Higher trust helps owners prioritise genuine claimants.
-              </p>
-              <div className="mt-4 text-xs opacity-70 flex items-center gap-2">
-                <span className="material-symbols-outlined text-sm">info</span>
-                Minimum 0 – Maximum 200
+              <div className="space-y-1.5">
+                <div className="w-full h-2 rounded-full overflow-hidden bg-[--color-surface-container-highest]">
+                  <div
+                    className="h-full rounded-full transition-all duration-700 ease-out"
+                    style={{
+                      width: `${Math.min((profile.reputation / 200) * 100, 100)}%`,
+                      background:
+                        profile.reputation >= 150
+                          ? 'linear-gradient(90deg, var(--color-success), color-mix(in srgb, var(--color-success) 70%, var(--color-primary)))'
+                          : profile.reputation >= 100
+                            ? 'linear-gradient(90deg, var(--color-primary-dim), var(--color-primary))'
+                            : profile.reputation >= 50
+                              ? 'linear-gradient(90deg, var(--color-warning), color-mix(in srgb, var(--color-warning) 80%, var(--color-error)))'
+                              : 'linear-gradient(90deg, var(--color-error), color-mix(in srgb, var(--color-error) 70%, var(--color-warning)))',
+                    }}
+                    role="progressbar"
+                    aria-valuenow={profile.reputation}
+                    aria-valuemin={0}
+                    aria-valuemax={200}
+                  />
+                </div>
+                <div className="flex justify-between text-[10px] text-[--color-outline]">
+                  <span>0</span>
+                  <span className="font-medium">{profile.reputation} / 200</span>
+                </div>
+              </div>
+              <div className="space-y-2 text-xs text-[--color-on-surface-variant] pt-1 border-t border-[--color-outline-variant]/10">
+                <div className="flex items-center gap-2">
+                  <span
+                    className="material-symbols-outlined text-[14px]"
+                    style={{ color: 'var(--color-success)', fontVariationSettings: "'FILL' 1" }}
+                    aria-hidden="true"
+                  >
+                    add_circle
+                  </span>
+                  +10 when you complete a physical handoff
+                </div>
+                <div className="flex items-center gap-2">
+                  <span
+                    className="material-symbols-outlined text-[14px]"
+                    style={{ color: 'var(--color-error)', fontVariationSettings: "'FILL' 1" }}
+                    aria-hidden="true"
+                  >
+                    remove_circle
+                  </span>
+                  -10 if a Samaritan rejects your claim as false
+                </div>
               </div>
             </div>
           </div>

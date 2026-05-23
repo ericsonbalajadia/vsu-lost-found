@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/components/modals/LostItemFindersModal.tsx
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { lostItemFindersApi } from '../../api/lostItemFindersApi'
 import { formatTime } from '../../utils/formatTime'
@@ -28,6 +28,18 @@ export default function LostItemFindersModal({ isOpen, onClose, item }: LostItem
   const [loading, setLoading] = useState(true)
   const hasLocation = !!(item.location_lat && item.location_lng)
 
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      // Small delay ensures the modal is rendered in the DOM before focusing
+      const timer = setTimeout(() => {
+        modalRef.current?.focus();
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
+
   useEffect(() => {
     if (!isOpen) return
     const fetchFinders = async () => {
@@ -42,9 +54,10 @@ export default function LostItemFindersModal({ isOpen, onClose, item }: LostItem
   if (!isOpen) return null
 
   return createPortal(
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 md:p-8 bg-slate-900/40 backdrop-blur-sm">
+    <div ref={modalRef} tabIndex={-1} className="fixed inset-0 z-[60] flex items-center justify-center p-4 md:p-8 bg-slate-900/40 backdrop-blur-sm">
       <div className="relative w-full max-w-4xl max-h-[90vh] overflow-hidden bg-white rounded-2xl shadow-2xl flex flex-col md:flex-row">
         <button
+          aria-label="Close potential finders modal"
           onClick={onClose}
           className="absolute top-3 right-3 md:top-5 md:right-5 z-20 w-7 h-7 md:w-8 md:h-8 rounded-full bg-white/90 backdrop-blur flex items-center justify-center text-slate-500 hover:text-slate-900 hover:bg-white shadow-sm transition-all"
         >

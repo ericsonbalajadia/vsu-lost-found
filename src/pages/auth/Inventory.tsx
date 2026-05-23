@@ -73,7 +73,7 @@ export default function Inventory() {
   return (
     <AuthenticatedLayout>
       {/* Page header (scrolls away) */}
-      <div className="px-8 md:px-12 pt-10 pb-4 shrink-0">
+      <div id="main-content" className="px-8 md:px-12 pt-10 pb-4 shrink-0">
         <h1 className="text-4xl lg:text-5xl font-black text-on-surface tracking-tight mb-4 font-headline">
           Dashboard Overview
         </h1>
@@ -99,9 +99,10 @@ export default function Inventory() {
               className="w-full pl-12 pr-4 py-4 bg-surface-container-highest border-none rounded-2xl focus:ring-2 focus:ring-primary-container focus:bg-surface-container-lowest transition-all text-on-surface placeholder:text-outline"
             />
           </div>
-          <div className="inline-flex p-1 bg-surface-container-high rounded-full w-full md:w-auto self-stretch md:self-auto">
+          <div role="tablist" aria-label="Item type filter" className="inline-flex p-1 bg-surface-container-high rounded-full w-full md:w-auto self-stretch md:self-auto">
             {(['all', 'found', 'lost'] as const).map((t) => (
               <button
+              role="tab"
                 key={t}
                 onClick={() => setFilter('type', t === 'all' ? null : t)}
                 className={`flex-1 md:min-w-[120px] px-6 py-2 rounded-full text-sm font-headline transition-all ${

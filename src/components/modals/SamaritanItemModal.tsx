@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any, react-hooks/set-state-in-effect */
 // src/components/modals/SamaritanItemModal.tsx
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { supabase } from '../../lib/supabase'
 import { claimsApi } from '../../api/claimsApi'
@@ -54,6 +54,18 @@ export default function SamaritanItemModal({
   const [handshakeClaimId, setHandshakeClaimId] = useState<string | null>(null)
   const [privateNotes, setPrivateNotes] = useState<string | null>(null)
   const hasLocation = !!(item.location_lat && item.location_lng)
+
+  const modalRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isOpen) {
+      // Small delay ensures the modal is rendered in the DOM before focusing
+      const timer = setTimeout(() => {
+        modalRef.current?.focus();
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen]);
 
 const fetchClaims = useCallback(async () => {
   setLoading(true);
@@ -141,10 +153,11 @@ const fetchClaims = useCallback(async () => {
   if (!isOpen) return null
 
   return createPortal(
-    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 md:p-8 bg-slate-900/40 backdrop-blur-sm">
+    <div ref={modalRef} tabIndex={-1} className="fixed inset-0 z-[70] flex items-center justify-center p-4 md:p-8 bg-slate-900/40 backdrop-blur-sm">
       <div className="relative w-full max-w-5xl max-h-[90vh] overflow-hidden bg-white rounded-2xl shadow-2xl flex flex-col md:flex-row">
         {/* Close button */}
         <button
+          aria-label="Close item details modal"
           onClick={onClose}
           className="absolute top-3 right-3 md:top-5 md:right-5 z-20 w-7 h-7 md:w-8 md:h-8 rounded-full bg-white/90 backdrop-blur flex items-center justify-center text-slate-500 hover:text-slate-900 hover:bg-white shadow-sm transition-all"
         >
@@ -294,6 +307,7 @@ const fetchClaims = useCallback(async () => {
                             <div className="flex gap-2">
                               {isAccepted ? (
                                 <button
+                                aria-label="View handshake details for this claim"
                                   onClick={() => setHandshakeClaimId(claim.id)}
                                   className="px-2 py-1 rounded-lg text-[10px] font-bold bg-primary text-white shadow-sm"
                                 >
@@ -302,6 +316,7 @@ const fetchClaims = useCallback(async () => {
                               ) : (
                                 <>
                                   <button
+                                    aria-label="Decline this claim"
                                     onClick={() => setShowRejectConfirm(claim.id)}
                                     disabled={processingId === claim.id}
                                     className="px-2 py-1 rounded-lg text-[10px] font-bold border border-error/30 text-error"
@@ -309,6 +324,7 @@ const fetchClaims = useCallback(async () => {
                                     Decline
                                   </button>
                                   <button
+                                    aria-label="Accept this claim"
                                     onClick={() => handleAccept(claim.id)}
                                     disabled={processingId === claim.id}
                                     className="px-2 py-1 rounded-lg text-[10px] font-bold bg-primary text-white shadow-sm"
@@ -536,6 +552,7 @@ const fetchClaims = useCallback(async () => {
                             <div className="flex gap-2">
                               {isAccepted ? (
                                 <button
+                                  aria-label="View handshake details for this claim"
                                   onClick={() => setHandshakeClaimId(claim.id)}
                                   className="px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-[10px] md:text-xs font-bold bg-primary text-white shadow-sm hover:bg-primary-dim transition-all flex items-center gap-1 md:gap-2"
                                 >
@@ -547,6 +564,7 @@ const fetchClaims = useCallback(async () => {
                               ) : (
                                 <>
                                   <button
+                                    aria-label="Decline this claim"
                                     onClick={() => setShowRejectConfirm(claim.id)}
                                     disabled={processingId === claim.id}
                                     className="px-2 py-1 md:px-3 md:py-2 rounded-lg text-[10px] md:text-xs font-bold border border-outline-variant/30 text-on-surface hover:bg-error/5 hover:text-error hover:border-error/20 transition-all flex items-center gap-1 md:gap-2"
@@ -557,6 +575,7 @@ const fetchClaims = useCallback(async () => {
                                     Decline
                                   </button>
                                   <button
+                                    aria-label="Accept this claim"
                                     onClick={() => handleAccept(claim.id)}
                                     disabled={processingId === claim.id}
                                     className="px-2 py-1 md:px-4 md:py-2 rounded-lg text-[10px] md:text-xs font-bold bg-primary text-white shadow-sm hover:bg-primary-dim transition-all flex items-center gap-1 md:gap-2"
@@ -604,12 +623,14 @@ const fetchClaims = useCallback(async () => {
             </p>
             <div className="flex gap-3 justify-end">
               <button
+              aria-label="Cancel rejecting this claim and close confirmation dialog"
                 onClick={() => setShowRejectConfirm(null)}
                 className="px-3 py-1.5 md:px-4 md:py-2 border rounded-lg text-sm"
               >
                 Cancel
               </button>
               <button
+                aria-label="Confirm rejecting this claim"
                 onClick={() => handleReject(showRejectConfirm)}
                 className="px-3 py-1.5 md:px-4 md:py-2 bg-error text-white rounded-lg text-sm"
               >

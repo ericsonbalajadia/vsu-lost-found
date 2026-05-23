@@ -47,7 +47,11 @@ export interface Item {
   created_at: string;
   updated_at: string;
   // Joined fields
-  profiles?: Pick<Profile, 'full_name' | 'reputation' | 'avatar_url' | 'campus_building'>;
+  profiles?: Pick<
+    Profile,
+    'id' | 'full_name' | 'reputation' | 'avatar_url' |
+    'campus_building' | 'email' | 'phone'
+  >;
 }
 
 export interface CreateItemPayload {

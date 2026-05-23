@@ -43,7 +43,7 @@ export default function SecuritySettings() {
 
   return (
     <SidebarSettings>
-      <div className="w-full space-y-10">
+      <div id="main-content" className="w-full space-y-10">
         <div className="space-y-2">
           <h1 className="text-4xl font-extrabold tracking-tight font-headline text-on-surface">
             Security Settings

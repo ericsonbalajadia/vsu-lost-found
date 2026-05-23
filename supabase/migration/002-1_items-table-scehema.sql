@@ -88,6 +88,10 @@ CREATE POLICY "Admin full access items"
   ON items FOR ALL
   USING (auth_is_admin());
 
+CREATE POLICY "Reporters delete own items"
+  ON items FOR DELETE
+  USING (auth.uid() = reporter_id);
+
 -- =============================================
 -- Row Level Security for items
 -- =============================================
