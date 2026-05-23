@@ -1,6 +1,6 @@
 // src/pages/auth/MyItems.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
 import { itemsApi } from '../../api/itemsApi'
@@ -26,23 +26,26 @@ export default function MyItems() {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<TabKey>('all')
   const [searchTerm, setSearchTerm] = useState('')
-  const [editingItem, setEditingItem] = useState<any>(null);
+  const [editingItem, setEditingItem] = useState<any>(null)
 
-  const fetchItems = async () => {
-  if (!user) return
-  setLoading(true)
-  const { data } = await itemsApi.getMyItems(user.id)
-  const typedItems = (data as any[])?.map((item) => ({
-    ...item,
-    profiles: item.profiles?.[0],
-  })) ?? []
-  setItems(typedItems as Item[])
-  setLoading(false)
-}
+  // Define fetchItems with useCallback
+  const fetchItems = useCallback(async () => {
+    if (!user) return
+    setLoading(true)
+    const { data } = await itemsApi.getMyItems(user.id)
+    const typedItems =
+      (data as any[])?.map((item) => ({
+        ...item,
+        profiles: item.profiles?.[0],
+      })) ?? []
+    setItems(typedItems as Item[])
+    setLoading(false)
+  }, [user])
 
-useEffect(() => {
-  fetchItems()
-}, [user])
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchItems()
+  }, [fetchItems])
 
   const filteredItems = items
     .filter((item) => {
@@ -68,27 +71,28 @@ useEffect(() => {
   }
 
   // In MyItems.tsx, inside the component, define a refresh function
-const refreshItems = async () => {
-  setLoading(true);
-  const { data } = await itemsApi.getMyItems(user!.id);
-  const typedItems = (data as any[])?.map((item) => ({
-    ...item,
-    profiles: item.profiles?.[0],
-  })) ?? [];
-  setItems(typedItems as Item[]);
-  setLoading(false);
-};
+  const refreshItems = async () => {
+    setLoading(true)
+    const { data } = await itemsApi.getMyItems(user!.id)
+    const typedItems =
+      (data as any[])?.map((item) => ({
+        ...item,
+        profiles: item.profiles?.[0],
+      })) ?? []
+    setItems(typedItems as Item[])
+    setLoading(false)
+  }
 
-// Then in the EditItemModal, use it:
-<EditItemModal
-  isOpen={!!editingItem}
-  onClose={() => setEditingItem(null)}
-  item={editingItem}
-  onSuccess={() => {
-    setEditingItem(null);
-    refreshItems(); // ✅ refresh the list
-  }}
-/>
+  // Then in the EditItemModal, use it:
+  ;<EditItemModal
+    isOpen={!!editingItem}
+    onClose={() => setEditingItem(null)}
+    item={editingItem}
+    onSuccess={() => {
+      setEditingItem(null)
+      refreshItems() // ✅ refresh the list
+    }}
+  />
 
   return (
     <AuthenticatedLayout>
@@ -179,7 +183,12 @@ const refreshItems = async () => {
                   </div>
                 ) : (
                   filteredItems.map((item) => (
-                    <ItemCard key={item.id} item={item} onDelete={handleDeleteItem} onEdit={setEditingItem} />
+                    <ItemCard
+                      key={item.id}
+                      item={item}
+                      onDelete={handleDeleteItem}
+                      onEdit={setEditingItem}
+                    />
                   ))
                 )}
               </div>
@@ -189,14 +198,14 @@ const refreshItems = async () => {
       </div>
 
       <EditItemModal
-  isOpen={!!editingItem}
-  onClose={() => setEditingItem(null)}
-  item={editingItem}
-  onSuccess={() => {
-    setEditingItem(null);
-    refreshItems(); // refresh list
-  }}
-/>
+        isOpen={!!editingItem}
+        onClose={() => setEditingItem(null)}
+        item={editingItem}
+        onSuccess={() => {
+          setEditingItem(null)
+          refreshItems() // refresh list
+        }}
+      />
     </AuthenticatedLayout>
   )
 }
