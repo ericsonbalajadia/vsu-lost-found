@@ -139,7 +139,7 @@ export default function ItemCard({ item, onRefresh, onDelete, onEdit }: ItemCard
 
   return (
     <>
-      <article className="group bg-surface-container-lowest rounded-xl overflow-hidden transition-all duration-300 hover:-translate-y-1 flex flex-col border border-outline-variant/20 relative">
+      <article className="group bg-surface-container-lowest rounded-xl overflow-hidden transition-all duration-300 hover:-translate-y-1 flex flex-col border border-outline-variant/20 relative z-0">
         {/* Kebab menu (top‑right corner) – only for owner and active items */}
         {isOwner && item.status === 'active' && onDelete && (
           <div ref={menuRef} className="absolute top-3 right-3 z-20">

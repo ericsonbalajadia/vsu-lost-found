@@ -84,9 +84,9 @@ export default function Inventory() {
       </div>
 
       {/* Sticky search & filter bar */}
-      <div className="sticky top-0 z-10 bg-background shadow-sm">
+      <div className="sticky top-0 z-10 w-full bg-surface-container-lowest border-b border-outline-variant/20 shadow-md transition-all">
         {/* Desktop layout */}
-        <div className="hidden md:flex flex-col md:flex-row gap-4 items-center px-8 md:px-12 py-4">
+        <div className="hidden md:flex flex-col md:flex-row gap-4 items-center px-8 md:px-12 py-4 max-w-[1600px] mx-auto">
           <div className="relative flex-1 w-full group">
             <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-on-surface-variant">
               search
