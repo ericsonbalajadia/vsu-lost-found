@@ -270,36 +270,62 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
       </main>
 
       {/* Mobile Bottom Navigation */}
-      <nav className="fixed bottom-0 left-0 right-0 z-50 bg-surface-container-lowest border-t border-outline-variant/10 md:hidden flex justify-around items-center h-16 px-4">
-        {navItems.map(item => {
-          const active = isActive(item.path);
-          return (
-            <Link
-              key={item.path}
-              to={item.path}
-              className={`flex flex-col items-center justify-center gap-1 transition-colors ${
-                active ? 'text-primary' : 'text-on-surface-variant'
-              }`}
-            >
-              <span
-                className="material-symbols-outlined text-2xl"
-                style={active ? { fontVariationSettings: "'FILL' 1" } : undefined}
-              >
-                {item.icon}
-              </span>
-              <span className="text-[11px] font-medium">{item.label}</span>
-            </Link>
-          );
-        })}
-        <button
-          onClick={signOut}
-          aria-label="Log Out"
-          className="flex flex-col items-center justify-center gap-1 text-on-surface-variant hover:text-error transition-colors"
-        >
-          <span className="material-symbols-outlined text-2xl">logout</span>
-          <span className="text-[11px] font-medium">Logout</span>
-        </button>
-      </nav>
+{/* Mobile Bottom Navigation – custom order with emphasised Report */}
+{/* Mobile Bottom Navigation */}
+<nav className="fixed bottom-0 left-0 right-0 z-50 bg-surface-container-lowest border-t border-outline-variant/10 md:hidden flex justify-around items-center h-16 px-2">
+  {/* Dashboard */}
+  <Link
+    to="/inventory"
+    className={`flex flex-col items-center justify-center gap-1 transition-colors ${
+      location.pathname === '/inventory' ? 'text-primary' : 'text-on-surface-variant'
+    }`}
+  >
+    <span className="material-symbols-outlined text-2xl">dashboard</span>
+    <span className="text-[11px] font-medium">Dashboard</span>
+  </Link>
+
+  {/* My Items */}
+  <Link
+    to="/my-items"
+    className={`flex flex-col items-center justify-center gap-1 transition-colors ${
+      location.pathname === '/my-items' ? 'text-primary' : 'text-on-surface-variant'
+    }`}
+  >
+    <span className="material-symbols-outlined text-2xl">inventory_2</span>
+    <span className="text-[11px] font-medium">My Items</span>
+  </Link>
+
+  {/* Report (emphasised, icon only) */}
+  <Link
+    to="/report"
+    className="flex items-center justify-center w-16 h-16 rounded-full bg-primary text-white shadow-xl shadow-primary/40 hover:scale-105 active:scale-95 transition-transform -mt-6"
+    aria-label="Report Item"
+  >
+    <span className="material-symbols-outlined text-2xl">add_circle</span>
+  </Link>
+
+  {/* Claims */}
+  <Link
+    to="/claims"
+    className={`flex flex-col items-center justify-center gap-1 transition-colors ${
+      location.pathname === '/claims' ? 'text-primary' : 'text-on-surface-variant'
+    }`}
+  >
+    <span className="material-symbols-outlined text-2xl">assignment</span>
+    <span className="text-[11px] font-medium">Claims</span>
+  </Link>
+
+  {/* Settings */}
+  <Link
+    to="/settings/profile"
+    className={`flex flex-col items-center justify-center gap-1 transition-colors ${
+      location.pathname.startsWith('/settings') ? 'text-primary' : 'text-on-surface-variant'
+    }`}
+  >
+    <span className="material-symbols-outlined text-2xl">settings</span>
+    <span className="text-[11px] font-medium">Settings</span>
+  </Link>
+</nav>
     </div>
   );
 }
