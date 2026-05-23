@@ -164,106 +164,116 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
       {/* Main Content */}
       <main className="flex-1 flex flex-col min-w-0 bg-background overflow-hidden">
         {/* TopAppBar */}
-        <header className="h-16 bg-surface-container-lowest/80 backdrop-blur-md border-b border-outline-variant/10 sticky top-0 z-50 w-full flex items-center justify-between px-6 lg:px-10 shrink-0">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={toggleSidebar}
-              aria-label="Toggle sidebar"
-              className="hidden md:flex w-10 h-10 items-center justify-center rounded-full hover:bg-surface-container transition-colors text-on-surface-variant group"
+<header className="h-16 bg-surface-container-lowest/80 backdrop-blur-md border-b border-outline-variant/10 sticky top-0 z-50 w-full flex items-center justify-between px-6 lg:px-10 shrink-0">
+  <div className="flex items-center gap-4">
+    {/* Sidebar toggle (desktop only) */}
+    <button
+      onClick={toggleSidebar}
+      aria-label="Toggle sidebar"
+      className="hidden md:flex w-10 h-10 items-center justify-center rounded-full hover:bg-surface-container transition-colors text-on-surface-variant group"
+    >
+      <svg
+        className="lucide lucide-panel-right group-hover:text-primary transition-colors"
+        fill="none"
+        height="24"
+        stroke="currentColor"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        strokeWidth="2"
+        viewBox="0 0 24 24"
+        width="24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <rect height="18" rx="2" width="18" x="3" y="3" />
+        <path d="M15 3v18" />
+      </svg>
+    </button>
+
+    {/* Page title (desktop only) */}
+    <div className="hidden md:flex flex-col">
+      <span className="font-display text-sm font-extrabold text-primary">{getPageTitle()}</span>
+    </div>
+
+    {/* Logo + name (mobile only) */}
+    <div className="flex md:hidden items-center gap-2">
+      <img alt="FoundPath Logo" className="h-8 w-auto object-contain" src="/FoundPath.png" />
+      <span className="font-headline font-bold text-lg tracking-tight text-primary">FoundPath</span>
+    </div>
+  </div>
+
+  {/* Right side – notification bell + avatar dropdown (unchanged) */}
+  <div className="flex items-center gap-1 pr-2">
+    <NotificationBell />
+    <div className="h-6 w-[1px] bg-outline-variant/30 mx-2 self-center" />
+
+    {/* Avatar with dropdown (unchanged) */}
+    <div className="relative" ref={dropdownRef}>
+      <button
+        onClick={() => setDropdownOpen(!dropdownOpen)}
+        aria-label="User menu"
+        className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-surface-container transition-colors group ml-1"
+      >
+        {profile?.avatar_url ? (
+          <img
+            src={profile.avatar_url}
+            alt="User avatar"
+            className="w-8 h-8 rounded-full object-cover ring-2 ring-surface-container-high shadow-sm"
+          />
+        ) : (
+          <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary">
+            <span className="material-symbols-outlined text-xl">account_circle</span>
+          </div>
+        )}
+      </button>
+
+      {dropdownOpen && (
+        <div className="absolute right-0 mt-2 w-64 rounded-xl bg-surface-container-lowest/90 backdrop-blur-md shadow-lg border border-outline-variant/20 z-50 overflow-hidden">
+          <div className="px-4 py-3 border-b border-outline-variant/20">
+            <p className="font-semibold text-on-surface truncate">{profile?.full_name || 'User'}</p>
+            <p className="text-xs text-outline truncate">{user?.email || ''}</p>
+          </div>
+          <div className="py-2">
+            <Link
+              to="/settings/profile"
+              onClick={() => setDropdownOpen(false)}
+              className="flex items-center gap-3 px-4 py-3 text-sm text-on-surface hover:bg-primary/5 transition-colors"
             >
-              <svg
-                className="lucide lucide-panel-right group-hover:text-primary transition-colors"
-                fill="none"
-                height="24"
-                stroke="currentColor"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                viewBox="0 0 24 24"
-                width="24"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <rect height="18" rx="2" width="18" x="3" y="3" />
-                <path d="M15 3v18" />
-              </svg>
+              <span className="material-symbols-outlined text-xl">account_circle</span>
+              <span>My Profile</span>
+            </Link>
+            <Link
+              to="/settings/profile"
+              onClick={() => setDropdownOpen(false)}
+              className="flex items-center gap-3 px-4 py-3 text-sm text-on-surface hover:bg-primary/5 transition-colors"
+            >
+              <span className="material-symbols-outlined text-xl">settings</span>
+              <span>Settings</span>
+            </Link>
+            <Link
+              to="/help"
+              onClick={() => setDropdownOpen(false)}
+              className="flex items-center gap-3 px-4 py-3 text-sm text-on-surface hover:bg-primary/5 transition-colors"
+            >
+              <span className="material-symbols-outlined text-xl">help</span>
+              <span>Help</span>
+            </Link>
+            <div className="border-t border-outline-variant/20 my-1" />
+            <button
+              onClick={() => {
+                setDropdownOpen(false);
+                signOut();
+              }}
+              className="w-full flex items-center gap-3 px-4 py-3 text-sm text-error hover:bg-error/5 transition-colors"
+            >
+              <span className="material-symbols-outlined text-xl">logout</span>
+              <span>Logout</span>
             </button>
-            <div className="hidden md:flex flex-col">
-              <span className="font-display text-sm font-extrabold text-primary">{getPageTitle()}</span>
-            </div>
           </div>
-          <div className="flex items-center gap-1 pr-2">
-            <NotificationBell />
-            <div className="h-6 w-[1px] bg-outline-variant/30 mx-2 self-center" />
-
-            {/* Avatar with dropdown */}
-            <div className="relative" ref={dropdownRef}>
-              <button
-                onClick={() => setDropdownOpen(!dropdownOpen)}
-                aria-label="User menu"
-                className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-surface-container transition-colors group ml-1"
-              >
-                {profile?.avatar_url ? (
-                  <img
-                    src={profile.avatar_url}
-                    alt="User avatar"
-                    className="w-8 h-8 rounded-full object-cover ring-2 ring-surface-container-high shadow-sm"
-                  />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary">
-                    <span className="material-symbols-outlined text-xl">account_circle</span>
-                  </div>
-                )}
-              </button>
-
-              {dropdownOpen && (
-                <div className="absolute right-0 mt-2 w-64 rounded-xl bg-surface-container-lowest/90 backdrop-blur-md shadow-lg border border-outline-variant/20 z-50 overflow-hidden">
-                  {/* User info header */}
-                  <div className="px-4 py-3 border-b border-outline-variant/20">
-                    <p className="font-semibold text-on-surface truncate">{profile?.full_name || 'User'}</p>
-                    <p className="text-xs text-outline truncate">{user?.email || ''}</p>
-                  </div>
-                  <div className="py-2">
-                    <Link
-                      to="/settings/profile"
-                      onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-3 px-4 py-3 text-sm text-on-surface hover:bg-primary/5 transition-colors"
-                    >
-                      <span className="material-symbols-outlined text-xl">account_circle</span>
-                      <span>My Profile</span>
-                    </Link>
-                    <Link
-                      to="/settings/profile"
-                      onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-3 px-4 py-3 text-sm text-on-surface hover:bg-primary/5 transition-colors"
-                    >
-                      <span className="material-symbols-outlined text-xl">settings</span>
-                      <span>Settings</span>
-                    </Link>
-                    <Link
-                      to="/help"
-                      onClick={() => setDropdownOpen(false)}
-                      className="flex items-center gap-3 px-4 py-3 text-sm text-on-surface hover:bg-primary/5 transition-colors"
-                    >
-                      <span className="material-symbols-outlined text-xl">help</span>
-                      <span>Help</span>
-                    </Link>
-                    <div className="border-t border-outline-variant/20 my-1" />
-                    <button
-                      onClick={() => {
-                        setDropdownOpen(false);
-                        signOut();
-                      }}
-                      className="w-full flex items-center gap-3 px-4 py-3 text-sm text-error hover:bg-error/5 transition-colors"
-                    >
-                      <span className="material-symbols-outlined text-xl">logout</span>
-                      <span>Logout</span>
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
-        </header>
+        </div>
+      )}
+    </div>
+  </div>
+</header>
 
         {/* Scrollable content – add bottom padding on mobile */}
         <div className="flex-1 overflow-y-auto pb-20 md:pb-0">{children}</div>
