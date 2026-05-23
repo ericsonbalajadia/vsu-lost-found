@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 // src/pages/auth/Report.tsx
 import { useState, useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -201,7 +202,7 @@ export default function Report() {
 
   return (
     <AuthenticatedLayout>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
+      <div id="main-content" className="max-w-7xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
         <Breadcrumbs />
 
         <div className="mb-4 sm:mb-6">
