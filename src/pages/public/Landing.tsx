@@ -7,9 +7,26 @@ import type { Item } from '../../types/database'
 import ItemCard from '../../components/ui/ItemCard'
 import { getSkeletonCards } from '../../components/ui/SkeletonLoader'
 
+import useEmblaCarousel from 'embla-carousel-react'
+import Autoplay from 'embla-carousel-autoplay'
+
 export default function Landing() {
   const [previewItems, setPreviewItems] = useState<Item[]>([])
   const [loading, setLoading] = useState(true)
+
+  // Embla carousel setup with autoplay and loop
+  const [emblaRef] = useEmblaCarousel(
+    {
+      loop: true,           // infinite circular movement
+      align: 'start',       // align items to start
+      slidesToScroll: 1,    // scroll one item at a time
+      breakpoints: {
+        '(min-width: 768px)': { slidesToScroll: 2 },
+        '(min-width: 1024px)': { slidesToScroll: 3 },
+      },
+    },
+    [Autoplay({ delay: 3000, stopOnInteraction: false })] // auto-slide every 3s
+  )
 
   useEffect(() => {
     const fetchPreview = async () => {
@@ -89,7 +106,7 @@ export default function Landing() {
         </section>
 
         {/* Latest Discoveries – full screen */}
-        <section className="min-h-screen bg-surface flex flex-col justify-center py-16">
+<section className="min-h-screen bg-surface flex flex-col justify-center py-16">
           <div className="max-w-7xl mx-auto px-6 w-full">
             <div className="flex justify-between items-end mb-16">
               <div>
@@ -111,14 +128,17 @@ export default function Landing() {
             {loading ? (
               <>{getSkeletonCards(6)}</>
             ) : previewItems.length === 0 ? (
-              <p className="text-center text-on-surface-variant">
-                No items found. Check back later.
-              </p>
+              <p className="text-center text-on-surface-variant">No items found. Check back later.</p>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {previewItems.map((item) => (
-                  <ItemCard key={item.id} item={item} />
-                ))}
+              // Carousel wrapper
+              <div className="embla overflow-hidden" ref={emblaRef}>
+                <div className="embla__container flex">
+                  {previewItems.map((item) => (
+                    <div className="embla__slide min-w-0 flex-shrink-0 w-full md:w-1/2 lg:w-1/3 px-3" key={item.id}>
+                      <ItemCard item={item} />
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </div>
