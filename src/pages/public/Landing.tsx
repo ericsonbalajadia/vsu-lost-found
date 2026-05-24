@@ -120,14 +120,14 @@ export default function Landing() {
 
           {/* Scroll Down Arrow Indicator */}
           <div
-            className="absolute bottom-50 left-1/2 transform -translate-x-1/2 cursor-pointer z-20 animate-bounce"
+            className="absolute bottom-24 md:bottom-8 lg:bottom-52 left-1/2 transform -translate-x-1/2 cursor-pointer z-20 animate-bounce"
             onClick={scrollToDiscoveries}
             role="button"
             aria-label="Scroll to next section"
             tabIndex={0}
             onKeyDown={(e) => e.key === 'Enter' && scrollToDiscoveries()}
           >
-            <span className="material-symbols-outlined text-primary text-9xl">
+            <span className="material-symbols-outlined text-primary text-6xl md:text-7xl lg:text-9xl">
               keyboard_double_arrow_down
             </span>
           </div>
@@ -269,7 +269,7 @@ export default function Landing() {
         </section>
 
         {/* How It Works – diagonal layout on desktop */}
-        <section className="min-h-[80vh] bg-gradient-to-b from-primary/90 to-primary/25 py-40 relative overflow-hidden">
+        <section className="min-h-[80vh] md:min-h-[80vh] bg-gradient-to-b from-primary/90 to-primary/25 py-40 relative overflow-hidden">
           {/* Decorative wave at top */}
           <div className="absolute top-0 left-0 w-full overflow-hidden leading-0">
             <svg
