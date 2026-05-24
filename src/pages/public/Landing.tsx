@@ -165,9 +165,12 @@ export default function Landing() {
               </div>
               <Link
                 to="/inventory"
-                className="hidden md:flex items-center gap-2 text-primary font-bold text-white hover:gap-3 transition-all"
+                className="flex items-center gap-0.5 md:gap-[0.25rem] text-primary font-bold text-white hover:gap-2 md:hover:gap-3 transition-all text-sm md:text-base"
               >
-                View Archive <span className="material-symbols-outlined">arrow_forward</span>
+                View Archive{' '}
+                <span className="material-symbols-outlined text-base md:text-xl">
+                  arrow_forward
+                </span>
               </Link>
             </div>
 
