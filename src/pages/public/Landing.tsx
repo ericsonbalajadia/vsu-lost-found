@@ -6,9 +6,11 @@ import { itemsApi } from '../../api/itemsApi'
 import type { Item } from '../../types/database'
 import ItemCard from '../../components/ui/ItemCard'
 import { getSkeletonCards } from '../../components/ui/SkeletonLoader'
+import DidYouKnow from '../../components/ui/DidYouKnow';
 
 import useEmblaCarousel from 'embla-carousel-react'
 import Autoplay from 'embla-carousel-autoplay'
+
 
 export default function Landing() {
   const [previewItems, setPreviewItems] = useState<Item[]>([])
@@ -127,92 +129,94 @@ export default function Landing() {
         </section>
 
         {/* Latest Discoveries – full screen */}
-        <section ref={discoveriesRef} className="min-h-screen bg-surface flex flex-col justify-center py-16">
-          <div className="max-w-7xl mx-auto px-6 w-full">
-            <div className="flex justify-between items-end mb-16">
-              <div>
-                <h2 className="font-headline text-3xl font-bold text-on-surface tracking-tight">
-                  Latest Discoveries
-                </h2>
-                <p className="font-body text-on-surface-variant mt-2">
-                  Recently archived items awaiting their owners.
-                </p>
-              </div>
-              <Link
-                to="/inventory"
-                className="hidden md:flex items-center gap-2 text-primary font-bold hover:gap-3 transition-all"
-              >
-                View Archive <span className="material-symbols-outlined">arrow_forward</span>
-              </Link>
-            </div>
+{/* Latest Discoveries – simpler, bottom padding for overlap */}
+<section
+  ref={discoveriesRef}
+  className="min-h-[90vh] bg-surface py-40"   // removed flex centering
+>
+  <div className="max-w-7xl mx-auto px-6 w-full">
+    <div className="flex justify-between items-end mb-12">
+      <div>
+        <h2 className="font-headline text-3xl font-bold text-on-surface tracking-tight">
+          Latest Discoveries
+        </h2>
+        <p className="font-body text-on-surface-variant mt-2">
+          Recently archived items awaiting their owners.
+        </p>
+      </div>
+      <Link
+        to="/inventory"
+        className="hidden md:flex items-center gap-2 text-primary font-bold hover:gap-3 transition-all"
+      >
+        View Archive <span className="material-symbols-outlined">arrow_forward</span>
+      </Link>
+    </div>
 
-            {loading ? (
-              <>{getSkeletonCards(6)}</>
-            ) : previewItems.length === 0 ? (
-              <p className="text-center text-on-surface-variant">No items found. Check back later.</p>
-            ) : (
-              // Carousel wrapper
-              <div className="embla overflow-hidden" ref={emblaRef}>
-                <div className="embla__container flex">
-                  {previewItems.map((item) => (
-                    <div className="embla__slide min-w-0 flex-shrink-0 w-full md:w-1/2 lg:w-1/3 px-3" key={item.id}>
-                      <ItemCard item={item} />
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </section>
+    {loading ? (
+      <>{getSkeletonCards(6)}</>
+    ) : previewItems.length === 0 ? (
+      <p className="text-center text-on-surface-variant">No items found. Check back later.</p>
+    ) : (
+      <div className="embla overflow-hidden" ref={emblaRef}>
+        <div className="embla__container flex">
+          {previewItems.map((item) => (
+            <div
+              className="embla__slide min-w-0 flex-shrink-0 w-full md:w-1/2 lg:w-1/3 px-3"
+              key={item.id}
+            >
+              <ItemCard item={item} />
+            </div>
+          ))}
+        </div>
+      </div>
+    )}
+  </div>
 
-        {/* Core Features – full screen */}
-        <section className="min-h-screen bg-surface-container-low flex flex-col justify-center py-16">
-          <div className="max-w-7xl mx-auto px-6 w-full">
-            <div className="text-center mb-16">
-              <h2 className="font-headline text-3xl font-bold text-on-surface tracking-tight mb-4">
-                The Archive Standards
-              </h2>
-              <div className="w-20 h-1 bg-primary mx-auto rounded-full"></div>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-              <div className="text-center px-4">
-                <div className="w-16 h-16 bg-surface-container-highest rounded-full flex items-center justify-center mx-auto mb-6">
-                  <span className="material-symbols-outlined text-primary text-3xl">
-                    verified_user
-                  </span>
-                </div>
-                <h3 className="font-headline text-xl font-bold mb-4">Secure Verification</h3>
-                <p className="font-body text-on-surface-variant leading-relaxed">
-                  Multi‑point identity verification ensuring items only return to their rightful
-                  owners.
-                </p>
-              </div>
-              <div className="text-center px-4">
-                <div className="w-16 h-16 bg-surface-container-highest rounded-full flex items-center justify-center mx-auto mb-6">
-                  <span className="material-symbols-outlined text-primary text-3xl">
-                    alternate_email
-                  </span>
-                </div>
-                <h3 className="font-headline text-xl font-bold mb-4">Email Coordination</h3>
-                <p className="font-body text-on-surface-variant leading-relaxed">
-                  Automated notifications and secure messaging threads between finders and owners.
-                </p>
-              </div>
-              <div className="text-center px-4">
-                <div className="w-16 h-16 bg-surface-container-highest rounded-full flex items-center justify-center mx-auto mb-6">
-                  <span className="material-symbols-outlined text-primary text-3xl">
-                    account_balance
-                  </span>
-                </div>
-                <h3 className="font-headline text-xl font-bold mb-4">Campus Integration</h3>
-                <p className="font-body text-on-surface-variant leading-relaxed">
-                  Seamlessly connected to university IDs and campus security protocols for total
-                  peace of mind.
-                </p>
-              </div>
-            </div>
-          </div>
-        </section>
+  <DidYouKnow />
+  
+  
+</section>
+
+{/* Core Features – moves up into the padding */}
+<section className="min-h-screen bg-surface-container-low flex flex-col justify-center py-16 -mt-32 rounded-t-3xl relative z-10 shadow-[0_-10px_30px_-5px_rgba(0,0,0,0.05)]">
+  <div className="max-w-7xl mx-auto px-6 w-full">
+    <div className="text-center mb-16">
+      <h2 className="font-headline text-3xl font-bold text-on-surface tracking-tight mb-4">
+        The Archive Standards
+      </h2>
+      <div className="w-20 h-1 bg-primary mx-auto rounded-full"></div>
+    </div>
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+      <div className="text-center px-4">
+        <div className="w-16 h-16 bg-surface-container-highest rounded-full flex items-center justify-center mx-auto mb-6">
+          <span className="material-symbols-outlined text-primary text-3xl">verified_user</span>
+        </div>
+        <h3 className="font-headline text-xl font-bold mb-4">Secure Verification</h3>
+        <p className="font-body text-on-surface-variant leading-relaxed">
+          Multi‑point identity verification ensuring items only return to their rightful owners.
+        </p>
+      </div>
+      <div className="text-center px-4">
+        <div className="w-16 h-16 bg-surface-container-highest rounded-full flex items-center justify-center mx-auto mb-6">
+          <span className="material-symbols-outlined text-primary text-3xl">alternate_email</span>
+        </div>
+        <h3 className="font-headline text-xl font-bold mb-4">Email Coordination</h3>
+        <p className="font-body text-on-surface-variant leading-relaxed">
+          Automated notifications and secure messaging threads between finders and owners.
+        </p>
+      </div>
+      <div className="text-center px-4">
+        <div className="w-16 h-16 bg-surface-container-highest rounded-full flex items-center justify-center mx-auto mb-6">
+          <span className="material-symbols-outlined text-primary text-3xl">account_balance</span>
+        </div>
+        <h3 className="font-headline text-xl font-bold mb-4">Campus Integration</h3>
+        <p className="font-body text-on-surface-variant leading-relaxed">
+          Seamlessly connected to university IDs and campus security protocols for total peace of mind.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
 
         {/* (Optional) How it Works & Final CTA sections can be added here as full-screen sections */}
       </main>
