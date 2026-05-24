@@ -147,7 +147,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
             <ul className="space-y-1.5">
               <li>
                 <Link
-                  to="/settings/profile"
+                  to="/settings"
                   className={`flex items-center px-4 py-3 gap-3 text-on-surface-variant hover:text-primary hover:bg-primary/5 rounded-xl transition-all duration-200 font-headline font-semibold text-sm ${
                     collapsed ? 'justify-center' : ''
                   }`}
@@ -255,7 +255,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
                   </div>
                   <div className="py-2">
                     <Link
-                      to="/settings/profile"
+                      to="/settings"
                       onClick={() => setDropdownOpen(false)}
                       className="flex items-center gap-3 px-4 py-3 text-sm text-on-surface hover:bg-primary/5 transition-colors"
                     >
@@ -263,7 +263,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
                       <span>My Profile</span>
                     </Link>
                     <Link
-                      to="/settings/profile"
+                      to="/settings"
                       onClick={() => setDropdownOpen(false)}
                       className="flex items-center gap-3 px-4 py-3 text-sm text-on-surface hover:bg-primary/5 transition-colors"
                     >
@@ -346,7 +346,7 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
 
         {/* Settings */}
         <Link
-          to="/settings/profile"
+          to="/settings"
           className={`flex flex-col items-center justify-center gap-1 transition-colors ${
             location.pathname.startsWith('/settings') ? 'text-primary' : 'text-on-surface-variant'
           }`}

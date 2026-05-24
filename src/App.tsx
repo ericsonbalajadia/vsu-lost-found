@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import AuthGuard from './guards/AuthGuard';
 import AdminGuard from './guards/AdminGuard';
+import SettingsPage from './pages/auth/settings/SettingsPage';
 
 // ─────────────────────────────────────────────────────────────
 // Lazy‑loaded page components (all pages that were static)
@@ -26,6 +27,7 @@ const ClaimantHandshake = lazy(() => import('./pages/claimant/ClaimantHandshake'
 const ProfileSettings = lazy(() => import('./pages/auth/settings/ProfileSettings'));
 const SecuritySettings = lazy(() => import('./pages/auth/settings/SecuritySettings'));
 const NotifSettings = lazy(() => import('./pages/auth/settings/NotifSettings'));
+
 
 // 404 page
 const NotFound = lazy(() => import('./pages/NotFound'));
@@ -80,9 +82,10 @@ export default function App() {
               <Route path="/inventory" element={<Inventory />} />
               <Route path="/report" element={<Report />} />
               <Route path="/my-items" element={<MyItems />} />
-              <Route path="/settings/profile" element={<ProfileSettings />} />
+              {/* <Route path="/settings/profile" element={<ProfileSettings />} />
               <Route path="/settings/security" element={<SecuritySettings />} />
-              <Route path="/settings/notifications" element={<NotifSettings />} />
+              <Route path="/settings/notifications" element={<NotifSettings />} /> */}
+              <Route path="/settings" element={<SettingsPage />} />
               <Route path="/claims/:id/handshake" element={<ClaimantHandshake />} />
               <Route path="/my-claims" element={<MyClaims />} />
               <Route path="/claims" element={<Claims />} />
