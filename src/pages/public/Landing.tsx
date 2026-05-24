@@ -6,24 +6,23 @@ import { itemsApi } from '../../api/itemsApi'
 import type { Item } from '../../types/database'
 import ItemCard from '../../components/ui/ItemCard'
 import { getSkeletonCards } from '../../components/ui/SkeletonLoader'
-import DidYouKnow from '../../components/ui/DidYouKnow';
+import DidYouKnow from '../../components/ui/DidYouKnow'
 
 import useEmblaCarousel from 'embla-carousel-react'
 import Autoplay from 'embla-carousel-autoplay'
-
 
 export default function Landing() {
   const [previewItems, setPreviewItems] = useState<Item[]>([])
   const [loading, setLoading] = useState(true)
 
-   const discoveriesRef = useRef<HTMLElement>(null)
+  const discoveriesRef = useRef<HTMLElement>(null)
 
   // Embla carousel setup with autoplay and loop
   const [emblaRef] = useEmblaCarousel(
     {
-      loop: true,           // infinite circular movement
-      align: 'start',       // align items to start
-      slidesToScroll: 1,    // scroll one item at a time
+      loop: true, // infinite circular movement
+      align: 'start', // align items to start
+      slidesToScroll: 1, // scroll one item at a time
       breakpoints: {
         '(min-width: 768px)': { slidesToScroll: 2 },
         '(min-width: 1024px)': { slidesToScroll: 3 },
@@ -46,10 +45,9 @@ export default function Landing() {
     fetchPreview()
   }, [])
 
-   const scrollToDiscoveries = () => {
+  const scrollToDiscoveries = () => {
     discoveriesRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
-
 
   return (
     <div id="main-content" className="bg-surface">
@@ -114,7 +112,7 @@ export default function Landing() {
           </div>
 
           {/* Scroll Down Arrow Indicator */}
-          <div 
+          <div
             className="absolute bottom-50 left-1/2 transform -translate-x-1/2 cursor-pointer z-20 animate-bounce"
             onClick={scrollToDiscoveries}
             role="button"
@@ -123,95 +121,118 @@ export default function Landing() {
             onKeyDown={(e) => e.key === 'Enter' && scrollToDiscoveries()}
           >
             <span className="material-symbols-outlined text-primary text-9xl">
-             keyboard_double_arrow_down
+              keyboard_double_arrow_down
             </span>
           </div>
         </section>
 
         {/* Latest Discoveries – full screen */}
-{/* Latest Discoveries – simpler, bottom padding for overlap */}
-<section
-  ref={discoveriesRef}
-  className="min-h-[90vh] bg-surface py-40"   // removed flex centering
->
-  <div className="max-w-7xl mx-auto px-6 w-full">
-    <div className="flex justify-between items-end mb-12">
-      <div>
-        <h2 className="font-headline text-3xl font-bold text-on-surface tracking-tight">
-          Latest Discoveries
-        </h2>
-        <p className="font-body text-on-surface-variant mt-2">
-          Recently archived items awaiting their owners.
-        </p>
-      </div>
-      <Link
-        to="/inventory"
-        className="hidden md:flex items-center gap-2 text-primary font-bold hover:gap-3 transition-all"
-      >
-        View Archive <span className="material-symbols-outlined">arrow_forward</span>
-      </Link>
-    </div>
-
-    {loading ? (
-      <>{getSkeletonCards(6)}</>
-    ) : previewItems.length === 0 ? (
-      <p className="text-center text-on-surface-variant">No items found. Check back later.</p>
-    ) : (
-      <div className="embla overflow-hidden" ref={emblaRef}>
-        <div className="embla__container flex">
-          {previewItems.map((item) => (
-            <div
-              className="embla__slide min-w-0 flex-shrink-0 w-full md:w-1/2 lg:w-1/3 px-3"
-              key={item.id}
-            >
-              <ItemCard item={item} />
+        <section
+          ref={discoveriesRef}
+          className="min-h-[90vh] bg-surface py-40" // removed flex centering
+        >
+          <div className="max-w-7xl mx-auto px-6 w-full">
+            <div className="flex justify-between items-end mb-12">
+              <div>
+                <h2 className="font-headline text-3xl font-bold text-on-surface tracking-tight">
+                  Latest Discoveries
+                </h2>
+                <p className="font-body text-on-surface-variant mt-2">
+                  Recently archived items awaiting their owners.
+                </p>
+              </div>
+              <Link
+                to="/inventory"
+                className="hidden md:flex items-center gap-2 text-primary font-bold hover:gap-3 transition-all"
+              >
+                View Archive <span className="material-symbols-outlined">arrow_forward</span>
+              </Link>
             </div>
-          ))}
-        </div>
-      </div>
-    )}
-  </div>
 
-  <DidYouKnow />
-  
-  
-</section>
+            {loading ? (
+              <>{getSkeletonCards(6)}</>
+            ) : previewItems.length === 0 ? (
+              <p className="text-center text-on-surface-variant">
+                No items found. Check back later.
+              </p>
+            ) : (
+              <div className="embla overflow-hidden" ref={emblaRef}>
+                <div className="embla__container flex">
+                  {previewItems.map((item) => (
+                    <div
+                      className="embla__slide min-w-0 flex-shrink-0 w-full md:w-1/2 lg:w-1/3 px-3"
+                      key={item.id}
+                    >
+                      <ItemCard item={item} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
 
-{/* Core Features – moves up into the padding */}
+          <DidYouKnow />
+        </section>
+
+        {/* Core Features – moves up into the padding */}
 <section className="min-h-screen bg-surface-container-low flex flex-col justify-center py-16 -mt-32 rounded-t-3xl relative z-10 shadow-[0_-10px_30px_-5px_rgba(0,0,0,0.05)]">
   <div className="max-w-7xl mx-auto px-6 w-full">
     <div className="text-center mb-16">
       <h2 className="font-headline text-3xl font-bold text-on-surface tracking-tight mb-4">
         The Archive Standards
       </h2>
-      <div className="w-20 h-1 bg-primary mx-auto rounded-full"></div>
+      <div className="w-20 h-1 bg-gradient-to-r from-primary via-primary/70 to-transparent mx-auto rounded-full"></div>
+      <p className="font-body text-on-surface-variant mt-4 max-w-2xl mx-auto">
+        FoundPath combines smart technology with community trust to restore belongings efficiently.
+      </p>
     </div>
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-      <div className="text-center px-4">
-        <div className="w-16 h-16 bg-surface-container-highest rounded-full flex items-center justify-center mx-auto mb-6">
-          <span className="material-symbols-outlined text-primary text-3xl">verified_user</span>
+
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+      {/* 1. Smart Matching System */}
+      <div className="group relative bg-white/5 backdrop-blur-sm rounded-2xl p-6 text-center transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-primary/5 border border-primary/10 hover:border-primary/30">
+        <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+        <div className="w-16 h-16 bg-surface-container-highest rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm group-hover:scale-110 transition-transform duration-300">
+          <span className="material-symbols-outlined text-primary text-3xl">sync_alt</span>
         </div>
-        <h3 className="font-headline text-xl font-bold mb-4">Secure Verification</h3>
-        <p className="font-body text-on-surface-variant leading-relaxed">
-          Multi‑point identity verification ensuring items only return to their rightful owners.
+        <h3 className="font-headline text-xl font-bold mb-3">Smart Matching System</h3>
+        <p className="font-body text-on-surface-variant text-sm leading-relaxed">
+          Automatic location‑based matching of lost and found items (same category, within 500m). Both parties receive an instant notification.
         </p>
       </div>
-      <div className="text-center px-4">
-        <div className="w-16 h-16 bg-surface-container-highest rounded-full flex items-center justify-center mx-auto mb-6">
-          <span className="material-symbols-outlined text-primary text-3xl">alternate_email</span>
+
+      {/* 2. Reputation / Trust System */}
+      <div className="group relative bg-white/5 backdrop-blur-sm rounded-2xl p-6 text-center transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-primary/5 border border-primary/10 hover:border-primary/30">
+        <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+        <div className="w-16 h-16 bg-surface-container-highest rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm group-hover:scale-110 transition-transform duration-300">
+          <span className="material-symbols-outlined text-primary text-3xl">verified</span>
         </div>
-        <h3 className="font-headline text-xl font-bold mb-4">Email Coordination</h3>
-        <p className="font-body text-on-surface-variant leading-relaxed">
-          Automated notifications and secure messaging threads between finders and owners.
+        <h3 className="font-headline text-xl font-bold mb-3">Reputation / Trust System</h3>
+        <p className="font-body text-on-surface-variant text-sm leading-relaxed">
+          Earn +10 reputation for each successful return, lose −10 for false claims. Your trust score is visible on every item card.
         </p>
       </div>
-      <div className="text-center px-4">
-        <div className="w-16 h-16 bg-surface-container-highest rounded-full flex items-center justify-center mx-auto mb-6">
-          <span className="material-symbols-outlined text-primary text-3xl">account_balance</span>
+
+      {/* 3. Predictive Insights */}
+      <div className="group relative bg-white/5 backdrop-blur-sm rounded-2xl p-6 text-center transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-primary/5 border border-primary/10 hover:border-primary/30">
+        <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+        <div className="w-16 h-16 bg-surface-container-highest rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm group-hover:scale-110 transition-transform duration-300">
+          <span className="material-symbols-outlined text-primary text-3xl">insights</span>
         </div>
-        <h3 className="font-headline text-xl font-bold mb-4">Campus Integration</h3>
-        <p className="font-body text-on-surface-variant leading-relaxed">
-          Seamlessly connected to university IDs and campus security protocols for total peace of mind.
+        <h3 className="font-headline text-xl font-bold mb-3">Predictive Insights</h3>
+        <p className="font-body text-on-surface-variant text-sm leading-relaxed">
+          Real‑time filter by type (all/found/lost), category, and search by title/description. Find exactly what you’re looking for.
+        </p>
+      </div>
+
+      {/* 4. Community + Notification Intelligence */}
+      <div className="group relative bg-white/5 backdrop-blur-sm rounded-2xl p-6 text-center transition-all duration-300 hover:-translate-y-2 hover:shadow-xl hover:shadow-primary/5 border border-primary/10 hover:border-primary/30">
+        <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+        <div className="w-16 h-16 bg-surface-container-highest rounded-full flex items-center justify-center mx-auto mb-6 shadow-sm group-hover:scale-110 transition-transform duration-300">
+          <span className="material-symbols-outlined text-primary text-3xl">notifications_active</span>
+        </div>
+        <h3 className="font-headline text-xl font-bold mb-3">Community + Notifications</h3>
+        <p className="font-body text-on-surface-variant text-sm leading-relaxed">
+          In‑app notifications for claim updates, smart matches, and “Found this” reports. Stay informed without refreshing.
         </p>
       </div>
     </div>
