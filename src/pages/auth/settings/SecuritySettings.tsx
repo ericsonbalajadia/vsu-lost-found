@@ -3,8 +3,12 @@ import { useState } from 'react';
 import SidebarSettings from '../../../components/layout/SidebarSettings';
 import { profilesApi } from '../../../api/profilesApi';
 
+interface SecuritySettingsProps {
+  standalone?: boolean
+}
 
-export default function SecuritySettings() {
+
+export default function SecuritySettings({ standalone = false }: SecuritySettingsProps)  {
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -39,10 +43,7 @@ export default function SecuritySettings() {
     }
   };
 
-  
-
-  return (
-    <SidebarSettings>
+  const content = (
       <div id="main-content" className="w-full space-y-10">
         <div className="space-y-2">
           <h1 className="text-4xl font-extrabold tracking-tight font-headline text-on-surface">
@@ -209,6 +210,10 @@ export default function SecuritySettings() {
           </div>
         </div>
       </div>
-    </SidebarSettings>
-  );
+  )
+
+  if (standalone) return content
+  return <SidebarSettings>{content}</SidebarSettings>
+
+
 }

@@ -6,7 +6,11 @@ import { useAuth } from '../../../contexts/AuthContext'
 import { profilesApi } from '../../../api/profilesApi'
 import type { UpdateNotifPrefsPayload } from '../../../types/api'
 
-export default function NotifSettings() {
+interface NotifSettingsProps {
+  standalone?: boolean
+}
+
+export default function NotifSettings({ standalone = false }: NotifSettingsProps)  {
   const { user, profile } = useAuth()
   const [matchNotif, setMatchNotif] = useState(true)
   const [claimNotif, setClaimNotif] = useState(true)
@@ -55,8 +59,7 @@ export default function NotifSettings() {
     }
   }
 
-  return (
-    <SidebarSettings>
+  const content = (
       <div id="main-content" className="max-w-2xl mx-auto space-y-6">
         <header>
           <h1 className="text-4xl font-extrabold font-headline text-on-surface tracking-tight mb-2">
@@ -188,6 +191,9 @@ export default function NotifSettings() {
           </button>
         </div>
       </div>
-    </SidebarSettings>
   )
+
+  if (standalone) return content
+  return <SidebarSettings>{content}</SidebarSettings>
+
 }

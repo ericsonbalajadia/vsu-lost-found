@@ -43,7 +43,11 @@ const ProfileSkeleton = () => (
   </div>
 )
 
-export default function ProfileSettings() {
+interface ProfileSettingsProps {
+  standalone?: boolean
+}
+
+export default function ProfileSettings({ standalone = false }: ProfileSettingsProps) {
   const { user, profile } = useAuth() // refreshProfile not needed if no retry button
   const [fullName, setFullName] = useState('')
   const [phone, setPhone] = useState('')
@@ -88,22 +92,21 @@ export default function ProfileSettings() {
 
   // Show skeleton while profile is being fetched (or if missing)
   if (!profile) {
-    return (
-      <SidebarSettings>
-        <ProfileSkeleton />
-      </SidebarSettings>
-    )
+    const skeletonContent = <ProfileSkeleton />
+    if (standalone) return skeletonContent
+    return <SidebarSettings>{skeletonContent}</SidebarSettings>
   }
 
-  return (
-    <SidebarSettings>
+  const content = (
+    <>
       <AvatarModal
         isOpen={avatarModalOpen}
         onClose={() => setAvatarModalOpen(false)}
         onSuccess={() => {
           // refresh profile (already handled by refreshProfile in modal)
         }}
-      />
+      />{' '}
+      {/* same as before */}
       <div id="main-content" className="w-full space-y-10">
         {/* Page Header */}
         <div className="space-y-2">
@@ -159,19 +162,17 @@ export default function ProfileSettings() {
               <div className="space-y-1.5">
                 <div
                   className="h-full rounded-full transition-all duration-700 ease-out progress-bar-fill"
-                  style={
-                    {
-                      '--progress-width': `${Math.min((profile.reputation / 200) * 100, 100)}%`,
-                      '--progress-gradient':
-                        profile.reputation >= 150
-                          ? 'linear-gradient(90deg, var(--color-success), color-mix(in srgb, var(--color-success) 70%, var(--color-primary)))'
-                          : profile.reputation >= 100
-                            ? 'linear-gradient(90deg, var(--color-primary-dim), var(--color-primary))'
-                            : profile.reputation >= 50
-                              ? 'linear-gradient(90deg, var(--color-warning), color-mix(in srgb, var(--color-warning) 80%, var(--color-error)))'
-                              : 'linear-gradient(90deg, var(--color-error), color-mix(in srgb, var(--color-error) 70%, var(--color-warning)))',
-                    } as React.CSSProperties
-                  }
+                  style={{
+                    width: `${Math.min((profile.reputation / 200) * 100, 100)}%`,
+                    background:
+                      profile.reputation >= 150
+                        ? 'linear-gradient(90deg, var(--color-success), color-mix(in srgb, var(--color-success) 70%, var(--color-primary)))'
+                        : profile.reputation >= 100
+                          ? 'linear-gradient(90deg, var(--color-primary-dim), var(--color-primary))'
+                          : profile.reputation >= 50
+                            ? 'linear-gradient(90deg, var(--color-warning), color-mix(in srgb, var(--color-warning) 80%, var(--color-error)))'
+                            : 'linear-gradient(90deg, var(--color-error), color-mix(in srgb, var(--color-error) 70%, var(--color-warning)))',
+                  }}
                 />
                 <div className="flex justify-between text-[10px] text-[--color-outline]">
                   <span>0</span>
@@ -325,6 +326,9 @@ export default function ProfileSettings() {
           </div>
         </div>
       </div>
-    </SidebarSettings>
+    </>
   )
+
+  if (standalone) return content
+  return <SidebarSettings>{content}</SidebarSettings>
 }

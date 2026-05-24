@@ -297,7 +297,9 @@ export default function AuthenticatedLayout({ children }: { children: ReactNode 
         </header>
 
         {/* Scrollable content */}
-        <div className="flex-1 overflow-y-auto pb-20 md:pb-0">{children}</div>
+        <div id="settings-scroll-container" className="flex-1 overflow-y-auto pb-20 md:pb-0">
+  {children}
+</div>
       </main>
 
       {/* Mobile Bottom Navigation – custom order with emphasised Report + Logout */}

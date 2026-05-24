@@ -4,7 +4,6 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import AuthGuard from './guards/AuthGuard';
 import AdminGuard from './guards/AdminGuard';
-import SettingsPage from './pages/auth/settings/SettingsPage';
 
 // ─────────────────────────────────────────────────────────────
 // Lazy‑loaded page components (all pages that were static)
@@ -24,9 +23,7 @@ const MyClaims = lazy(() => import('./pages/auth/MyClaims'));
 const ClaimantHandshake = lazy(() => import('./pages/claimant/ClaimantHandshake'));
 
 // Settings pages
-const ProfileSettings = lazy(() => import('./pages/auth/settings/ProfileSettings'));
-const SecuritySettings = lazy(() => import('./pages/auth/settings/SecuritySettings'));
-const NotifSettings = lazy(() => import('./pages/auth/settings/NotifSettings'));
+const SettingsPage = lazy(() => import('./pages/auth/settings/SettingsPage'));
 
 
 // 404 page
