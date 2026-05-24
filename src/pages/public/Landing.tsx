@@ -64,16 +64,16 @@ export default function Landing() {
               FoundPath
             </div>
           </div>
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="flex items-center gap-3 md:gap-8">
             <Link
               to="/login"
-              className="text-on-surface-variant hover:text-primary transition-colors font-body text-label-md"
+              className="text-on-surface-variant hover:text-primary transition-colors font-body text-sm md:text-label-md"
             >
               Sign In
             </Link>
             <Link
               to="/signup"
-              className="bg-primary text-on-primary px-6 py-2 rounded-xl font-headline font-bold text-label-md hover:scale-95 transition-transform"
+              className="bg-primary text-on-primary px-3 md:px-6 py-1 md:py-2 rounded-xl font-headline font-bold text-sm md:text-label-md hover:scale-95 transition-transform whitespace-nowrap"
             >
               Get Started
             </Link>
