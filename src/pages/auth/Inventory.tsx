@@ -8,6 +8,7 @@ import type { Item, ItemCategory, ItemType } from '../../types/database'
 import ItemCard from '../../components/ui/ItemCard'
 import { getSkeletonCards } from '../../components/ui/SkeletonLoader'
 import AuthenticatedLayout from '../../components/layout/AuthenticatedLayout'
+import { supabase } from '../../lib/supabase';
 
 // Reusable “Add New Entry” card
 const AddEntryCard = () => (
@@ -41,25 +42,46 @@ export default function Inventory() {
   const catParam = searchParams.get('category') as ItemCategory | null
   const searchQuery = searchParams.get('q') || ''
 
-  useEffect(() => {
-    const fetch = async () => {
-      setLoading(true)
-      const filters: ItemFilters = {}
-      if (typeParam) filters.type = typeParam
-      if (catParam) filters.category = catParam
-      if (searchQuery) filters.search = searchQuery
-      const { data } = await itemsApi.getAll(filters)
+  // Fetch items with current filters
+  const fetchItems = async () => {
+    setLoading(true)
+    const filters: ItemFilters = {}
+    if (typeParam) filters.type = typeParam
+    if (catParam) filters.category = catParam
+    if (searchQuery) filters.search = searchQuery
+    const { data } = await itemsApi.getAll(filters)
 
-      const typedItems =
-        (data as any[])?.map((item) => ({
-          ...item,
-          profiles: item.profiles?.[0],
-        })) ?? []
-      setItems(typedItems as Item[])
-      setLoading(false)
+    const typedItems =
+      (data as any[])?.map((item) => ({
+        ...item,
+        profiles: item.profiles?.[0],
+      })) ?? []
+    setItems(typedItems as Item[])
+    setLoading(false)
+  }
+
+  // Initial fetch + real‑time subscription
+  useEffect(() => {
+    fetchItems()
+
+    // Subscribe to all changes on the 'items' table
+    const channel = supabase
+      .channel('items-changes')
+      .on(
+        'postgres_changes',
+        { event: '*', schema: 'public', table: 'items' },
+        () => {
+          // Refetch the whole list with current filters
+          fetchItems()
+        }
+      )
+      .subscribe()
+
+    // Cleanup subscription when component unmounts or filters change
+    return () => {
+      supabase.removeChannel(channel)
     }
-    fetch()
-  }, [typeParam, catParam, searchQuery])
+  }, [typeParam, catParam, searchQuery]) // re‑run when filters change (re‑subscribe)
 
   const setFilter = (key: string, value: string | null) => {
     setSearchParams((prev) => {
