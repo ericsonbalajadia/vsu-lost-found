@@ -26,7 +26,7 @@ export default function Landing() {
   }, [])
 
   return (
-    <div id="main-content" className="min-h-screen bg-surface">
+    <div id="main-content" className="bg-surface">
       {/* TopAppBar – simplified (no sidebar) */}
       <nav className="bg-surface/85 backdrop-blur-xl sticky top-0 z-50">
         <div className="flex justify-between items-center w-full px-6 py-4 max-w-7xl mx-auto">
@@ -51,8 +51,8 @@ export default function Landing() {
       </nav>
 
       <main>
-        {/* Hero Section – use original image from HTML but adjust colours */}
-        <section className="relative min-h-[600px] flex items-center overflow-hidden bg-surface-container">
+        {/* Hero Section – full screen */}
+        <section className="relative min-h-screen flex items-center overflow-hidden bg-surface-container">
           <div className="absolute inset-0 z-0">
             <img
               className="w-full h-full object-cover opacity-30"
@@ -88,9 +88,9 @@ export default function Landing() {
           </div>
         </section>
 
-        {/* Latest Discoveries – dynamic preview */}
-        <section className="py-24 bg-surface">
-          <div className="max-w-7xl mx-auto px-6">
+        {/* Latest Discoveries – full screen */}
+        <section className="min-h-screen bg-surface flex flex-col justify-center py-16">
+          <div className="max-w-7xl mx-auto px-6 w-full">
             <div className="flex justify-between items-end mb-16">
               <div>
                 <h2 className="font-headline text-3xl font-bold text-on-surface tracking-tight">
@@ -109,26 +109,24 @@ export default function Landing() {
             </div>
 
             {loading ? (
-              <>{getSkeletonCards(6)} </>
+              <>{getSkeletonCards(6)}</>
             ) : previewItems.length === 0 ? (
               <p className="text-center text-on-surface-variant">
                 No items found. Check back later.
               </p>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                {previewItems && previewItems.length > 0 ? (
-                  previewItems.map((item) => (
-                    <ItemCard key={item.id} item={item} />
-                  ))
-                ) : null}
+                {previewItems.map((item) => (
+                  <ItemCard key={item.id} item={item} />
+                ))}
               </div>
             )}
           </div>
         </section>
 
-        {/* Core Features – static (same as HTML, colours adjusted) */}
-        <section className="py-24 bg-surface-container-low">
-          <div className="max-w-7xl mx-auto px-6">
+        {/* Core Features – full screen */}
+        <section className="min-h-screen bg-surface-container-low flex flex-col justify-center py-16">
+          <div className="max-w-7xl mx-auto px-6 w-full">
             <div className="text-center mb-16">
               <h2 className="font-headline text-3xl font-bold text-on-surface tracking-tight mb-4">
                 The Archive Standards
@@ -136,7 +134,6 @@ export default function Landing() {
               <div className="w-20 h-1 bg-primary mx-auto rounded-full"></div>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
-              {/* Feature cards – similar to HTML but with updated colours */}
               <div className="text-center px-4">
                 <div className="w-16 h-16 bg-surface-container-highest rounded-full flex items-center justify-center mx-auto mb-6">
                   <span className="material-symbols-outlined text-primary text-3xl">
@@ -176,10 +173,10 @@ export default function Landing() {
           </div>
         </section>
 
-        {/* How it Works, Final CTA, Footer – similar to HTML, adjust colours */}
-        {/* ... (static content, can be copied from HTML with colour updates) ... */}
+        {/* (Optional) How it Works & Final CTA sections can be added here as full-screen sections */}
       </main>
 
+      {/* Footer – not full screen */}
       <footer className="bg-surface-container border-t border-outline-variant/15 w-full">
         <div className="flex flex-col md:flex-row justify-between items-center w-full px-8 py-12 max-w-7xl mx-auto">
           <div className="mb-8 md:mb-0">
