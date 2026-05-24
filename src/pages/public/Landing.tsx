@@ -54,8 +54,15 @@ export default function Landing() {
       {/* TopAppBar – simplified (no sidebar) */}
       <nav className="bg-surface/85 backdrop-blur-xl sticky top-0 z-50">
         <div className="flex justify-between items-center w-full px-6 py-4 max-w-7xl mx-auto">
-          <div className="font-headline font-bold text-primary tracking-tighter text-headline-sm">
-            FoundPath
+          <div className="flex items-center gap-3">
+            <img
+              src="/FoundPath.png" // Replace with your actual logo path
+              alt="FoundPath Logo"
+              className="h-8 w-auto" // Adjust height as needed
+            />
+            <div className="font-headline font-bold text-primary tracking-tighter text-headline-sm">
+              FoundPath
+            </div>
           </div>
           <div className="hidden md:flex items-center space-x-8">
             <Link
