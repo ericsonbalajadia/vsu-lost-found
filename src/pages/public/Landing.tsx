@@ -1,6 +1,6 @@
 // src/pages/public/Landing.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { itemsApi } from '../../api/itemsApi'
 import type { Item } from '../../types/database'
@@ -13,6 +13,8 @@ import Autoplay from 'embla-carousel-autoplay'
 export default function Landing() {
   const [previewItems, setPreviewItems] = useState<Item[]>([])
   const [loading, setLoading] = useState(true)
+
+   const discoveriesRef = useRef<HTMLElement>(null)
 
   // Embla carousel setup with autoplay and loop
   const [emblaRef] = useEmblaCarousel(
@@ -41,6 +43,11 @@ export default function Landing() {
     }
     fetchPreview()
   }, [])
+
+   const scrollToDiscoveries = () => {
+    discoveriesRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+
 
   return (
     <div id="main-content" className="bg-surface">
@@ -72,11 +79,11 @@ export default function Landing() {
         <section className="relative min-h-screen flex items-center overflow-hidden bg-surface-container">
           <div className="absolute inset-0 z-0">
             <img
-              className="w-full h-full object-cover opacity-30"
-              src="https://lh3.googleusercontent.com/aida-public/AB6AXuA-fL862R3R8E5x_SFRv-TLbGlkw21HWS23E8HBYcFBk2M8vjJquDp7TyBh9sZqTJwHoCjl0RLMgjYQaZNLybxFbMn-Z_xmiMayfbz-b7sMBUygdQuHaSWqP5lpxZQiY0Mdat8gSqXW-YtIF5uw59rjQvkIt2u2brGKqnu9QjqSxC_lZ-XWvCbmrUan_eXLS0wrTecnCCZNGV4v8iA5iJN6MUmf8I4nqF00aztR5O1Z7-tR1ry6V4oqT6ZHXPAvXtm2a4pZNrKOhZU"
+              className="w-full h-full object-cover blur-[0.75px]"
+              src="./project_site.png"
               alt="Campus Hall"
             />
-            <div className="absolute inset-0 bg-gradient-to-b from-surface/20 via-surface to-surface"></div>
+            <div className="absolute inset-0 bg-gradient-to-b from-surface/5 via-surface/90 to-surface 50% to-100%"></div>
           </div>
           <div className="relative z-10 max-w-7xl mx-auto px-6 py-24 text-center">
             <div className="max-w-3xl mx-auto">
@@ -103,10 +110,24 @@ export default function Landing() {
               </div>
             </div>
           </div>
+
+          {/* Scroll Down Arrow Indicator */}
+          <div 
+            className="absolute bottom-50 left-1/2 transform -translate-x-1/2 cursor-pointer z-20 animate-bounce"
+            onClick={scrollToDiscoveries}
+            role="button"
+            aria-label="Scroll to next section"
+            tabIndex={0}
+            onKeyDown={(e) => e.key === 'Enter' && scrollToDiscoveries()}
+          >
+            <span className="material-symbols-outlined text-primary text-9xl">
+             keyboard_double_arrow_down
+            </span>
+          </div>
         </section>
 
         {/* Latest Discoveries – full screen */}
-<section className="min-h-screen bg-surface flex flex-col justify-center py-16">
+        <section ref={discoveriesRef} className="min-h-screen bg-surface flex flex-col justify-center py-16">
           <div className="max-w-7xl mx-auto px-6 w-full">
             <div className="flex justify-between items-end mb-16">
               <div>
