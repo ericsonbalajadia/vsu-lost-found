@@ -1,6 +1,6 @@
 // src/pages/auth/Inventory.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { itemsApi } from '../../api/itemsApi'
 import type { ItemFilters } from '../../api/itemsApi'
@@ -43,7 +43,7 @@ export default function Inventory() {
   const searchQuery = searchParams.get('q') || ''
 
   // Fetch items with current filters
-  const fetchItems = async () => {
+  const fetchItems = useCallback(async () => {
     setLoading(true)
     const filters: ItemFilters = {}
     if (typeParam) filters.type = typeParam
@@ -58,10 +58,11 @@ export default function Inventory() {
       })) ?? []
     setItems(typedItems as Item[])
     setLoading(false)
-  }
+  }, [typeParam, catParam, searchQuery])
 
   // Initial fetch + real‑time subscription
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     fetchItems()
 
     // Subscribe to all changes on the 'items' table
@@ -81,7 +82,7 @@ export default function Inventory() {
     return () => {
       supabase.removeChannel(channel)
     }
-  }, [typeParam, catParam, searchQuery]) // re‑run when filters change (re‑subscribe)
+  }, [fetchItems]) // re‑run when filters change (re‑subscribe)
 
   const setFilter = (key: string, value: string | null) => {
     setSearchParams((prev) => {
