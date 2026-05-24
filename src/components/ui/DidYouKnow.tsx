@@ -59,14 +59,14 @@ export default function DidYouKnow() {
   return (
     <div className="mt-12 bg-gradient-to-r from-primary/5 via-surface-container-low to-primary/5 rounded-2xl p-6 md:p-8 border border-primary/10 shadow-sm transition-all hover:shadow-md">
       <div className="flex flex-col md:flex-row items-center gap-5">
-        <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary shrink-0">
-          <span className="material-symbols-outlined text-3xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+        <div className="w-16 h-16 rounded-full bg-primary/80 flex items-center justify-center text-primary shrink-0">
+          <span className="material-symbols-outlined text-3xl text-white" style={{ fontVariationSettings: "'FILL' 1" }}>
             {tip.icon}
           </span>
         </div>
         <div className="flex-1 text-center md:text-left">
-          <h3 className="text-xl font-bold font-headline text-primary mb-1">{tip.title}</h3>
-          <p className={`text-on-surface-variant transition-opacity duration-300 ${fade ? 'opacity-100' : 'opacity-0'}`}>
+          <h3 className="text-xl font-bold font-headline text-primary mb-1 ">{tip.title}</h3>
+          <p className={`text-on-surface-variant text-gray-800 transition-opacity duration-300 ${fade ? 'opacity-100' : 'opacity-0'}`}>
             {tip.message}
           </p>
         </div>

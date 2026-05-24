@@ -129,21 +129,36 @@ export default function Landing() {
         {/* Latest Discoveries – full screen */}
         <section
           ref={discoveriesRef}
-          className="min-h-[90vh] bg-surface py-40" // removed flex centering
+          className="relative min-h-[110vh] bg-gradient-to-b from-primary/90 to-primary/15 py-40 overflow-hidden"
         >
+          {/* Decorative wave at top */}
+          <div className="absolute top-0 left-0 w-full overflow-hidden leading-0 z-0">
+            <svg
+              className="relative block w-full h-12"
+              viewBox="0 0 1200 120"
+              preserveAspectRatio="none"
+            >
+              <path
+                d="M0,0V46.29c47.79,22.2,103.59,32.17,158,28,70.36-5.37,136.33-33.31,206.8-37.5C438.64,32.43,512.34,53.67,583,72.05c69.27,18,138.3,24.88,209.4,13.08,36.15-6,69.85-17.84,104.45-29.34C989.49,25,1113-14.29,1200,52.47V0Z"
+                fill="white"
+                opacity="0.15"
+              />
+            </svg>
+          </div>
+
           <div className="max-w-7xl mx-auto px-6 w-full">
             <div className="flex justify-between items-end mb-12">
               <div>
-                <h2 className="font-headline text-3xl font-bold text-on-surface tracking-tight">
+                <h2 className="font-headline text-3xl font-bold text-on-surface text-white tracking-tight">
                   Latest Discoveries
                 </h2>
-                <p className="font-body text-on-surface-variant mt-2">
+                <p className="font-body text-on-surface-variant text-white mt-2">
                   Recently archived items awaiting their owners.
                 </p>
               </div>
               <Link
                 to="/inventory"
-                className="hidden md:flex items-center gap-2 text-primary font-bold hover:gap-3 transition-all"
+                className="hidden md:flex items-center gap-2 text-primary font-bold text-white hover:gap-3 transition-all"
               >
                 View Archive <span className="material-symbols-outlined">arrow_forward</span>
               </Link>
@@ -156,11 +171,11 @@ export default function Landing() {
                 No items found. Check back later.
               </p>
             ) : (
-              <div className="embla overflow-hidden" ref={emblaRef}>
+              <div className="embla overflow-hidden text-white" ref={emblaRef}>
                 <div className="embla__container flex">
                   {previewItems.map((item) => (
                     <div
-                      className="embla__slide min-w-0 flex-shrink-0 w-full md:w-1/2 lg:w-1/3 px-3"
+                      className="embla__slide min-w-0 flex-shrink-0 w-full md:w-1/2 lg:w-1/3 px-3 text-white"
                       key={item.id}
                     >
                       <ItemCard item={item} />
@@ -247,7 +262,7 @@ export default function Landing() {
         </section>
 
         {/* How It Works – diagonal layout on desktop */}
-        <section className="py-60 mb-60 bg-surface relative overflow-hidden">
+        <section className="min-h-[80vh] bg-gradient-to-b from-primary/90 to-primary/25 py-40 relative overflow-hidden">
           {/* Decorative wave at top */}
           <div className="absolute top-0 left-0 w-full overflow-hidden leading-0">
             <svg
@@ -266,11 +281,11 @@ export default function Landing() {
           <div className="max-w-7xl mx-auto px-6">
             {/* Header */}
             <div className="text-center mb-16">
-              <h2 className="font-headline text-3xl font-bold text-on-surface tracking-tight mb-4">
+              <h2 className="font-headline text-3xl font-bold text-on-surface text-white tracking-tight mb-4">
                 How It Works
               </h2>
               <div className="w-20 h-1 bg-gradient-to-r from-primary via-primary/70 to-transparent mx-auto rounded-full" />
-              <p className="font-body text-on-surface-variant mt-4 max-w-2xl mx-auto">
+              <p className="font-body text-on-surface-variant text-white mt-4 max-w-2xl mx-auto">
                 From reporting to recovery – a seamless process designed for the campus community.
               </p>
             </div>
@@ -301,21 +316,22 @@ export default function Landing() {
       </div> */}
 
               {/* Steps grid – diagonal positioning via margin-top and margin-left */}
-              <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 lg:gap-0 relative">
+              {/* Steps grid – diagonal positioning via margin-top and margin-left */}
+              <div className="grid grid-cols-1 lg:grid-cols-4 gap-8 lg:gap-0 text-white relative">
                 {/* Step 1 */}
                 <div className="relative text-center lg:text-left lg:translate-x-0 lg:translate-y-0 lg:mt-4">
-                  <div className="relative z-10 mx-auto lg:mx-0 w-20 h-20 mb-5">
-                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300 border border-primary/20">
-                      <span className="material-symbols-outlined text-primary text-3xl">
+                  <div className="relative z-10 mx-auto lg:mx-0 w-24 h-24 mb-8">
+                    <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300 border border-primary/20">
+                      <span className="material-symbols-outlined text-white text-[10rem]">
                         add_circle
                       </span>
                     </div>
-                    <div className="absolute -top-2 -right-2 w-7 h-7 bg-primary rounded-full flex items-center justify-center text-white text-sm font-bold shadow-md">
+                    <div className="absolute -top-3 -right-3 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white text-base font-bold shadow-md">
                       1
                     </div>
                   </div>
-                  <h3 className="font-headline text-xl font-bold mb-2">Report Item</h3>
-                  <p className="font-body text-on-surface-variant text-sm leading-relaxed max-w-xs mx-auto lg:mx-0">
+                  <h3 className="font-headline text-2xl font-bold mb-2">Report Item</h3>
+                  <p className="font-body text-on-surface-variant text-base text-white leading-relaxed max-w-xs mx-auto lg:mx-0">
                     Lost or found something? Submit a report with location, photo, and a security
                     question (for found items).
                   </p>
@@ -323,18 +339,16 @@ export default function Landing() {
 
                 {/* Step 2 */}
                 <div className="relative text-center lg:text-left lg:translate-x-8 lg:translate-y-12">
-                  <div className="relative z-10 mx-auto lg:mx-0 w-20 h-20 mb-5">
-                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300 border border-primary/20">
-                      <span className="material-symbols-outlined text-primary text-3xl">
-                        search
-                      </span>
+                  <div className="relative z-10 mx-auto lg:mx-0 w-24 h-24 mb-8">
+                    <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300 border border-primary/20">
+                      <span className="material-symbols-outlined text-white text-4xl">search</span>
                     </div>
-                    <div className="absolute -top-2 -right-2 w-7 h-7 bg-primary rounded-full flex items-center justify-center text-white text-sm font-bold shadow-md">
+                    <div className="absolute -top-3 -right-3 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white text-base font-bold shadow-md">
                       2
                     </div>
                   </div>
-                  <h3 className="font-headline text-xl font-bold mb-2">Smart Matching</h3>
-                  <p className="font-body text-on-surface-variant text-sm leading-relaxed max-w-xs mx-auto lg:mx-0">
+                  <h3 className="font-headline text-2xl font-bold mb-2">Smart Matching</h3>
+                  <p className="font-body text-on-surface-variant text-base text-white leading-relaxed max-w-xs mx-auto lg:mx-0">
                     Our system automatically notifies both parties when a lost and found item match
                     by category and location.
                   </p>
@@ -342,18 +356,18 @@ export default function Landing() {
 
                 {/* Step 3 */}
                 <div className="relative text-center lg:text-left lg:translate-x-16 lg:translate-y-24">
-                  <div className="relative z-10 mx-auto lg:mx-0 w-20 h-20 mb-5">
-                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300 border border-primary/20">
-                      <span className="material-symbols-outlined text-primary text-3xl">
+                  <div className="relative z-10 mx-auto lg:mx-0 w-24 h-24 mb-8">
+                    <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300 border border-primary/20">
+                      <span className="material-symbols-outlined text-white text-4xl">
                         verified_user
                       </span>
                     </div>
-                    <div className="absolute -top-2 -right-2 w-7 h-7 bg-primary rounded-full flex items-center justify-center text-white text-sm font-bold shadow-md">
+                    <div className="absolute -top-3 -right-3 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white text-base font-bold shadow-md">
                       3
                     </div>
                   </div>
-                  <h3 className="font-headline text-xl font-bold mb-2">Claim & Verify</h3>
-                  <p className="font-body text-on-surface-variant text-sm leading-relaxed max-w-xs mx-auto lg:mx-0">
+                  <h3 className="font-headline text-2xl font-bold mb-2">Claim & Verify</h3>
+                  <p className="font-body text-on-surface-variant text-base text-white leading-relaxed max-w-xs mx-auto lg:mx-0">
                     Claimants answer the security question. The finder (Samaritan) reviews and
                     accepts or rejects the claim.
                   </p>
@@ -361,18 +375,18 @@ export default function Landing() {
 
                 {/* Step 4 */}
                 <div className="relative text-center lg:text-left lg:translate-x-24 lg:translate-y-36">
-                  <div className="relative z-10 mx-auto lg:mx-0 w-20 h-20 mb-5">
-                    <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300 border border-primary/20">
-                      <span className="material-symbols-outlined text-primary text-3xl">
+                  <div className="relative z-10 mx-auto lg:mx-0 w-24 h-24 mb-8">
+                    <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform duration-300 border border-primary/20">
+                      <span className="material-symbols-outlined text-white text-4xl">
                         handshake
                       </span>
                     </div>
-                    <div className="absolute -top-2 -right-2 w-7 h-7 bg-primary rounded-full flex items-center justify-center text-white text-sm font-bold shadow-md">
+                    <div className="absolute -top-3 -right-3 w-8 h-8 bg-primary rounded-full flex items-center justify-center text-white text-base font-bold shadow-md">
                       4
                     </div>
                   </div>
-                  <h3 className="font-headline text-xl font-bold mb-2">Handshake & Return</h3>
-                  <p className="font-body text-on-surface-variant text-sm leading-relaxed max-w-xs mx-auto lg:mx-0">
+                  <h3 className="font-headline text-2xl font-bold mb-2">Handshake & Return</h3>
+                  <p className="font-body text-on-surface-variant text-base text-white leading-relaxed max-w-xs mx-auto lg:mx-0">
                     Communicate via email, arrange a safe meetup, and mark the item as resolved.
                     Earn +10 reputation!
                   </p>
