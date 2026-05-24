@@ -188,11 +188,8 @@ export default function ItemDetailModal({
   if (!isOpen) return null
 
   return createPortal(
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-[1050] animate-fadeIn">
-      <div
-        ref={modalRef}
-        className="bg-surface-container-lowest text-on-surface rounded-[2.5rem] shadow-soft border border-outline-variant/10 w-full max-w-4xl max-h-[90vh] overflow-y-auto flex flex-col relative scale-up"
-      >
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 md:p-8 bg-slate-900/40 backdrop-blur-sm">
+      <div className="relative w-full max-w-5xl max-h-[90vh] overflow-hidden bg-white rounded-2xl shadow-2xl flex flex-col md:flex-row">
         <button
           aria-label="Close item details modal"
           onClick={onClose}
