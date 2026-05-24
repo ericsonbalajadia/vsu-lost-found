@@ -157,12 +157,12 @@ export default function ProfileSettings() {
                 <ReputationBadge score={profile.reputation} size="md" showLabel />
               </div>
               <div className="space-y-1.5">
-                <div className="w-full h-2 rounded-full overflow-hidden bg-[--color-surface-container-highest]">
-                  <div
-                    className="h-full rounded-full transition-all duration-700 ease-out"
-                    style={{
-                      width: `${Math.min((profile.reputation / 200) * 100, 100)}%`,
-                      background:
+                <div
+                  className="h-full rounded-full transition-all duration-700 ease-out progress-bar-fill"
+                  style={
+                    {
+                      '--progress-width': `${Math.min((profile.reputation / 200) * 100, 100)}%`,
+                      '--progress-gradient':
                         profile.reputation >= 150
                           ? 'linear-gradient(90deg, var(--color-success), color-mix(in srgb, var(--color-success) 70%, var(--color-primary)))'
                           : profile.reputation >= 100
@@ -170,13 +170,9 @@ export default function ProfileSettings() {
                             : profile.reputation >= 50
                               ? 'linear-gradient(90deg, var(--color-warning), color-mix(in srgb, var(--color-warning) 80%, var(--color-error)))'
                               : 'linear-gradient(90deg, var(--color-error), color-mix(in srgb, var(--color-error) 70%, var(--color-warning)))',
-                    }}
-                    role="progressbar"
-                    aria-valuenow={profile.reputation}
-                    aria-valuemin={0}
-                    aria-valuemax={200}
-                  />
-                </div>
+                    } as React.CSSProperties
+                  }
+                />
                 <div className="flex justify-between text-[10px] text-[--color-outline]">
                   <span>0</span>
                   <span className="font-medium">{profile.reputation} / 200</span>
