@@ -49,7 +49,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchProfile = useCallback(
     async (userId: string, timeoutMs = 8000): Promise<Profile | null> => {
-      console.log('[Auth] fetching profile for', userId);
       const timeoutPromise = new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error('Profile fetch timeout')), timeoutMs)
       );
@@ -67,7 +66,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (error.code === 'PGRST116') return null;
           throw error;
         }
-        console.log('[Auth] profile loaded');
         return data;
       } catch (err) {
         console.error('[Auth] profile fetch error:', err);
@@ -91,15 +89,62 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           isAdmin: false,
           error: null,
         });
-        // Then fetch profile (with timeout) – do not await
-        const profile = await fetchProfile(session.user.id);
-        if (!isMounted.current) return;
-        setState((prev) => ({
-          ...prev,
-          profile,
-          profileLoading: false,
-          isAdmin: profile?.role === 'admin',
-        }));
+        // Fetch profile in background without blocking
+        fetchProfile(session.user.id)
+          .then(async (profile) => {
+            if (!isMounted.current) return;
+            
+            // If profile doesn't exist, try to create it
+            if (!profile) {
+              try {
+                const { error } = await supabase.rpc('create_user_profile', {
+                  user_id: session.user.id,
+                  user_email: session.user.email || '',
+                  user_name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'User',
+                });
+                if (error) {
+                  console.error('[Auth] RPC error:', error);
+                }
+                
+                // Small delay to ensure DB write is complete
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                // Fetch again after creation
+                const newProfile = await fetchProfile(session.user.id);
+                
+                if (!isMounted.current) return;
+                setState((prev) => ({
+                  ...prev,
+                  profile: newProfile,
+                  profileLoading: false,
+                  isAdmin: newProfile?.role === 'admin',
+                }));
+              } catch (err) {
+                console.error('[Auth] profile creation error:', err);
+                if (isMounted.current) {
+                  setState((prev) => ({
+                    ...prev,
+                    profileLoading: false,
+                  }));
+                }
+              }
+            } else {
+              setState((prev) => ({
+                ...prev,
+                profile,
+                profileLoading: false,
+                isAdmin: profile?.role === 'admin',
+              }));
+            }
+          })
+          .catch((err: Error) => {
+            console.error('[Auth] background profile fetch error:', err);
+            if (!isMounted.current) return;
+            setState((prev) => ({
+              ...prev,
+              profileLoading: false,
+            }));
+          });
 
         // If the OAuth redirect left an auth hash fragment (e.g. #access_token=... or just #),
         // clear only the hash while preserving the current route and query string.
@@ -138,7 +183,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
       }
     },
-    [fetchProfile, navigate]
+    [fetchProfile]
   );
 
   const refreshProfile = useCallback(async () => {
