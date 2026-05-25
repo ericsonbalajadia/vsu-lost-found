@@ -153,8 +153,11 @@ const fetchClaims = useCallback(async () => {
   if (!isOpen) return null
 
   return createPortal(
-    <div ref={modalRef} tabIndex={-1} className="fixed inset-0 z-[70] flex items-center justify-center p-4 md:p-8 bg-slate-900/40 backdrop-blur-sm">
-      <div className="relative w-full max-w-5xl max-h-[90vh] overflow-hidden bg-white rounded-2xl shadow-2xl flex flex-col md:flex-row">
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-[1050] animate-fadeIn">
+      <div
+        ref={modalRef}
+        className="bg-surface-container-lowest text-on-surface rounded-[2.5rem] shadow-soft border border-outline-variant/10 w-full max-w-4xl max-h-[90vh] overflow-y-auto flex flex-col relative scale-up"
+      >
         {/* Close button */}
         <button
           aria-label="Close item details modal"
@@ -615,7 +618,7 @@ const fetchClaims = useCallback(async () => {
 
       {/* Decline Confirmation Modal */}
       {showRejectConfirm && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[80]">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[1100]">
           <div className="bg-white rounded-xl p-5 md:p-6 max-w-[90%] sm:max-w-sm w-full">
             <h3 className="text-lg md:text-xl font-bold mb-2">Confirm Penalty</h3>
             <p className="text-sm md:text-base mb-4">

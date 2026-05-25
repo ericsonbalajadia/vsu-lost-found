@@ -54,7 +54,7 @@ export default function LostItemFindersModal({ isOpen, onClose, item }: LostItem
   if (!isOpen) return null
 
   return createPortal(
-    <div ref={modalRef} tabIndex={-1} className="fixed inset-0 z-[60] flex items-center justify-center p-4 md:p-8 bg-slate-900/40 backdrop-blur-sm">
+    <div ref={modalRef} tabIndex={-1} className="fixed inset-0 z-[1050] flex items-center justify-center p-4 md:p-8 bg-slate-900/40 backdrop-blur-sm">
       <div className="relative w-full max-w-4xl max-h-[90vh] overflow-hidden bg-white rounded-2xl shadow-2xl flex flex-col md:flex-row">
         <button
           aria-label="Close potential finders modal"
