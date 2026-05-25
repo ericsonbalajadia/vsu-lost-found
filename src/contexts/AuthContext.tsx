@@ -8,6 +8,7 @@ import React, {
   useCallback,
   useContext,
 } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type {
   User,
   Session,
@@ -33,6 +34,7 @@ interface AuthContextValue extends AuthState {
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const navigate = useNavigate();
   const [state, setState] = useState<AuthState>({
     user: null,
     profile: null,
@@ -100,14 +102,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }));
 
         // If the OAuth redirect left a hash fragment (e.g. #access_token=... or just #),
-        // replace the URL to the inventory route so the app doesn't stay on the hash.
+        // navigate to the inventory route so the router updates without a full reload.
         try {
           if (typeof window !== 'undefined' && window.location.hash) {
-            const target = '/inventory';
-            window.history.replaceState(null, '', target);
+            navigate('/inventory', { replace: true });
           }
         } catch (err) {
-          console.warn('[Auth] unable to clean URL hash:', err);
+          console.warn('[Auth] unable to navigate after OAuth redirect:', err);
         }
       } else {
         setState({
@@ -182,7 +183,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           data: { session },
         } = await supabase.auth.getSession();
         if (session?.user) {
-          window.history.replaceState(null, '', '/inventory');
+          navigate('/inventory', { replace: true });
         }
       } catch (err) {
         console.warn('[Auth] error checking session for hash replace:', err);
