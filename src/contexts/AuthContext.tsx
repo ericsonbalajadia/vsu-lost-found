@@ -122,7 +122,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         });
       }
     },
-    [fetchProfile]
+    [fetchProfile, navigate]
   );
 
   const refreshProfile = useCallback(async () => {
@@ -190,7 +190,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
     };
     tryReplaceHash();
-  }, []);
+  }, [navigate]);
 
   const signOut = async () => {
     await supabase.auth.signOut();
