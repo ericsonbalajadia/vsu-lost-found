@@ -98,6 +98,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           profileLoading: false,
           isAdmin: profile?.role === 'admin',
         }));
+
+        // If the OAuth redirect left a hash fragment (e.g. #access_token=... or just #),
+        // replace the URL to the inventory route so the app doesn't stay on the hash.
+        try {
+          if (typeof window !== 'undefined' && window.location.hash) {
+            const target = '/inventory';
+            window.history.replaceState(null, '', target);
+          }
+        } catch (err) {
+          console.warn('[Auth] unable to clean URL hash:', err);
+        }
       } else {
         setState({
           user: null,
@@ -155,6 +166,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       subscription.unsubscribe();
     };
   }, [applySession]);
+
+  // On mount: if the app was returned to a hash URL (e.g. '/#') check for an
+  // existing session and, if present, replace the URL to '/inventory'. This
+  // ensures OAuth callback hashes don't leave the router at '/#'.
+  useEffect(() => {
+    const tryReplaceHash = async () => {
+      if (typeof window === 'undefined') return;
+      if (!window.location.hash) return;
+      // Only consider root path or empty pathname
+      const path = window.location.pathname || '/';
+      if (path !== '/' && path !== '') return;
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        if (session?.user) {
+          window.history.replaceState(null, '', '/inventory');
+        }
+      } catch (err) {
+        console.warn('[Auth] error checking session for hash replace:', err);
+      }
+    };
+    tryReplaceHash();
+  }, []);
 
   const signOut = async () => {
     await supabase.auth.signOut();

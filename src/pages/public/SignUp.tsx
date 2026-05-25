@@ -55,12 +55,15 @@ export default function SignUp() {
   }
 
   const handleGoogleSignUp = async () => {
+    const base = import.meta.env.VITE_APP_URL ?? window.location.origin;
     await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${import.meta.env.VITE_APP_URL}/inventory`,
+        redirectTo: `${base}/inventory`,
+        // Force Google to show the account chooser
+        queryParams: { prompt: 'select_account' },
       },
-    })
+    });
   }
 
   return (
