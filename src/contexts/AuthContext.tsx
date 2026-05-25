@@ -101,14 +101,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           isAdmin: profile?.role === 'admin',
         }));
 
-        // If the OAuth redirect left a hash fragment (e.g. #access_token=... or just #),
-        // navigate to the inventory route so the router updates without a full reload.
+        // If the OAuth redirect left an auth hash fragment (e.g. #access_token=... or just #),
+        // clear only the hash while preserving the current route and query string.
         try {
           if (typeof window !== 'undefined' && window.location.hash) {
-            navigate('/inventory', { replace: true });
+            const hash = window.location.hash;
+            const hashParams = new URLSearchParams(hash.startsWith('#') ? hash.slice(1) : hash);
+            const isOAuthHash =
+              hash === '#' ||
+              hashParams.has('access_token') ||
+              hashParams.has('refresh_token') ||
+              hashParams.has('expires_in') ||
+              hashParams.has('token_type') ||
+              hashParams.has('type');
+
+            if (isOAuthHash) {
+              window.history.replaceState(
+                window.history.state,
+                document.title,
+                `${window.location.pathname}${window.location.search}`
+              );
+            }
           }
         } catch (err) {
-          console.warn('[Auth] unable to navigate after OAuth redirect:', err);
+          console.warn('[Auth] unable to clear OAuth redirect hash:', err);
         }
       } else {
         setState({
