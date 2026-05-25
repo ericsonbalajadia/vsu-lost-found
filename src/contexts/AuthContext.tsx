@@ -8,6 +8,7 @@ import React, {
   useCallback,
   useContext,
 } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type {
   User,
   Session,
@@ -33,6 +34,7 @@ interface AuthContextValue extends AuthState {
 export const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const navigate = useNavigate();
   const [state, setState] = useState<AuthState>({
     user: null,
     profile: null,
@@ -47,7 +49,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const fetchProfile = useCallback(
     async (userId: string, timeoutMs = 8000): Promise<Profile | null> => {
-      console.log('[Auth] fetching profile for', userId);
       const timeoutPromise = new Promise<never>((_, reject) =>
         setTimeout(() => reject(new Error('Profile fetch timeout')), timeoutMs)
       );
@@ -65,7 +66,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (error.code === 'PGRST116') return null;
           throw error;
         }
-        console.log('[Auth] profile loaded');
         return data;
       } catch (err) {
         console.error('[Auth] profile fetch error:', err);
@@ -89,15 +89,88 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           isAdmin: false,
           error: null,
         });
-        // Then fetch profile (with timeout) – do not await
-        const profile = await fetchProfile(session.user.id);
-        if (!isMounted.current) return;
-        setState((prev) => ({
-          ...prev,
-          profile,
-          profileLoading: false,
-          isAdmin: profile?.role === 'admin',
-        }));
+        // Fetch profile in background without blocking
+        fetchProfile(session.user.id)
+          .then(async (profile) => {
+            if (!isMounted.current) return;
+            
+            // If profile doesn't exist, try to create it
+            if (!profile) {
+              try {
+                const { error } = await supabase.rpc('create_user_profile', {
+                  user_id: session.user.id,
+                  user_email: session.user.email || '',
+                  user_name: session.user.user_metadata?.full_name || session.user.email?.split('@')[0] || 'User',
+                });
+                if (error) {
+                  console.error('[Auth] RPC error:', error);
+                }
+                
+                // Small delay to ensure DB write is complete
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                // Fetch again after creation
+                const newProfile = await fetchProfile(session.user.id);
+                
+                if (!isMounted.current) return;
+                setState((prev) => ({
+                  ...prev,
+                  profile: newProfile,
+                  profileLoading: false,
+                  isAdmin: newProfile?.role === 'admin',
+                }));
+              } catch (err) {
+                console.error('[Auth] profile creation error:', err);
+                if (isMounted.current) {
+                  setState((prev) => ({
+                    ...prev,
+                    profileLoading: false,
+                  }));
+                }
+              }
+            } else {
+              setState((prev) => ({
+                ...prev,
+                profile,
+                profileLoading: false,
+                isAdmin: profile?.role === 'admin',
+              }));
+            }
+          })
+          .catch((err: Error) => {
+            console.error('[Auth] background profile fetch error:', err);
+            if (!isMounted.current) return;
+            setState((prev) => ({
+              ...prev,
+              profileLoading: false,
+            }));
+          });
+
+        // If the OAuth redirect left an auth hash fragment (e.g. #access_token=... or just #),
+        // clear only the hash while preserving the current route and query string.
+        try {
+          if (typeof window !== 'undefined' && window.location.hash) {
+            const hash = window.location.hash;
+            const hashParams = new URLSearchParams(hash.startsWith('#') ? hash.slice(1) : hash);
+            const isOAuthHash =
+              hash === '#' ||
+              hashParams.has('access_token') ||
+              hashParams.has('refresh_token') ||
+              hashParams.has('expires_in') ||
+              hashParams.has('token_type') ||
+              hashParams.has('type');
+
+            if (isOAuthHash) {
+              window.history.replaceState(
+                window.history.state,
+                document.title,
+                `${window.location.pathname}${window.location.search}`
+              );
+            }
+          }
+        } catch (err) {
+          console.warn('[Auth] unable to clear OAuth redirect hash:', err);
+        }
       } else {
         setState({
           user: null,
@@ -155,6 +228,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       subscription.unsubscribe();
     };
   }, [applySession]);
+
+  // On mount: if the app was returned to a hash URL (e.g. '/#') check for an
+  // existing session and, if present, replace the URL to '/inventory'. This
+  // ensures OAuth callback hashes don't leave the router at '/#'.
+  useEffect(() => {
+    const tryReplaceHash = async () => {
+      if (typeof window === 'undefined') return;
+      if (!window.location.hash) return;
+      // Only consider root path or empty pathname
+      const path = window.location.pathname || '/';
+      if (path !== '/' && path !== '') return;
+      try {
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        if (session?.user) {
+          navigate('/inventory', { replace: true });
+        }
+      } catch (err) {
+        console.warn('[Auth] error checking session for hash replace:', err);
+      }
+    };
+    tryReplaceHash();
+  }, [navigate]);
 
   const signOut = async () => {
     await supabase.auth.signOut();

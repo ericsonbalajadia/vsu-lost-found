@@ -1,6 +1,7 @@
 // src/App.tsx
 import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
 import { Toaster } from 'react-hot-toast';
 import AuthGuard from './guards/AuthGuard';
 import AdminGuard from './guards/AdminGuard';
@@ -67,8 +68,9 @@ export default function App() {
         }}
       />
       <BrowserRouter>
-        <Suspense fallback={<PageLoader />}>
-          <Routes>
+        <AuthProvider>
+          <Suspense fallback={<PageLoader />}>
+            <Routes>
             {/* Public routes */}
             <Route path="/" element={<Landing />} />
             <Route path="/signup" element={<SignUp />} />
@@ -96,7 +98,8 @@ export default function App() {
             {/* 404 catch‑all */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </Suspense>
+          </Suspense>
+        </AuthProvider>
       </BrowserRouter>
     </>
   );

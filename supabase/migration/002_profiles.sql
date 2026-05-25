@@ -77,7 +77,7 @@ CREATE POLICY "Enable insert for trigger" ON profiles
 
 -- -----------------------------------------------------
 -- 5. RPC function to create a profile (used by frontend and trigger)
--- -----------------------------------------------------
+-- Updated to handle unique email constraint
 DROP FUNCTION IF EXISTS create_user_profile(UUID, TEXT, TEXT);
 CREATE OR REPLACE FUNCTION create_user_profile(
   user_id UUID,
@@ -91,7 +91,14 @@ AS $$
 BEGIN
   INSERT INTO profiles (id, full_name, email, reputation, role)
   VALUES (user_id, user_name, user_email, 100, 'student')
-  ON CONFLICT (id) DO NOTHING;
+  ON CONFLICT (id) DO UPDATE SET
+    full_name = COALESCE(EXCLUDED.full_name, profiles.full_name),
+    email = COALESCE(EXCLUDED.email, profiles.email),
+    updated_at = NOW();
+EXCEPTION WHEN unique_violation THEN
+  -- If email already exists but it's for the same user ID, that's fine
+  -- If it's a different user, the user will need to use a different email
+  RAISE NOTICE 'Profile or email already exists for user %', user_id;
 END;
 $$;
 
@@ -99,7 +106,6 @@ GRANT EXECUTE ON FUNCTION create_user_profile TO authenticated;
 
 -- -----------------------------------------------------
 -- 6. Trigger function that calls create_user_profile
--- -----------------------------------------------------
 DROP FUNCTION IF EXISTS handle_new_user_trigger() CASCADE;
 CREATE OR REPLACE FUNCTION handle_new_user_trigger()
 RETURNS TRIGGER
@@ -107,11 +113,16 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 BEGIN
-  PERFORM create_user_profile(
-    NEW.id,
-    NEW.email,
-    COALESCE(NEW.raw_user_meta_data->>'full_name', split_part(NEW.email, '@', 1))
-  );
+  BEGIN
+    PERFORM create_user_profile(
+      NEW.id,
+      NEW.email,
+      COALESCE(NEW.raw_user_meta_data->>'full_name', split_part(NEW.email, '@', 1))
+    );
+  EXCEPTION WHEN OTHERS THEN
+    -- Log the error but don't fail user creation
+    RAISE NOTICE 'Failed to create profile for user %: %', NEW.id, SQLERRM;
+  END;
   RETURN NEW;
 END;
 $$;
