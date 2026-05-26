@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 225" fill="none">
+  <!-- Background (soft neutral) -->
+  <rect width="400" height="225" rx="12" fill="#F4F7F8"/>
+
+  <!-- Dashed border -->
+  <rect x="12" y="12" width="376" height="201" rx="8"
+        stroke="#C9D3D6" stroke-width="2" stroke-dasharray="8 6"/>
+
+  <!-- Icon group – centered horizontally and vertically adjusted -->
+  <g transform="translate(200 90)">
+    <!-- Magnifying glass -->
+    <circle cx="-10" cy="-10" r="32" fill="#D8E1E4"/>
+    <circle cx="-10" cy="-10" r="22" stroke="#6B7B83" stroke-width="5"/>
+    <line x1="14" y1="14" x2="34" y2="34"
+          stroke="#6B7B83" stroke-width="6" stroke-linecap="round"/>
+
+    <!-- Item silhouette -->
+    <rect x="-20" y="-24" width="24" height="30" rx="4"
+          fill="#8FA1A8"/>
+    <rect x="-15" y="-18" width="14" height="3" rx="2"
+          fill="#D8E1E4"/>
+
+    <!-- Question mark -->
+    <text x="32" y="-16"
+          font-family="Inter, Arial, sans-serif"
+          font-size="24"
+          font-weight="700"
+          fill="#F4A261">?</text>
+  </g>
+
+  <!-- Title -->
+  <text x="200" y="165"
+        text-anchor="middle"
+        font-family="Inter, Arial, sans-serif"
+        font-size="18"
+        font-weight="600"
+        fill="#3E4C52">
+    Lost &amp; Found
+  </text>
+
+  <!-- Subtitle -->
+  <text x="200" y="185"
+        text-anchor="middle"
+        font-family="Inter, Arial, sans-serif"
+        font-size="12"
+        fill="#73838A">
+    No item image uploaded
+  </text>
+</svg>
